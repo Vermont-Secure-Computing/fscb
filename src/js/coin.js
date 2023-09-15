@@ -30,9 +30,10 @@
 	/* start of address functions */
 
 	/* generate a private and public keypair, with address and WIF address */
-	coinjs.newKeys = function(input){
+	coinjs.newKeys = function(){
 		
-		var privkey = (input) ? Crypto.SHA256(input) : this.newPrivkey();
+		// var privkey = (input) ? Crypto.SHA256(input) : this.newPrivkey();
+		var privkey = this.newPrivkey()
 		var pubkey = this.newPubkey(privkey);
 		
 		return {

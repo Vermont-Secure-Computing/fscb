@@ -36,112 +36,6 @@
   </head>
   <body>
     <div>
-      <!-- <div class="container bg-gray-600">
-        <h1 class="text-3xl font-bold underline text-green-600">Hello from Electron 2 renderer!</h1>
-     </div>  -->
-      <!-- Main navigation container -->
-      <!-- <nav
-        class="relative flex w-full flex-wrap items-center justify-between bg-[#FBFBFB] py-2 text-neutral-500 shadow-lg hover:text-neutral-700 focus:text-neutral-700 dark:bg-neutral-600 lg:py-4"
-        role="tablist"
-        data-te-nav-ref>
-        <div class="flex w-full flex-wrap items-center justify-between px-3">
-          <div class="ml-2">
-            <ul
-              class="mb-5 flex list-none flex-row flex-wrap border-b-0 pl-0"
-              role="tablist"
-              data-te-nav-ref>
-              <li role="presentation">
-                <a
-                  href="#new-file"
-                  class="my-2 block border-x-0 border-b-2 border-t-0 border-transparent px-7 pb-3.5 pt-4 text-xs font-medium uppercase leading-tight text-neutral-500 hover:isolate hover:border-transparent hover:bg-neutral-100 focus:isolate focus:border-transparent data-[te-nav-active]:border-primary data-[te-nav-active]:text-primary dark:text-neutral-400 dark:hover:bg-transparent dark:data-[te-nav-active]:border-primary-400 dark:data-[te-nav-active]:text-primary-400"
-                  role="tab"
-                  aria-controls="new-file"
-                  aria-selected="true"
-                  >New File</a
-                >
-              </li>
-              <li role="presentation">
-                <a
-                  href="#tabs-profile"
-                  class="my-2 block border-x-0 border-b-2 border-t-0 border-transparent px-7 pb-3.5 pt-4 text-xs font-medium uppercase leading-tight text-neutral-500 hover:isolate hover:border-transparent hover:bg-neutral-100 focus:isolate focus:border-transparent data-[te-nav-active]:border-primary data-[te-nav-active]:text-primary dark:text-neutral-400 dark:hover:bg-transparent dark:data-[te-nav-active]:border-primary-400 dark:data-[te-nav-active]:text-primary-400"
-                  data-te-toggle="pill"
-                  data-te-target="#tabs-profile"
-                  role="tab"
-                  aria-controls="tabs-profile"
-                  aria-selected="false"
-                  >Import Text</a
-                >
-              </li>
-              <li role="presentation">
-                <a
-                  href="#about-fscb"
-                  class="my-2 block border-x-0 border-b-2 border-t-0 border-transparent px-7 pb-3.5 pt-4 text-xs font-medium uppercase leading-tight text-neutral-500 hover:isolate hover:border-transparent hover:bg-neutral-100 focus:isolate focus:border-transparent data-[te-nav-active]:border-primary data-[te-nav-active]:text-primary dark:text-neutral-400 dark:hover:bg-transparent dark:data-[te-nav-active]:border-primary-400 dark:data-[te-nav-active]:text-primary-400"
-                  data-te-toggle="pill"
-                  data-te-target="#about-fscb"
-                  role="tab"
-                  aria-controls="about-fscb"
-                  aria-selected="false"
-                  >About FSCB</a
-                >
-              </li>
-              <li role="presentation">
-                <a
-                  href="#tabs-contact"
-                  class="disabled pointer-events-none my-2 block border-x-0 border-b-2 border-t-0 border-transparent bg-transparent px-7 pb-3.5 pt-4 text-xs font-medium uppercase leading-tight text-neutral-400 hover:isolate hover:border-transparent hover:bg-neutral-100 focus:isolate focus:border-transparent dark:text-neutral-600"
-                  data-te-toggle="pill"
-                  data-te-target="#tabs-contact"
-                  role="tab"
-                  aria-controls="tabs-contact"
-                  aria-selected="false"
-                  >How it works</a
-                >
-              </li>
-            </ul>
-          </div>
-        </div>
-        
-      </nav>
-      <div class="mb-6">
-        <div 
-          class="hidden opacity-100 transition-opacity duration-150 ease-linear data-[te-tab-active]:block"
-          id="new-file"
-          role="tabpanel"
-          aria-labelledby="tabs-newfile-tab"
-          data-te-tab-active>
-          <div class="relative mb-4 flex flex-wrap items-stretch">
-            <input
-              type="text"
-              class="relative ml-20 mr-20 mt-10 block w-[1px] min-w-0 flex-auto rounded-r border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-primary focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-200 dark:focus:border-primary"
-              placeholder="Name Of Contract"
-              aria-label="NameOfContract"
-              aria-describedby="basic-addon1" />
-              
-          </div>
-          <div class="relative mb-4 flex flex-wrap items-stretch">
-            <input
-            type="text"
-            class="relative ml-20 mr-20 block w-[1px] min-w-0 flex-auto rounded-r border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-primary focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-200 dark:focus:border-primary"
-            placeholder="Account Name"
-            aria-label="AccountName"
-            aria-describedby="basic-addon2" />
-          </div>
-          <div class="relative mb-4 flex flex-wrap items-stretch">
-            <input
-            type="text"
-            class="relative ml-20 mr-20 block w-[1px] min-w-0 flex-auto rounded-r border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-primary focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-200 dark:focus:border-primary"
-            placeholder="Account Email"
-            aria-label="AccountEmail"
-            aria-describedby="basic-addon3" />
-          </div>
-        </div>
-        <div
-          class="hidden opacity-0 transition-opacity duration-150 ease-linear data-[te-tab-active]:block"
-          id="about-fscb"
-          role="tabpanel"
-          aria-labelledby="tabs-about-tab">
-          Tab 2 content
-        </div>
-      </div> -->
       <div class="rounded border mx-auto mt-4">
         <nav class="relative flex w-full flex-wrap items-center justify-between bg-[#FBFBFB] py-2 text-neutral-500 shadow-lg hover:text-neutral-700 focus:text-neutral-700 dark:bg-neutral-600 lg:py-4">
           <div class="ml-5 w-1">
@@ -181,20 +75,55 @@
               <div class="relative mb-4 flex flex-wrap items-stretch">
                 <input
                 type="text"
-                id="account-name"
+                id="creator-name"
                 class="relative ml-20 mr-20 block w-[1px] min-w-0 flex-auto rounded-r border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-primary focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-200 dark:focus:border-primary"
-                placeholder="Account Name"
-                aria-label="AccountName"
+                placeholder="Creator Name"
+                aria-label="CreatorName"
                 aria-describedby="basic-addon2" />
               </div>
               <div class="relative mb-4 flex flex-wrap items-stretch">
                 <input
                 type="text"
-                id="account-email"
+                id="creator-email"
                 class="relative ml-20 mr-20 block w-[1px] min-w-0 flex-auto rounded-r border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-primary focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-200 dark:focus:border-primary"
-                placeholder="Account Email"
-                aria-label="AccountEmail"
+                placeholder="Creator Email"
+                aria-label="CreatorEmail"
                 aria-describedby="basic-addon3" />
+              </div>
+              <div id="multikeys">
+                <div class="grid md:grid-cols-7 md:gap-6 multikeysInner">
+                  
+                    <input type="text" id="bankers-name" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name" placeholder="Bankers Name">
+                  
+                  
+                    <input type="text" id="bankers-email" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email" placeholder="Bankers Email">
+                  
+                  
+                    <a class="pubkeyAdd"><object data="./images/plus.svg" width="50" height="50" class="green" id="img-anchor"></object></a>
+                  
+                </div>
+              </div>
+              <div class="row-span-3 my-4">
+                <label for="#releaseCoins">Enter the amount of signatures required to release the coins</label>
+                <div class="col-span-3">
+                  <select id="releaseCoins" class="px-5 py-2 border border-gray-400">
+                    <option>1</option>
+                    <option selected>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                    <option>6</option>
+                    <option>7</option>
+                    <option>8</option>
+                    <option>9</option>
+                    <option>10</option>
+                    <option>11</option>
+                    <option>12</option>
+                    <option>13</option>
+                    <option>14</option>
+                    <option>15</option>
+                  </select>
+                </div>
               </div>
               <div>
                 <button type="submit">
@@ -205,6 +134,7 @@
           </div>
           <div id="third" class="hidden p-4">
             About FSCB
+            <table id="data-container"></table>
           </div>
           <div id="fourth" class="hidden p-4">
             How it works
