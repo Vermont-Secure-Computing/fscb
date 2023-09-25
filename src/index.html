@@ -36,20 +36,23 @@
   </head>
   <body>
     <div>
-      <div class="rounded border mx-auto mt-4">
+      <div class="rounded border mx-auto">
         <nav class="relative flex w-full flex-wrap items-center justify-between bg-[#FBFBFB] py-2 text-neutral-500 shadow-lg hover:text-neutral-700 focus:text-neutral-700 dark:bg-neutral-600 lg:py-4">
           <div class="ml-5 w-1">
-            <label
+            <!-- <label
               class="w-1.5  text-gray-800 font-semibold py-2 rounded-t"
             >
-              <!-- <img src="./images/logo.svg" width="32" /> -->
+              <img src="./images/logo.svg" width="32" />
               <span class="mt-2 text-sm">Import Text</span>
               <input id="import-text" type="file" class="hidden" />
-            </label>
+            </label> -->
+            <button>Import Text</button>
           </div>
           <!-- Tabs -->
             <ul id="tabs" class="inline-flex pt-2 px-1 w-3/4 border-b">
-              <li class="bg-white px-4 text-gray-800 font-semibold py-2 rounded-t border-t border-r border-l -mb-px"><a id="default-tab" href="#second">New File</a></li>
+              <li class="bg-white px-4 text-gray-800 font-semibold py-2 rounded-t border-t border-r border-l -mb-px"><a href="#first" id="default-tab">Account List</a></li>
+              <li class="px-4 text-gray-800 font-semibold py-2 rounded-t"><a class="testingClick" href="#second">New File</a></li>
+              <li class="px-4 text-gray-800 font-semibold py-2 rounded-t"><a href="#addbanker">Add Banker</a></li>
               <li class="px-4 text-gray-800 font-semibold py-2 rounded-t"><a href="#third">About FSCB</a></li>
               <li class="px-4 text-gray-800 font-semibold py-2 rounded-t"><a href="#fourth">How it works</a></li>
             </ul>
@@ -57,10 +60,10 @@
       
         <!-- Tab Contents -->
         <div id="tab-contents">
-          <!-- <div id="first" class="hidden p-4">
-            First tab
-          </div> -->
-          <div id="second" class="p-4">
+          <div id="first" class="p-4">
+            Account list
+          </div>
+          <div id="second" class="hidden p-4">
             <form id="create-new-form">
               <div class="relative mb-4 flex flex-wrap items-stretch">
                 <input
@@ -91,45 +94,56 @@
                 aria-describedby="basic-addon3" />
               </div>
               <div id="multikeys">
-                <div class="grid md:grid-cols-7 md:gap-6 multikeysInner">
+                    <!-- <input type="text" id="bankers-name" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name" placeholder="Bankers Name">
                   
-                    <input type="text" id="bankers-name" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name" placeholder="Bankers Name">
+                    <input type="text" id="bankers-email" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email" placeholder="Bankers Email"> -->
+                  <div class="grid md:grid-cols-2 md:gap-6 multikeysInner">
+                    <div class="col-span-1">
+                      <select data-placeholder="Choose Bankers" multiple>
+                        <!-- <option value="" disabled selected hidden>Choose Bankers</option> -->
+                      </select>
+                    </div>
                   
                   
-                    <input type="text" id="bankers-email" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email" placeholder="Bankers Email">
-                  
-                  
-                    <a class="pubkeyAdd"><object data="./images/plus.svg" width="50" height="50" class="green" id="img-anchor"></object></a>
-                  
-                </div>
+                    <!-- <a class="pubkeyAdd"><object data="./images/plus.svg" width="50" height="50" class="green" id="img-anchor"></object></a> -->
+                    <div class="col-span-1">
+                      <label for="#releaseCoins">Enter the amount of signatures required to release the coins</label>
+                      <div class="col-span-3">
+                        <select id="releaseCoins" class="px-5 py-2 border border-gray-400">
+                          <option>1</option>
+                          <option selected>2</option>
+                          <option>3</option>
+                          <option>4</option>
+                          <option>5</option>
+                          <option>6</option>
+                          <option>7</option>
+                          <option>8</option>
+                          <option>9</option>
+                          <option>10</option>
+                          <option>11</option>
+                          <option>12</option>
+                          <option>13</option>
+                          <option>14</option>
+                          <option>15</option>
+                        </select>
+                      </div>
+                      <button type="submit">
+                        Create File
+                      </button>
+                    </div>
+                  </div>
               </div>
-              <div class="row-span-3 my-4">
-                <label for="#releaseCoins">Enter the amount of signatures required to release the coins</label>
-                <div class="col-span-3">
-                  <select id="releaseCoins" class="px-5 py-2 border border-gray-400">
-                    <option>1</option>
-                    <option selected>2</option>
-                    <option>3</option>
-                    <option>4</option>
-                    <option>5</option>
-                    <option>6</option>
-                    <option>7</option>
-                    <option>8</option>
-                    <option>9</option>
-                    <option>10</option>
-                    <option>11</option>
-                    <option>12</option>
-                    <option>13</option>
-                    <option>14</option>
-                    <option>15</option>
-                  </select>
-                </div>
-              </div>
-              <div>
-                <button type="submit">
-                  Create File
-                </button>
-              </div>
+              
+            </form>
+          </div>
+          <div id="addbanker" class="hidden p-4">
+            Add Banker
+            <form id="add-banker-form">
+              <input type="text" id="banker-name-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add" placeholder="Bankers Name">    
+              <input type="email" id="banker-email-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email-add" placeholder="Bankers Email">
+              <button type="submit">
+                Add
+              </button>
             </form>
           </div>
           <div id="third" class="hidden p-4">
