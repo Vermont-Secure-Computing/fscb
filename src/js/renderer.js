@@ -1,10 +1,5 @@
 // var keys = ["02a580990522b85a9d842669f0950a615c061ec6916f32b8b3461efe58985c0cb4", "02bb3d790f459a017c11002a80671e8fc6213675b8845044996f51690011d7bdb0", "03d2fb8b133858b2a5b70e884451f2eaa23064e3dc9f77e417b317bed014f30dfc"]
 // var sigsNeeded = 2
-
-
-
-
-
 //  var multisig =  coinjs.pubkeys2MultisigAddress(keys, sigsNeeded);
 //  console.log(multisig)
  
@@ -14,6 +9,7 @@ const importText =   document.getElementById('import-text');
 // const bankersClick = document.getElementById('bakers-address').getElementsByClassName('pubkeyAdd')[0];
 
 const formCreateAccount =   document.getElementById('create-new-form');
+const importTextForm = document.getElementById('import-text-form');
 const formAddBanker = document.getElementById('add-banker-form');
 const contractName = document.getElementById("contract-name");
 const creatorName = document.getElementById("creator-name");
@@ -82,7 +78,7 @@ async function saveAndCreateText(e) {
     const sigSendNumber = sigNumber.options[sigNumber.selectedIndex].text;
     const innerMultiKey = document.querySelectorAll('.active a')
     console.log(innerMultiKey)
-    let bankersMerge = []
+    let bankersMerge = [];
     for (let i = 0; i < innerMultiKey.length; i++) {
     //     bankersMerge.push({"banker_id": contractSendName.split(' ').join('_') + "-" + innerMultiKey[i].querySelector('.banker-email').value + "-" + (Math.floor(1000000000 + Math.random() * 9000000000)), 
     //     "banker_name": innerMultiKey[i].querySelector('.banker-name').value, 
@@ -96,6 +92,13 @@ async function saveAndCreateText(e) {
     // })
         bankersMerge.push(innerMultiKey[i].dataset.value)
     }
+    console.log["banker merge ", bankersMerge]
+    const keys = bankersMerge;
+    const multisig =  coinjs.pubkeys2MultisigAddress(keys, sigSendNumber);
+    console.log("multisig ", multisig)
+    const pubkeySend = multisig.address;
+    const redeemScriptSend = multisig.redeemScript;
+
 
     ipcRenderer.send("message:contractnew", {
         contractSendName,
@@ -103,27 +106,57 @@ async function saveAndCreateText(e) {
         creatorSendEmail,
         bankersMerge,
         sigSendNumber,
-        creatorAddressDetail
+        creatorAddressDetail,
+        pubkeySend,
+        redeemScriptSend
     });
 }
 
 ipcRenderer.on("list:file", function(evt){
     const convertToJson = JSON.parse(evt)
-    // console.log(convertToJson)
-    let text = ""
-    const container = document.getElementById('data-container')
-    text+='<tr>'
+    console.log(convertToJson)
+    // let text = ""
+    // const container = document.getElementById('data-container')
+    // text+='<tr>'
+    // for(let x in convertToJson) {
+    //     if(convertToJson.hasOwnProperty(x)){
+    //         // console.log(convertToJson[x].email)
+    //         text+="<td>" + convertToJson[x].email + "</td>"
+    //     }
+    // }
+    // text+="</tr>"
+    // // console.log(text)
+    // // const stuff = convertToJson.map((item) => `<p>${item.firstname}<p>`)
+    // container.innerHTML = text
+    const accountBody = document.getElementById('accounts-list-body')
+    let accountTr = document.createElement('tr')
+    accountTr.setAttribute('class', 'border-b dark:border-neutral-500')
+    let accountTd = document.createElement('td')
+    accountTd.setAttribute('class', 'whitespace-nowrap px-6 py-4')
+    let accountTd1 = document.createElement('td')
+    accountTd1.setAttribute('class', 'whitespace-nowrap px-6 py-4')
+    let respub;
     for(let x in convertToJson) {
-        if(convertToJson.hasOwnProperty(x)){
-            // console.log(convertToJson[x].email)
-            text+="<td>" + convertToJson[x].email + "</td>"
-        }
+        console.log(convertToJson[x])
+        ipcRenderer.send("get:balance", {"pubkey": convertToJson[x].address})
+        accountTd.innerHTML = convertToJson[x].contract_name
+        accountTd1.innerHTML = convertToJson[x].address
+        // if(convertToJson.hasOwnProperty(x)){
+        //     console.log(convertToJson[x].contract_name)
+        //     // text+="<td>" + convertToJson[x].email + "</td>"
+        // }
     }
-    text+="</tr>"
-    // console.log(text)
-    // const stuff = convertToJson.map((item) => `<p>${item.firstname}<p>`)
-    container.innerHTML = text
+    accountTr.appendChild(accountTd)
+    accountTr.appendChild(accountTd1)
+    accountBody.appendChild(accountTr)
 })
+
+// ipcRenderer.on('list:file', function(evt) {
+//     console.log(evt)
+//     const accountBody = document.getElementById('accounts-list-body')
+//     const accountTr = document.createElement('tr')
+  
+// })
 
 function addOrDelete() {
     console.log("click add or delete")
@@ -209,15 +242,15 @@ ipcRenderer.on('send:bankers', function(e) {
     console.log(select)
     bankersArray = e
     for(const key in bankersArray) {
-        // console.log(bankersArray[key])
+        console.log(bankersArray[key])
         // let data = {
         //     "banker_name": bankersArray[key].banker_name
         // }
         const opt = bankersArray[key].banker_email;
-        // console.log(opt)
+        const pub = bankersArray[key].pubkey;
         const el = document.createElement("option");
         el.textContent = opt;
-        el.value = opt;
+        el.value = pub;
         el.setAttribute('class', 'optionForSelection')
         select.appendChild(el);
     }
@@ -407,9 +440,33 @@ ipcRenderer.on('send:bankers', function(e) {
 })
 
 
+function parseTextArea(e) {
+    e.preventDefault();
+    const textarea = document.getElementById('import-text'); 
+    // const resultDiv = document.getElementById('result'); 
+    const jsonString = textarea.value; 
+    const startIndex = jsonString.indexOf('{'); 
+    const endIndex = jsonString.lastIndexOf('}'); 
+    if (startIndex !== -1 && endIndex !== -1) { 
+        let jsonStr = jsonString.substring(startIndex, endIndex + 1); 
+        jsonStr = jsonStr.replace(/\s/g, "") 
+        console.log(jsonStr) 
+    }
+}
+
+ipcRenderer.on('user:profile', function(evt) {
+    if (evt.user === false) {
+        const userProfile = document.getElementById('user-profile')
+        userProfile.classList.remove('hidden')
+    }
+})
+
+
+
 
 // importText.addEventListener("change", loadText);
 formCreateAccount.addEventListener("submit", saveAndCreateText);
+importTextForm.addEventListener('submit', parseTextArea);
 // addMinus.addEventListener('click', addOrDelete);
 minusButton.addEventListener('click', deleteInput);
 formAddBanker.addEventListener('submit', addBanker);

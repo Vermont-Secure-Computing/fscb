@@ -1,5 +1,6 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, ipcRenderer } = require('electron');
 const path = require('path');
+const https = require('https');
 const fs = require("fs");
 const jsonFile = "./data/data.json"
 const jsonFileBanker = "./data/banker.json"
@@ -27,17 +28,24 @@ const createWindow = () => {
   }
 
   win.removeMenu()
+  const existAccount = fs.existsSync('./data/data.json')
+  // console.log(accounts)
+  // const accountParse = JSON.parse(accounts)
 
-  const test = fs.readFileSync("./testing.json", "utf-8")
-  // console.log(test)
-
+  const existsUser = fs.existsSync('./data/user.json')
+  
+  
   win.loadFile('src/index.html').then(() => {
-    win.webContents.send("list:file", test)
-  }).then(() => win.show())
+    if (existAccount) {
+      const accounts = fs.readFileSync("./data/data.json", "utf-8")
+      win.webContents.send("list:file", accounts)
+    }
+    
+    if (!existsUser) {
+      win.webContents.send("user:profile", {"user": false})
+    }
+  })
 
-  // const test = fs.readFileSync("./testing.json", "utf-8")
-  // win.webContents.send("list:file", test)
-  // console.log(test)
 }
 
 app.whenReady().then(() => {
@@ -87,7 +95,7 @@ function bankerIdNumber() {
 
 
 ipcMain.on("message:contractnew", (e, options) => {
-  // console.log("rederer send", options)
+  console.log("rederer send", options)
   const getIdNumber = idNumber()
   pathMessage = 'message'
   // console.log(options.bankersMerge)
@@ -97,8 +105,7 @@ ipcMain.on("message:contractnew", (e, options) => {
   let mergeBankers = []
   for (let i = 0; i < options.bankersMerge.length; i++ ) {
     for (let j in bankersParse) {
-      if (options.bankersMerge[i] === bankersParse[j].banker_email) {
-        bankersParse[j].signature = ""
+      if (options.bankersMerge[i] === bankersParse[j].pubkey) {
         mergeBankers.push(bankersParse[j])
       }
     }
@@ -137,10 +144,9 @@ ipcMain.on("message:contractnew", (e, options) => {
       "creator_email": options.creatorSendEmail,
       "bankers": mergeBankers,
       "signature_nedded": options.sigSendNumber,
-      // "creator_pubkey": options.creatorAddressDetail.pubkey,
-      // "creator_address": options.creatorAddressDetail.address,
-      // "creator_wif": options.creatorAddressDetail.wif,
-      // "creator_privkey": options.creatorAddressDetail.privkey,
+      "address": options.pubkeySend,
+      "redeem_script": options.redeemScriptSend,
+      "signatures": [],
       "claimed": "false"
   }
   const sData = JSON.stringify(data, null, 2)
@@ -158,6 +164,8 @@ ipcMain.on("message:contractnew", (e, options) => {
           const wData = JSON.stringify(jdata, null, 2)
           fs.writeFile(path +"/"+ fileName, wData, function writeJson() {
             if (err) return console.log(err);
+            const accounts = fs.readFileSync("./data/data.json", "utf-8")
+            win.webContents.send("list:file", accounts)
           })
       });
       } else {
@@ -170,6 +178,8 @@ ipcMain.on("message:contractnew", (e, options) => {
           if (err) return console.log(err);
           // console.log(JSON.stringify(sData));
           // console.log('writing to ' + fileName);
+          const accounts = fs.readFileSync("./data/data.json", "utf-8")
+          win.webContents.send("list:file", accounts)
         });
       }
     });
@@ -235,13 +245,12 @@ ipcMain.on('click:addBanker', () => {
     })
 })
 
-// async function loadListFile() {
-//   const test = fs.readFileSync("./testing.json", "utf-8")
-//   win.webContents.send("list:file", test)
-//   // console.log(test)
-// }
+ipcMain.on('get:balance', (e, options) => {
+  console.log(options)
+  const getBalance = https.get("https://twigchain.com/ext/getaddress/WeF1hYB2XLBgUxxD6aNJpc2NuBmfz3BRtp")
+  console.log(getBalance)
+})
 
-// loadListFile()
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()

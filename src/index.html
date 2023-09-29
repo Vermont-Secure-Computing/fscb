@@ -46,10 +46,11 @@
               <span class="mt-2 text-sm">Import Text</span>
               <input id="import-text" type="file" class="hidden" />
             </label> -->
-            <button>Import Text</button>
+            <!-- <button>Import Text</button> -->
           </div>
           <!-- Tabs -->
             <ul id="tabs" class="inline-flex pt-2 px-1 w-3/4 border-b">
+              <li class="px-4 text-gray-800 font-semibold py-2 rounded-t"><a href="#importText">Import Text</a></li>
               <li class="bg-white px-4 text-gray-800 font-semibold py-2 rounded-t border-t border-r border-l -mb-px"><a href="#first" id="default-tab">Account List</a></li>
               <li class="px-4 text-gray-800 font-semibold py-2 rounded-t"><a class="testingClick" href="#second">New File</a></li>
               <li class="px-4 text-gray-800 font-semibold py-2 rounded-t"><a href="#addbanker">Add Banker</a></li>
@@ -60,11 +61,37 @@
       
         <!-- Tab Contents -->
         <div id="tab-contents">
+          <div id="importText" class="hidden p-4">
+            <form id="import-text-form">
+              <textarea name="" id="import-text" cols="30" rows="10" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Paste text here..."></textarea>
+              <button type="submit" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900 hover:bg-blue-800">import</button>
+            </form>
+          </div>
           <div id="first" class="p-4">
-            Account list
+            <div id="accounts-list">
+              <table class="min-w-full text-left text-sm font-light">
+                <thead class="border-b font-medium dark:border-neutral-500">
+                  <tr>
+                    <th scope="col" class="px-6 py-4">Account Name</th>
+                    <th scope="col" class="px-6 py-4">Address</th>
+                    <th scope="col" class="px-6 py-4">Balance</th>
+                    <th scope="col" class="px-6 py-4">View Detail</th>
+                  </tr>
+                </thead>
+                <tbody id="accounts-list-body">
+                </tbody>
+              </table>
+            </div>
           </div>
           <div id="second" class="hidden p-4">
             <form id="create-new-form">
+              <div class="relative mb-4 flex flex-wrap items-stretch">
+                <select name="currency" id="coin-currency">
+                  <option value="woodcoin" selected>woodcoin</option>
+                  <option value="bitcoin">bitcoin</option>
+                  <option value="litecoin">litecoin</option>
+                </select> 
+              </div>
               <div class="relative mb-4 flex flex-wrap items-stretch">
                 <input
                   type="text"
@@ -139,6 +166,11 @@
           <div id="addbanker" class="hidden p-4">
             Add Banker
             <form id="add-banker-form">
+              <select name="" id="">
+                <option value="woodcoin" selected>woodcoin</option>
+                <option value="bitcoin">bitcoin</option>
+                <option value="litecoin">litecoin</option>
+              </select>
               <input type="text" id="banker-name-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add" placeholder="Bankers Name">    
               <input type="email" id="banker-email-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email-add" placeholder="Bankers Email">
               <button type="submit">
@@ -153,6 +185,14 @@
           <div id="fourth" class="hidden p-4">
             How it works
           </div>
+        </div>
+        <div id="user-profile" class="my-auto hidden">
+          <form id="user-profile-form">
+            <span>Please do fill up the form</span>
+            <input type="text" placeholder="Enter Name">
+            <input type="email" placeholder="Enter Email">
+            <button type="submit">Submit</button>
+          </form>
         </div>
       </div>
     </div>
