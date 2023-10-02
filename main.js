@@ -41,9 +41,9 @@ const createWindow = () => {
       win.webContents.send("list:file", accounts)
     }
     
-    if (!existsUser) {
-      win.webContents.send("user:profile", {"user": false})
-    }
+    // if (!existsUser) {
+    //   win.webContents.send("user:profile", {"user": false})
+    // }
   })
 
 }
@@ -95,6 +95,7 @@ function bankerIdNumber() {
 
 
 ipcMain.on("message:contractnew", (e, options) => {
+  e.preventDefault()
   console.log("rederer send", options)
   const getIdNumber = idNumber()
   pathMessage = 'message'
@@ -147,6 +148,8 @@ ipcMain.on("message:contractnew", (e, options) => {
       "address": options.pubkeySend,
       "redeem_script": options.redeemScriptSend,
       "signatures": [],
+      "balance": "0.0",
+      "currency": options.coinCurrencySend,
       "claimed": "false"
   }
   const sData = JSON.stringify(data, null, 2)
@@ -163,9 +166,13 @@ ipcMain.on("message:contractnew", (e, options) => {
           // console.log(jdata);
           const wData = JSON.stringify(jdata, null, 2)
           fs.writeFile(path +"/"+ fileName, wData, function writeJson() {
-            if (err) return console.log(err);
-            const accounts = fs.readFileSync("./data/data.json", "utf-8")
-            win.webContents.send("list:file", accounts)
+            if (err) {
+              console.log(err)
+            } else {
+              console.log(fs.readFileSync("./data/data.json", "utf8"));
+              const accounts = fs.readFileSync("./data/data.json", "utf-8")
+              win.webContents.send("list:file", accounts)
+            }
           })
       });
       } else {
@@ -175,11 +182,13 @@ ipcMain.on("message:contractnew", (e, options) => {
         const sData = JSON.stringify(addContract, null, 2)
         fs.writeFile(path +"/"+ fileName
           , sData, function writeJson() {
-          if (err) return console.log(err);
-          // console.log(JSON.stringify(sData));
-          // console.log('writing to ' + fileName);
-          const accounts = fs.readFileSync("./data/data.json", "utf-8")
-          win.webContents.send("list:file", accounts)
+          if (err)  {
+            console.log(err)
+          } else {
+            console.log(fs.readFileSync("./data/data.json", "utf8"));
+            const accounts = fs.readFileSync("./data/data.json", "utf-8")
+            win.webContents.send("list:file",  accounts)
+          }
         });
       }
     });
@@ -187,6 +196,8 @@ ipcMain.on("message:contractnew", (e, options) => {
     console.log(e)
   }
   console.log("Success")
+  // const accounts = fs.readFileSync("./data/data.json", "utf-8")
+  // win.webContents.send("list:file",  accounts)
 })
 
 ipcMain.on('message:addBanker', (e, options) => {
@@ -247,8 +258,91 @@ ipcMain.on('click:addBanker', () => {
 
 ipcMain.on('get:balance', (e, options) => {
   console.log(options)
-  const getBalance = https.get("https://twigchain.com/ext/getaddress/WeF1hYB2XLBgUxxD6aNJpc2NuBmfz3BRtp")
-  console.log(getBalance)
+  const request = https.request(`https://twigchain.com/ext/getbalance/${options.pubkey}`, (response) => {
+    let data = '';
+    response.on('data', (chunk) => {
+        data = data + chunk.toString();
+    });
+  
+    response.on('end', () => {
+        const body = JSON.parse(data);
+        console.log(body);
+        win.webContents.send('response:balance', body)
+    });
+  })
+    
+  request.on('error', (error) => {
+      console.log('An error', error);
+      // win.webContents.send('response:balance', toString(0))
+  });
+    
+  request.end() 
+})
+
+ipcMain.on('balance:api', (e, options) => {
+  e.preventDefault()
+  console.log(options)
+  let account = {};
+  const fileName = "data.json"
+  const path = "data"
+  if (fs.existsSync(jsonFile)) {
+    accounts = fs.readFileSync("./data/data.json", "utf-8")
+    const allaccount = JSON.parse(accounts)
+    for(let i in allaccount) {
+      // console.log(i)
+      // console.log(Object.keys(allaccount).length)
+      const request = https.request(`https://twigchain.com/ext/getAddress/${allaccount[i].address}`, (response) => {
+      let data = '';
+      response.on('data', (chunk) => {
+          data = data + chunk.toString();
+      });
+      
+      response.on('end', async () => {
+          const body = await JSON.parse(data);
+          // console.log(body);
+          // allaccount[i].balance = body
+          if (body.address) {
+            if (allaccount[i].address === body.address) {
+              
+              allaccount[i].balance = body.balance
+              // const allparse = JSON.stringify(allaccount[i], null, 2)
+              fs.readFile(path +"/"+ fileName, 'utf8', function(err, jdata){
+                jdata = JSON.parse(jdata);
+                //Step 3: append contract variable to list
+                jdata[i] = allaccount[i]
+                console.log(jdata);
+                const wData = JSON.stringify(jdata, null, 2)
+                fs.writeFile(path +"/"+ fileName, wData, function writeJson() {
+                  if (err) {
+                    return console.log(err)
+                  } else {
+                    const readMore = fs.readFileSync("./data/data.json", "utf-8")
+                    win.webContents.send("list:file",  readMore)
+                  }
+                })
+              });
+              // account = allaccount[i]
+              // console.log(accounts)
+              // const updateJson = JSON.stringify(allaccount[i], null, 2)
+              // console.log(updateJson)
+              // fs.writeFile(jsonFile, updateJson, function writeJson() {
+              //   if (err) {
+              //     return console.log(err)
+              //   }
+              // })
+            }
+          }
+      });
+      })
+        
+      request.on('error', (error) => {
+          console.log('An error', error);
+          // win.webContents.send('response:balance', toString(0))
+          
+      });
+      request.end()
+    }
+  }
 })
 
 

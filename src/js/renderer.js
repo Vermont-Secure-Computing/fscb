@@ -2,6 +2,8 @@
 // var sigsNeeded = 2
 //  var multisig =  coinjs.pubkeys2MultisigAddress(keys, sigsNeeded);
 //  console.log(multisig)
+
+
  
 //  Start Tab Pannels
 
@@ -18,11 +20,14 @@ const creatorAddress = document.getElementById("creator-address");
 const minusButton = document.getElementById('multikeys');
 const addMinus = document.getElementById('multikeys').getElementsByClassName('pubkeyAdd')[0]
 const testingClick = document.getElementsByClassName('testingClick')[0]
+// const accountList = document.getElementById('accounts-list');
 
 const sigNumber = document.getElementById('releaseCoins');
+const currency = document.getElementById('coin-currency')
 let tabsContainer = document.getElementById('tabs');
 let tabTogglers = tabsContainer.querySelectorAll("nav #tabs a");
 let bankersArray
+
 
 
 
@@ -31,7 +36,9 @@ tabTogglers.forEach(function(toggler) {
         e.preventDefault();
 
         let tabName = this.getAttribute("href");
-
+        if (tabName === "#first") {
+            ipcRenderer.send("balance:api", {"send": "get"})
+        }
         let tabContents = document.querySelector("#tab-contents");
 
         for (let i = 0; i < tabContents.children.length; i++) {
@@ -76,6 +83,7 @@ async function saveAndCreateText(e) {
     const creatorAddressDetail = await coinjs.newKeys()
     // console.log("New Key ", creatorAddressDetail)
     const sigSendNumber = sigNumber.options[sigNumber.selectedIndex].text;
+    const coinCurrencySend = currency.options[currency.selectedIndex].text;
     const innerMultiKey = document.querySelectorAll('.active a')
     console.log(innerMultiKey)
     let bankersMerge = [];
@@ -106,6 +114,7 @@ async function saveAndCreateText(e) {
         creatorSendEmail,
         bankersMerge,
         sigSendNumber,
+        coinCurrencySend,
         creatorAddressDetail,
         pubkeySend,
         redeemScriptSend
@@ -114,7 +123,7 @@ async function saveAndCreateText(e) {
 
 ipcRenderer.on("list:file", function(evt){
     const convertToJson = JSON.parse(evt)
-    console.log(convertToJson)
+    // console.log(convertToJson)
     // let text = ""
     // const container = document.getElementById('data-container')
     // text+='<tr>'
@@ -129,26 +138,56 @@ ipcRenderer.on("list:file", function(evt){
     // // const stuff = convertToJson.map((item) => `<p>${item.firstname}<p>`)
     // container.innerHTML = text
     const accountBody = document.getElementById('accounts-list-body')
-    let accountTr = document.createElement('tr')
-    accountTr.setAttribute('class', 'border-b dark:border-neutral-500')
-    let accountTd = document.createElement('td')
-    accountTd.setAttribute('class', 'whitespace-nowrap px-6 py-4')
-    let accountTd1 = document.createElement('td')
-    accountTd1.setAttribute('class', 'whitespace-nowrap px-6 py-4')
-    let respub;
+    // let accountTr = document.createElement('tr')
+    // accountTr.setAttribute('class', 'border-b dark:border-neutral-500')
+    // let accountTd = document.createElement('td')
+    // accountTd.setAttribute('class', 'whitespace-nowrap px-6 py-4')
+    // let accountTd1 = document.createElement('td')
+    // accountTd1.setAttribute('class', 'whitespace-nowrap px-6 py-4')
+    // let accountTd2 = document.createElement('td')
+    // accountTd2.setAttribute('class', 'whitespace-nowrap px-6 py-4')
+    // let respub;
     for(let x in convertToJson) {
-        console.log(convertToJson[x])
-        ipcRenderer.send("get:balance", {"pubkey": convertToJson[x].address})
-        accountTd.innerHTML = convertToJson[x].contract_name
-        accountTd1.innerHTML = convertToJson[x].address
-        // if(convertToJson.hasOwnProperty(x)){
-        //     console.log(convertToJson[x].contract_name)
-        //     // text+="<td>" + convertToJson[x].email + "</td>"
-        // }
+        if(convertToJson.hasOwnProperty(x)){
+            console.log("convert to json", convertToJson[x])
+            // ipcRenderer.send("get:balance", {"pubkey": convertToJson[x].address})
+            let row = accountBody.insertRow();
+            let name = row.insertCell(0);
+            name.innerHTML = convertToJson[x].contract_name
+            let address = row.insertCell(1);
+            address.innerHTML = convertToJson[x].address
+            let balance = row.insertCell(2);
+            balance.innerHTML = convertToJson[x].balance
+            let veiwall = row.insertCell(3)
+            let buttonall = document.createElement('button')
+            buttonall.innerHTML = "view all"
+            veiwall.appendChild(buttonall)
+            // ipcRenderer.on('response:balance', function(e, arg) {
+            //     console.log(e)
+            //     if (e.error) {
+            //         balance.innerHTML = 0
+            //     } else {
+            //         balance.innerHTML = e
+            //     }
+            //     // ipcRenderer.removeAllListeners('get:balance');
+            //     // ipcRenderer.removeAllListeners('response:balance');
+            //     // ipcRenderer.removeAllListeners('list:file');
+            // })
+            
+            // if(convertToJson.hasOwnProperty(x)){
+            //     console.log(convertToJson[x].contract_name)
+            //     // text+="<td>" + convertToJson[x].email + "</td>"
+            // }
+            // ipcRenderer.removeAllListeners('get:balance');
+            // ipcRenderer.removeAllListeners('response:balance');
+            // ipcRenderer.removeAllListeners('list:file');
+        }
     }
-    accountTr.appendChild(accountTd)
-    accountTr.appendChild(accountTd1)
-    accountBody.appendChild(accountTr)
+    // accountTr.appendChild(accountTd)
+    // accountTr.appendChild(accountTd1)
+    // accountTr.appendChild(accountTd2)
+    // accountBody.appendChild(accountTr)
+    
 })
 
 // ipcRenderer.on('list:file', function(evt) {
@@ -471,6 +510,7 @@ importTextForm.addEventListener('submit', parseTextArea);
 minusButton.addEventListener('click', deleteInput);
 formAddBanker.addEventListener('submit', addBanker);
 testingClick.addEventListener('click', getBanker)
+
 
 
 
