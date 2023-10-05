@@ -158,7 +158,7 @@ ipcMain.on("message:contractnew", (e, options) => {
   const fileName = "data.json"
   const path = "data"
   try {
-    fs.mkdir(path, { recursive: true}, function (err) {
+    fs.mkdir(homedir + "/" + path, { recursive: true}, function (err) {
       if (err) return err;
       if (fs.existsSync(jsonFile)) {
         fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
@@ -217,7 +217,7 @@ ipcMain.on('message:addBanker', (e, options) => {
   const fileName = "banker.json"
   const path = "data"
   try {
-    fs.mkdir(path, { recursive: true}, function (err) {
+    fs.mkdir(homedir + "/" + path, { recursive: true}, function (err) {
       if (err) return err;
       if (fs.existsSync(jsonFileBanker)) {
         fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
