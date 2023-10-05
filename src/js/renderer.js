@@ -27,7 +27,7 @@ const getListClick = document.getElementsByClassName('getlistClick')[0]
 const sigNumber = document.getElementById('releaseCoins');
 const currency = document.getElementById('coin-currency')
 let tabsContainer = document.getElementById('tabs');
-let tabTogglers = tabsContainer.querySelectorAll("nav #tabs a");
+let tabTogglers = tabsContainer.querySelectorAll("aside #tabs a");
 let bankersArray
 
 
@@ -36,6 +36,7 @@ let bankersArray
 tabTogglers.forEach(function(toggler) {
     toggler.addEventListener("click", function(e) {
         e.preventDefault();
+        console.log('click button')
 
         let tabName = this.getAttribute("href");
         // if (tabName === "#first") {
