@@ -1,9 +1,11 @@
 const { app, BrowserWindow, ipcMain, ipcRenderer } = require('electron');
 const path = require('path');
 const https = require('https');
+const homedir = require('os').homedir();
 const fs = require("fs");
-const jsonFile = "./data/data.json"
-const jsonFileBanker = "./data/banker.json"
+const jsonFile = homedir + "/data/data.json"
+const jsonFileBanker = homedir + "./data/banker.json"
+console.log(homedir)
 
 const isDev = process.env.NODE_ENV !== 'production';
 
@@ -28,16 +30,16 @@ const createWindow = () => {
   }
 
   win.removeMenu()
-  const existAccount = fs.existsSync('./data/data.json')
+  const existAccount = fs.existsSync(homedir + '/data/data.json')
   // console.log(accounts)
   // const accountParse = JSON.parse(accounts)
 
-  const existsUser = fs.existsSync('./data/user.json')
+  const existsUser = fs.existsSync(homedir + '/data/user.json')
   
   
   win.loadFile('src/index.html').then(() => {
     if (existAccount) {
-      const accounts = fs.readFileSync("./data/data.json", "utf-8")
+      const accounts = fs.readFileSync(homedir +  "/data/data.json", "utf-8")
       win.webContents.send("list:file", accounts)
     }
     
@@ -100,7 +102,7 @@ ipcMain.on("message:contractnew", (e, options) => {
   const getIdNumber = idNumber()
   pathMessage = 'message'
   // console.log(options.bankersMerge)
-  const mybankers = fs.readFileSync("./data/banker.json", "utf-8")
+  const mybankers = fs.readFileSync(homedir + "/data/banker.json", "utf-8")
   const bankersParse = JSON.parse(mybankers)
   // console.log(typeof(bankersParse))
   let mergeBankers = []
@@ -159,18 +161,18 @@ ipcMain.on("message:contractnew", (e, options) => {
     fs.mkdir(path, { recursive: true}, function (err) {
       if (err) return err;
       if (fs.existsSync(jsonFile)) {
-        fs.readFile(path +"/"+ fileName, 'utf8', function(err, jdata){
+        fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
           jdata = JSON.parse(jdata);
           //Step 3: append contract variable to list
           jdata["contract" + getIdNumber] = data
           // console.log(jdata);
           const wData = JSON.stringify(jdata, null, 2)
-          fs.writeFile(path +"/"+ fileName, wData, function writeJson() {
+          fs.writeFile(homedir + "/" + path +"/"+ fileName, wData, function writeJson() {
             if (err) {
               console.log(err)
             } else {
-              console.log(fs.readFileSync("./data/data.json", "utf8"));
-              const accounts = fs.readFileSync("./data/data.json", "utf-8")
+              // console.log(fs.readFileSync("./data/data.json", "utf8"));
+              const accounts = fs.readFileSync(homedir + "/data/data.json", "utf-8")
               win.webContents.send("list:file", accounts)
             }
           })
@@ -185,9 +187,11 @@ ipcMain.on("message:contractnew", (e, options) => {
           if (err)  {
             console.log(err)
           } else {
-            console.log(fs.readFileSync("./data/data.json", "utf8"));
-            const accounts = fs.readFileSync("./data/data.json", "utf-8")
-            win.webContents.send("list:file",  accounts)
+            // console.log(fs.readFileSync("./data/data.json", "utf8"));
+            const accounts = fs.readFileSync(homedir + "/data/data.json", "utf-8")
+            
+            win.webContents.send("list:file", accounts)
+            
           }
         });
       }
@@ -216,13 +220,13 @@ ipcMain.on('message:addBanker', (e, options) => {
     fs.mkdir(path, { recursive: true}, function (err) {
       if (err) return err;
       if (fs.existsSync(jsonFileBanker)) {
-        fs.readFile(path +"/"+ fileName, 'utf8', function(err, jdata){
+        fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
           jdata = JSON.parse(jdata);
           //Step 3: append contract variable to list
           jdata["banker" + getBankerIdNumber] = data
           console.log(jdata);
           const wData = JSON.stringify(jdata, null, 2)
-          fs.writeFile(path +"/"+ fileName, wData, function writeJson() {
+          fs.writeFile(homedir + "/" + path +"/"+ fileName, wData, function writeJson() {
             if (err) return console.log(err);
           })
       });
@@ -231,7 +235,7 @@ ipcMain.on('message:addBanker', (e, options) => {
           ["banker" + getBankerIdNumber]: data
         }
         const sData = JSON.stringify(addBanker, null, 2)
-        fs.writeFile(path +"/"+ fileName
+        fs.writeFile(homedir + "/" + path +"/"+ fileName
           , sData, function writeJson() {
           if (err) return console.log(err);
           // console.log(JSON.stringify(sData));
@@ -247,7 +251,7 @@ ipcMain.on('message:addBanker', (e, options) => {
 ipcMain.on('click:addBanker', () => {
   const fileName = "banker.json"
   const path = "data"
-  fs.readFile(path +"/"+ fileName, 'utf8', function(err, jdata){
+  fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
     jdata = JSON.parse(jdata);
     //Step 3: append contract variable to list
     // console.log(jdata);
@@ -256,37 +260,37 @@ ipcMain.on('click:addBanker', () => {
     })
 })
 
-ipcMain.on('get:balance', (e, options) => {
-  console.log(options)
-  const request = https.request(`https://twigchain.com/ext/getbalance/${options.pubkey}`, (response) => {
-    let data = '';
-    response.on('data', (chunk) => {
-        data = data + chunk.toString();
-    });
+// ipcMain.on('get:balance', (e, options) => {
+//   console.log(options)
+//   const request = https.request(`https://twigchain.com/ext/getbalance/${options.pubkey}`, (response) => {
+//     let data = '';
+//     response.on('data', (chunk) => {
+//         data = data + chunk.toString();
+//     });
   
-    response.on('end', () => {
-        const body = JSON.parse(data);
-        console.log(body);
-        win.webContents.send('response:balance', body)
-    });
-  })
+//     response.on('end', () => {
+//         const body = JSON.parse(data);
+//         console.log(body);
+//         win.webContents.send('response:balance', body)
+//     });
+//   })
     
-  request.on('error', (error) => {
-      console.log('An error', error);
-      // win.webContents.send('response:balance', toString(0))
-  });
+//   request.on('error', (error) => {
+//       console.log('An error', error);
+//       // win.webContents.send('response:balance', toString(0))
+//   });
     
-  request.end() 
-})
+//   request.end() 
+// })
 
 ipcMain.on('balance:api', (e, options) => {
-  e.preventDefault()
-  console.log(options)
+  // e.preventDefault()
+  // console.log(options)
   let account = {};
   const fileName = "data.json"
   const path = "data"
   if (fs.existsSync(jsonFile)) {
-    accounts = fs.readFileSync("./data/data.json", "utf-8")
+    accounts = fs.readFileSync(homedir + "/data/data.json", "utf-8")
     const allaccount = JSON.parse(accounts)
     for(let i in allaccount) {
       // console.log(i)
@@ -306,18 +310,20 @@ ipcMain.on('balance:api', (e, options) => {
               
               allaccount[i].balance = body.balance
               // const allparse = JSON.stringify(allaccount[i], null, 2)
-              fs.readFile(path +"/"+ fileName, 'utf8', function(err, jdata){
+              fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
                 jdata = JSON.parse(jdata);
                 //Step 3: append contract variable to list
                 jdata[i] = allaccount[i]
                 console.log(jdata);
                 const wData = JSON.stringify(jdata, null, 2)
-                fs.writeFile(path +"/"+ fileName, wData, function writeJson() {
+                fs.writeFile(homedir + "/" + path +"/"+ fileName, wData, (err) => {
                   if (err) {
                     return console.log(err)
                   } else {
-                    const readMore = fs.readFileSync("./data/data.json", "utf-8")
+                    const readMore = fs.readFileSync(homedir + "/data/data.json", "utf-8")
+                    
                     win.webContents.send("list:file",  readMore)
+                   
                   }
                 })
               });
@@ -342,6 +348,41 @@ ipcMain.on('balance:api', (e, options) => {
       });
       request.end()
     }
+  }
+})
+
+async function bankerPubkeyResponse(evt) {
+  // console.log(evt)
+  const allbankers = await JSON.parse(fs.readFileSync(homedir + "/data/banker.json", "utf-8"))
+  // console.log(typeof(allbankers))
+  for (const i in allbankers) {
+    if (allbankers[i].id === evt.id) {
+      allbankers[i].pubkey = evt.pubkey
+      const wData = JSON.stringify(allbankers, null, 2)
+      console.log(wData)
+      fs.writeFile(homedir + "/data/banker.json", wData, (err) => {
+        if (err) {
+          console.log(err)
+        } else {
+          console.log("successful")
+        }
+      })
+    }
+  }
+}
+
+ipcMain.on("banker:addorsig", (e, options) => {
+  e.preventDefault()
+  // console.log(typeof(options))
+  const banker = JSON.parse(options)
+  // console.log(banker)
+  if (banker.message == "request-pubkey") {
+    // bankerPubkey(banker)
+  }else if (banker.message == "response-pubkey") {
+    // console.log("response pubkey")
+    bankerPubkeyResponse(banker)
+  }else {
+    console.log("signature")
   }
 })
 

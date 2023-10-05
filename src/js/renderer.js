@@ -19,7 +19,9 @@ const creatorEmail = document.getElementById("creator-email");
 const creatorAddress = document.getElementById("creator-address");
 const minusButton = document.getElementById('multikeys');
 const addMinus = document.getElementById('multikeys').getElementsByClassName('pubkeyAdd')[0]
-const testingClick = document.getElementsByClassName('testingClick')[0]
+const getbankerClick = document.getElementsByClassName('getbankerClick')[0]
+const getListClick = document.getElementsByClassName('getlistClick')[0]
+// console.log(getListClick)
 // const accountList = document.getElementById('accounts-list');
 
 const sigNumber = document.getElementById('releaseCoins');
@@ -36,9 +38,9 @@ tabTogglers.forEach(function(toggler) {
         e.preventDefault();
 
         let tabName = this.getAttribute("href");
-        if (tabName === "#first") {
-            ipcRenderer.send("balance:api", {"send": "get"})
-        }
+        // if (tabName === "#first") {
+        //     ipcRenderer.send("balance:api", {"send": "get"})
+        // }
         let tabContents = document.querySelector("#tab-contents");
 
         for (let i = 0; i < tabContents.children.length; i++) {
@@ -121,7 +123,8 @@ async function saveAndCreateText(e) {
     });
 }
 
-ipcRenderer.on("list:file", function(evt){
+ipcRenderer.on("list:file", function(e, evt){
+    console.log(e)
     const convertToJson = JSON.parse(evt)
     // console.log(convertToJson)
     // let text = ""
@@ -197,66 +200,66 @@ ipcRenderer.on("list:file", function(evt){
   
 // })
 
-function addOrDelete() {
-    console.log("click add or delete")
-    const mainKey = document.getElementById('multikeys')
-    let displayButton = document.querySelector("form button");
-    // const bankers = document.querySelectorAll('.banker')
-    // if (bankers.length >= 28 ) return;
-    // innerKey.getElementsByClassName('green')[0]
-    // const clone = '<div class="grid md:grid-cols-7 md:gap-6" id="multikeysInner">'+innerKey.innerHTML+'</div>'
-    // mainKey.innerHTML += clone
-    // document.getElementById('multikeys', 'img-anchor').dataset('./assets/imgs/minus.svg')
-    let div = document.createElement('div');
-    div.setAttribute("class", "grid md:grid-cols-7 md:gap-6 multikeysInner");
-    // let input1 = document.createElement('input')
-    // input1.setAttribute('class', 'col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name')
-    // input1.setAttribute('placeholder', 'Bankers Name')
-    // input1.setAttribute('required', '')
-    // let input2 = document.createElement('input')
-    // input2.setAttribute('class', 'col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email')
-    // input2.setAttribute('placeholder', 'Bankers Email')
-    // input2.setAttribute('required', '')
-    let select = document.createElement('select')
-    select.setAttribute('name', 'banker-name1')
-    select.setAttribute('id', 'bankers-name')
-    select.setAttribute('class', 'col-span-6 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500')
-    let option = document.createElement('option')
-    option.setAttribute('value', '')
-    option.setAttribute('disabled', 'disabled')
-    option.setAttribute('hidden', 'hidden')
-    option.setAttribute('selected', 'selected')
-    option.innerHTML = "Choose Banker"
-    select.appendChild(option)
-    // option.setAttribute('data-dept', 'Choose Banker')
-    for (const key in bankersArray) {
-        const opt = bankersArray[key].banker_email
-        console.log(opt)
-        let option1 = document.createElement('option')
-        option1.textContent = opt;
-        option1.value = opt;
-        select.appendChild(option1)
-    }
-    let anchor = document.createElement('a')
-    anchor.setAttribute('class', 'pubkeyRemove')
-    let minus = document.createElement('object')
-    minus.setAttribute('data', './images/minus.svg')
-    minus.setAttribute('width', '50')
-    minus.setAttribute('height', '50')
-    minus.setAttribute('class', 'red')
-    anchor.appendChild(minus)
-    div.appendChild(select)
-    // div.appendChild(input2)
-    div.appendChild(anchor)
-    mainKey.appendChild(div)
-}
+// function addOrDelete() {
+//     console.log("click add or delete")
+//     const mainKey = document.getElementById('multikeys')
+//     let displayButton = document.querySelector("form button");
+//     // const bankers = document.querySelectorAll('.banker')
+//     // if (bankers.length >= 28 ) return;
+//     // innerKey.getElementsByClassName('green')[0]
+//     // const clone = '<div class="grid md:grid-cols-7 md:gap-6" id="multikeysInner">'+innerKey.innerHTML+'</div>'
+//     // mainKey.innerHTML += clone
+//     // document.getElementById('multikeys', 'img-anchor').dataset('./assets/imgs/minus.svg')
+//     let div = document.createElement('div');
+//     div.setAttribute("class", "grid md:grid-cols-7 md:gap-6 multikeysInner");
+//     // let input1 = document.createElement('input')
+//     // input1.setAttribute('class', 'col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name')
+//     // input1.setAttribute('placeholder', 'Bankers Name')
+//     // input1.setAttribute('required', '')
+//     // let input2 = document.createElement('input')
+//     // input2.setAttribute('class', 'col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email')
+//     // input2.setAttribute('placeholder', 'Bankers Email')
+//     // input2.setAttribute('required', '')
+//     let select = document.createElement('select')
+//     select.setAttribute('name', 'banker-name1')
+//     select.setAttribute('id', 'bankers-name')
+//     select.setAttribute('class', 'col-span-6 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500')
+//     let option = document.createElement('option')
+//     option.setAttribute('value', '')
+//     option.setAttribute('disabled', 'disabled')
+//     option.setAttribute('hidden', 'hidden')
+//     option.setAttribute('selected', 'selected')
+//     option.innerHTML = "Choose Banker"
+//     select.appendChild(option)
+//     // option.setAttribute('data-dept', 'Choose Banker')
+//     for (const key in bankersArray) {
+//         const opt = bankersArray[key].banker_email
+//         console.log(opt)
+//         let option1 = document.createElement('option')
+//         option1.textContent = opt;
+//         option1.value = opt;
+//         select.appendChild(option1)
+//     }
+//     let anchor = document.createElement('a')
+//     anchor.setAttribute('class', 'pubkeyRemove')
+//     let minus = document.createElement('object')
+//     minus.setAttribute('data', './images/minus.svg')
+//     minus.setAttribute('width', '50')
+//     minus.setAttribute('height', '50')
+//     minus.setAttribute('class', 'red')
+//     anchor.appendChild(minus)
+//     div.appendChild(select)
+//     // div.appendChild(input2)
+//     div.appendChild(anchor)
+//     mainKey.appendChild(div)
+// }
 
-function deleteInput(e) {
-    const remove = e.target.classList.contains('pubkeyRemove')
-    if (!remove) return;
-    const removeEl = e.target.parentNode; 
-    document.getElementById('multikeys').removeChild(removeEl);
-}
+// function deleteInput(e) {
+//     const remove = e.target.classList.contains('pubkeyRemove')
+//     if (!remove) return;
+//     const removeEl = e.target.parentNode; 
+//     document.getElementById('multikeys').removeChild(removeEl);
+// }
 
 function addBanker(e) {
     e.preventDefault()
@@ -276,10 +279,10 @@ function getBanker() {
     }
 }
 
-ipcRenderer.on('send:bankers', function(e) {
+ipcRenderer.on('send:bankers', function(e, evt) {
     const select = document.querySelector("select[multiple]");
     console.log(select)
-    bankersArray = e
+    bankersArray = evt
     for(const key in bankersArray) {
         console.log(bankersArray[key])
         // let data = {
@@ -482,6 +485,7 @@ ipcRenderer.on('send:bankers', function(e) {
 function parseTextArea(e) {
     e.preventDefault();
     const textarea = document.getElementById('import-text'); 
+    console.log(textarea)
     // const resultDiv = document.getElementById('result'); 
     const jsonString = textarea.value; 
     const startIndex = jsonString.indexOf('{'); 
@@ -489,7 +493,8 @@ function parseTextArea(e) {
     if (startIndex !== -1 && endIndex !== -1) { 
         let jsonStr = jsonString.substring(startIndex, endIndex + 1); 
         jsonStr = jsonStr.replace(/\s/g, "") 
-        console.log(jsonStr) 
+        console.log(typeof(jsonStr))
+        ipcRenderer.send("banker:addorsig", jsonStr)
     }
 }
 
@@ -500,6 +505,10 @@ ipcRenderer.on('user:profile', function(evt) {
     }
 })
 
+function getList() {
+    ipcRenderer.send("balance:api", {})
+}
+
 
 
 
@@ -507,9 +516,10 @@ ipcRenderer.on('user:profile', function(evt) {
 formCreateAccount.addEventListener("submit", saveAndCreateText);
 importTextForm.addEventListener('submit', parseTextArea);
 // addMinus.addEventListener('click', addOrDelete);
-minusButton.addEventListener('click', deleteInput);
+// minusButton.addEventListener('click', deleteInput);
 formAddBanker.addEventListener('submit', addBanker);
-testingClick.addEventListener('click', getBanker)
+getbankerClick.addEventListener('click', getBanker)
+getListClick.addEventListener('click', getList)
 
 
 
