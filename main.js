@@ -368,21 +368,32 @@ ipcMain.on('balance:api', (e, options) => {
 
 async function bankerPubkeyResponse(evt) {
   // console.log(evt)
-  const allbankers = await JSON.parse(fs.readFileSync(homedir + "/data/banker.json", "utf-8"))
-  // console.log(typeof(allbankers))
-  for (const i in allbankers) {
-    if (allbankers[i].id === evt.id) {
-      allbankers[i].pubkey = evt.pubkey
-      const wData = JSON.stringify(allbankers, null, 2)
-      console.log(wData)
-      fs.writeFile(homedir + "/data/banker.json", wData, (err) => {
-        if (err) {
-          console.log(err)
-        } else {
-          console.log("successful")
-        }
-      })
+  if (fs.existsSync(homedir + "/data/banker.json")) {
+    const allbankers = await JSON.parse(fs.readFileSync(homedir + "/data/banker.json", "utf-8"))
+    // console.log(typeof(allbankers))
+    for (const i in allbankers) {
+      if (allbankers[i].id === evt.id) {
+        allbankers[i].pubkey = evt.pubkey
+        const wData = JSON.stringify(allbankers, null, 2)
+        console.log(wData)
+        fs.writeFile(homedir + "/data/banker.json", wData, (err) => {
+          if (err) {
+            console.log(err)
+          } else {
+            console.log("successful")
+          }
+        })
+      }
     }
+  }else {
+    console.log()
+  }
+}
+
+async function bankerPubkeyRequest(evt) {
+  if (fs.existsSync(homedir + "/data/user.json")) {
+    const user = await JSON.parse(fs.readFileSync(homedir + "/data/user.json", "utf-8"))
+    console.log(user)
   }
 }
 
@@ -392,7 +403,7 @@ ipcMain.on("banker:addorsig", (e, options) => {
   const banker = JSON.parse(options)
   // console.log(banker)
   if (banker.message === "request-pubkey") {
-    // bankerPubkey(banker)
+    bankerPubkeyRequest(banker)
   }else if (banker.message === "response-pubkey") {
     // console.log("response pubkey")
     bankerPubkeyResponse(banker)
