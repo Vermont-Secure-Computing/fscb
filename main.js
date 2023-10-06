@@ -31,21 +31,24 @@ const createWindow = () => {
 
   win.removeMenu()
   const existAccount = fs.existsSync(homedir + '/data/data.json')
-  // console.log(accounts)
+
   // const accountParse = JSON.parse(accounts)
 
   const existsUser = fs.existsSync(homedir + '/data/user.json')
   
   
+  
   win.loadFile('src/index.html').then(() => {
+
     if (existAccount) {
       const accounts = fs.readFileSync(homedir +  "/data/data.json", "utf-8")
       win.webContents.send("list:file", accounts)
     }
     
-    // if (!existsUser) {
-    //   win.webContents.send("user:profile", {"user": false})
-    // }
+    if (!existsUser) {
+      console.log("executed exist account")
+      win.webContents.send("user:profile", {"user": false})
+    }
   })
 
 }
@@ -377,13 +380,42 @@ ipcMain.on("banker:addorsig", (e, options) => {
   // console.log(typeof(options))
   const banker = JSON.parse(options)
   // console.log(banker)
-  if (banker.message == "request-pubkey") {
+  if (banker.message === "request-pubkey") {
     // bankerPubkey(banker)
-  }else if (banker.message == "response-pubkey") {
+  }else if (banker.message === "response-pubkey") {
     // console.log("response pubkey")
     bankerPubkeyResponse(banker)
+  }else if (banker.message === "request-signature") {
+    console.log("request signature")
   }else {
     console.log("signature")
+  }
+})
+
+ipcMain.on('user:address', (e, options) => {
+  let data = {
+    "user_name": options.userName,
+    "user_email": options.userEmmail,
+    "address": options.userAddress.address,
+    "pubkey": options.userAddress.pubkey,
+    "wif": options.userAddress.wif,
+    "privkey": options.userAddress.privkey
+  }
+  try {
+    // const fileName = "user.json"
+    const path = "data"
+    const wData = JSON.stringify(data, null, 2)
+    fs.mkdir(homedir + "/" + path, { recursive: true}, function (err) {
+      fs.writeFile(homedir + "/data/user.json", wData, (err) => {
+        if (err) {
+          console.log(err)
+        } else {
+          win.webContents.send('create:profile', {})
+        }
+      })
+    })
+  }catch (e) {
+    console.log(e)
   }
 })
 

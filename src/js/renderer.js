@@ -4,6 +4,8 @@
 //  console.log(multisig)
 
 
+
+
  
 //  Start Tab Pannels
 
@@ -12,6 +14,7 @@ const importText =   document.getElementById('import-text');
 
 const formCreateAccount =   document.getElementById('create-new-form');
 const importTextForm = document.getElementById('import-text-form');
+const userProfileForm = document.getElementById('user-profile-form')
 const formAddBanker = document.getElementById('add-banker-form');
 const contractName = document.getElementById("contract-name");
 const creatorName = document.getElementById("creator-name");
@@ -499,16 +502,68 @@ function parseTextArea(e) {
     }
 }
 
-ipcRenderer.on('user:profile', function(evt) {
-    if (evt.user === false) {
-        const userProfile = document.getElementById('user-profile')
-        userProfile.classList.remove('hidden')
-    }
+ipcRenderer.on('user:profile', (evt) => {
+    const userProfile = document.getElementById('user-profile')
+    const aside = document.getElementById('aside')
+    const tabsContent = document.getElementById('tab-contents')
+    userProfile.classList.remove('hidden')
+    aside.classList.add('hidden')
+    tabsContent.classList.add('hidden')
 })
 
 function getList() {
     ipcRenderer.send("balance:api", {})
 }
+
+async function createUserProfile(e) {
+    e.preventDefault()
+    const userName = document.getElementById('user-name').value
+    const userEmail = document.getElementById('user-email').value
+    coinjs.compressed = true
+    const userAddress = await coinjs.newKeys()
+    console.log(userAddress)
+    ipcRenderer.send("user:address", {
+        userName,
+        userEmail,
+        userAddress
+    })
+    ipcRenderer.on('create:profile', (e) => {
+        const userProfile = document.getElementById('user-profile')
+        const aside = document.getElementById('aside')
+        const tabsContent = document.getElementById('tab-contents')
+        userProfile.classList.add('hidden')
+        aside.classList.remove('hidden')
+        tabsContent.classList.remove('hidden')
+        alertSuccess("Profile has successfully been created")
+    })
+}
+
+function alertSuccess(message) {
+    Toastify.toast({
+      text: message,
+      duration: 5000,
+      close: false,
+      style: {
+        background: 'green',
+        color: 'white',
+        textAlign: 'center',
+      },
+    });
+  }
+  
+  function alertError(message) {
+    Toastify.toast({
+      text: message,
+      duration: 5000,
+      close: false,
+      style: {
+        background: 'red',
+        color: 'white',
+        textAlign: 'center',
+      },
+    });
+  }
+  
 
 
 
@@ -516,11 +571,13 @@ function getList() {
 // importText.addEventListener("change", loadText);
 formCreateAccount.addEventListener("submit", saveAndCreateText);
 importTextForm.addEventListener('submit', parseTextArea);
+userProfileForm.addEventListener('submit', createUserProfile);
 // addMinus.addEventListener('click', addOrDelete);
 // minusButton.addEventListener('click', deleteInput);
 formAddBanker.addEventListener('submit', addBanker);
 getbankerClick.addEventListener('click', getBanker)
 getListClick.addEventListener('click', getList)
+
 
 
 
