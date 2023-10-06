@@ -278,8 +278,7 @@ function addBanker(e) {
     // Get value of selected currency
     var selectElement = document.querySelector('#banker-currency');
     var bankerCurrency = selectElement.value;
-    console.log("currency: ", currency)
-    // console.log(mainBankerDiv)
+
     const bankerName = nameInput.value
     const bankerEmail = emailInput.value
     console.log("add banker: ", bankerName, bankerEmail)
@@ -315,7 +314,7 @@ ipcRenderer.on('send:bankers', function(e, evt) {
             let email = row.insertCell(1);
             email.innerHTML = bankersArray[x].banker_email
             let pubKey = row.insertCell(2);
-            pubKey.innerHTML = bankersArray[x].public_key
+            pubKey.innerHTML = bankersArray[x].pubkey
             let currency = row.insertCell(3)
             currency.innerHTML = bankersArray[x].currency
         }
@@ -338,9 +337,11 @@ ipcRenderer.on('send:bankers', function(e, evt) {
       // Add the select component to the select container
       selectDiv.appendChild(select)
 
-      console.log(select)
+      // Get the selected value for contract currency
+      // And filter bankers array with the value
       select.options.length = 0
       for(const key in bankersArray) {
+        if(bankersArray[key].pubkey){
           const opt = bankersArray[key].banker_email;
           const pub = bankersArray[key].pubkey;
           const el = document.createElement("option");
@@ -348,6 +349,7 @@ ipcRenderer.on('send:bankers', function(e, evt) {
           el.value = pub;
           el.setAttribute('class', 'optionForSelection')
           select.appendChild(el);
+        }
       }
 
       const selectOptions = select.querySelectorAll('option');
