@@ -305,6 +305,7 @@ ipcMain.on('balance:api', (e, options) => {
           data = data + chunk.toString();
       });
       
+      
       response.on('end', async () => {
           const body = await JSON.parse(data);
           // console.log(body);
