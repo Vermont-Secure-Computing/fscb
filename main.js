@@ -45,9 +45,9 @@ const createWindow = () => {
       win.webContents.send("list:file", accounts)
     }
 
-    // if (!existsUser) {
-    //   win.webContents.send("user:profile", {"user": false})
-    // }
+    if (!existsUser) {
+      win.webContents.send("user:profile", {"user": false})
+    }
   })
 
 }
