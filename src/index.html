@@ -36,7 +36,7 @@
   </head>
   <body>
     <div>
-      
+
       <div class="rounded border mx-auto grid grid-cols-12 gap-1">
         <aside class="col-span-3 bg-black">
           <img src="./images/fscb logo.png" alt="fscb">
@@ -60,13 +60,14 @@
               <li class="px-4 text-gray-800 font-semibold py-2 rounded-t"><a href="#fourth">How it works</a></li>
             </ul>
         </aside>
-      
+
         <!-- Tab Contents -->
-        <div class="bg-gray-700 col-span-9" id="tab-contents">
-          <div id="importText" class="hidden p-4"> <!-- Adjust the height here -->
-              <form id="import-text-form">
-                  <textarea name="" id="import-text" cols="30" rows="10" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Paste text here..."></textarea>
-                  <button type="submit" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900 hover:bg-blue-800">Import</button>
+        <div class="bg-gray-700 col-span-9" id="tab-contents" >
+          <div id="importText" class="hidden p-4">
+            <form id="import-text-form">
+              <textarea name="" id="import-text" cols="30" rows="10" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Paste text here..."></textarea>
+              <button type="submit" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900 hover:bg-blue-800">import</button>
+            </form>
           </div>
           <div id="first" class="p-4">
             <div id="accounts-list">
@@ -91,7 +92,7 @@
                   <option value="woodcoin" selected>woodcoin</option>
                   <option value="bitcoin">bitcoin</option>
                   <option value="litecoin">litecoin</option>
-                </select> 
+                </select>
               </div>
               <div class="relative mb-4 flex flex-wrap items-stretch">
                 <input
@@ -100,8 +101,8 @@
                   class="relative ml-20 mr-20 mt-10 block w-[1px] min-w-0 flex-auto rounded-r border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-primary focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-200 dark:focus:border-primary"
                   placeholder="Name Of Contract"
                   aria-label="NameOfContract"
-                  aria-describedby="basic-addon1"/>
-                  
+                  aria-describedby="basic-addon1" />
+
               </div>
               <div class="relative mb-4 flex flex-wrap items-stretch">
                 <input
@@ -123,16 +124,16 @@
               </div>
               <div id="multikeys">
                     <!-- <input type="text" id="bankers-name" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name" placeholder="Bankers Name">
-                  
+
                     <input type="text" id="bankers-email" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email" placeholder="Bankers Email"> -->
                   <div class="grid md:grid-cols-2 md:gap-6 multikeysInner">
-                    <div class="col-span-1">
-                      <select data-placeholder="Choose Bankers" multiple>
-                        <!-- <option value="" disabled selected hidden>Choose Bankers</option> -->
-                      </select>
+                    <div class="col-span-1" id="banker-select">
+                      <!-- <select data-placeholder="Choose Bankers" multiple>
+                        <option value="" disabled selected hidden>Choose Bankers</option>
+                      </select> -->
                     </div>
-                  
-                  
+
+
                     <!-- <a class="pubkeyAdd"><object data="./images/plus.svg" width="50" height="50" class="green" id="img-anchor"></object></a> -->
                     <div class="col-span-1">
                       <label for="#releaseCoins">Enter the amount of signatures required to release the coins</label>
@@ -161,22 +162,36 @@
                     </div>
                   </div>
               </div>
-              
+
             </form>
           </div>
           <div id="addbanker" class="hidden p-4">
             Add Banker
             <form id="add-banker-form">
-              <select name="" id="">
+              <select name="" id="banker-currency">
                 <option value="woodcoin" selected>woodcoin</option>
                 <option value="bitcoin">bitcoin</option>
                 <option value="litecoin">litecoin</option>
               </select>
-              <input type="text" id="banker-name-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add" placeholder="Bankers Name">    
+              <input type="text" id="banker-name-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add" placeholder="Bankers Name">
               <input type="email" id="banker-email-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email-add" placeholder="Bankers Email">
               <button type="submit" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900 hover:bg-blue-800">Submit</button>
-            
+
             </form>
+
+            <table class="min-w-full text-left text-sm font-light">
+              <thead class="border-b font-medium dark:border-neutral-500">
+                <tr>
+                  <th scope="col" class="px-6 py-4">Name</th>
+                  <th scope="col" class="px-6 py-4">Email</th>
+                  <th scope="col" class="px-6 py-4">Public Key</th>
+                  <th scope="col" class="px-6 py-4">Currency</th>
+                </tr>
+              </thead>
+              <tbody id="bankers-list-body">
+              </tbody>
+            </table>
+
           </div>
           <div id="third" class="hidden p-4">
             About FSCB
@@ -190,7 +205,7 @@
       <div id="user-profile" class="hidden mt-8">
         <form id="user-profile-form" class="justify-items: center;">
           <span>Please do fill up the form</span>
-          <input type="text" id="user-name" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add" placeholder="Users Name">    
+          <input type="text" id="user-name" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add" placeholder="Users Name">
           <input type="email" id="user-email" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email-add" placeholder="Users Email">
           <button type="submit">Submit</button>
         </form>

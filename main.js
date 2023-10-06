@@ -4,7 +4,7 @@ const https = require('https');
 const homedir = require('os').homedir();
 const fs = require("fs");
 const jsonFile = homedir + "/data/data.json"
-const jsonFileBanker = homedir + "./data/banker.json"
+const jsonFileBanker = homedir + "/data/banker.json"
 console.log(homedir)
 
 const isDev = process.env.NODE_ENV !== 'production';
@@ -35,20 +35,19 @@ const createWindow = () => {
   // const accountParse = JSON.parse(accounts)
 
   const existsUser = fs.existsSync(homedir + '/data/user.json')
-  
-  
-  
+
+
   win.loadFile('src/index.html').then(() => {
 
     if (existAccount) {
       const accounts = fs.readFileSync(homedir +  "/data/data.json", "utf-8")
+      console.log("accounts: ", accounts)
       win.webContents.send("list:file", accounts)
     }
-    
-    if (!existsUser) {
-      console.log("executed exist account")
-      win.webContents.send("user:profile", {"user": false})
-    }
+
+    // if (!existsUser) {
+    //   win.webContents.send("user:profile", {"user": false})
+    // }
   })
 
 }
@@ -85,7 +84,7 @@ function bankerIdNumber() {
     if (fs.existsSync(jsonFileBanker)) {
       const dataJson = fs.readFileSync(jsonFileBanker, "utf-8")
       const jconvert = JSON.parse(dataJson)
-      console.log("length: ", jconvert[Object.keys(jconvert)[Object.keys(jconvert).length - 1]].banker_id)
+      console.log("banker length: ", jconvert[Object.keys(jconvert)[Object.keys(jconvert).length - 1]].banker_id)
       return jconvert[Object.keys(jconvert)[Object.keys(jconvert).length - 1]].banker_id + 1
     } else {
       return 1
@@ -193,9 +192,9 @@ ipcMain.on("message:contractnew", (e, options) => {
           } else {
             // console.log(fs.readFileSync("./data/data.json", "utf8"));
             const accounts = fs.readFileSync(homedir + "/data/data.json", "utf-8")
-            
+
             win.webContents.send("list:file", accounts)
-            
+
           }
         });
       }
@@ -209,13 +208,14 @@ ipcMain.on("message:contractnew", (e, options) => {
 })
 
 ipcMain.on('message:addBanker', (e, options) => {
-  console.log(options)
+  console.log('message addbanker: ', options)
   const getBankerIdNumber = bankerIdNumber()
   let data = {
     "id": Math.floor(1000000000 + Math.random() * 9000000000),
     "banker_id": getBankerIdNumber,
     "banker_name": options.bankerName,
     "banker_email": options.bankerEmail,
+    "currency": options.bankerCurrency,
     "pubkey": ""
   }
   const fileName = "banker.json"
@@ -226,15 +226,18 @@ ipcMain.on('message:addBanker', (e, options) => {
       if (fs.existsSync(jsonFileBanker)) {
         fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
           jdata = JSON.parse(jdata);
+          //console.log("current banker: ", jdata)
           //Step 3: append contract variable to list
           jdata["banker" + getBankerIdNumber] = data
-          console.log(jdata);
+
           const wData = JSON.stringify(jdata, null, 2)
           fs.writeFile(homedir + "/" + path +"/"+ fileName, wData, function writeJson() {
             if (err) return console.log(err);
+            readBankersFile()
           })
       });
       } else {
+        console.log("file not existing")
         const addBanker = {
           ["banker" + getBankerIdNumber]: data
         }
@@ -244,7 +247,9 @@ ipcMain.on('message:addBanker', (e, options) => {
           if (err) return console.log(err);
           // console.log(JSON.stringify(sData));
           console.log('writing to ' + fileName);
+          readBankersFile()
         });
+
       }
     });
   } catch (e) {
@@ -252,7 +257,7 @@ ipcMain.on('message:addBanker', (e, options) => {
   }
 })
 
-ipcMain.on('click:addBanker', () => {
+function readBankersFile() {
   const fileName = "banker.json"
   const path = "data"
   fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
@@ -261,7 +266,13 @@ ipcMain.on('click:addBanker', () => {
     // console.log(jdata);
     // const wData = JSON.stringify(jdata, null, 2)
     win.webContents.send('send:bankers', jdata)
-    })
+  })
+  return
+}
+
+ipcMain.on('click:addBanker', () => {
+  console.log("ipcmain click: ")
+  readBankersFile()
 })
 
 // ipcMain.on('get:balance', (e, options) => {
@@ -271,20 +282,20 @@ ipcMain.on('click:addBanker', () => {
 //     response.on('data', (chunk) => {
 //         data = data + chunk.toString();
 //     });
-  
+
 //     response.on('end', () => {
 //         const body = JSON.parse(data);
 //         console.log(body);
 //         win.webContents.send('response:balance', body)
 //     });
 //   })
-    
+
 //   request.on('error', (error) => {
 //       console.log('An error', error);
 //       // win.webContents.send('response:balance', toString(0))
 //   });
-    
-//   request.end() 
+
+//   request.end()
 // })
 
 ipcMain.on('balance:api', (e, options) => {
@@ -304,15 +315,14 @@ ipcMain.on('balance:api', (e, options) => {
       response.on('data', (chunk) => {
           data = data + chunk.toString();
       });
-      
-      
+
       response.on('end', async () => {
           const body = await JSON.parse(data);
           // console.log(body);
           // allaccount[i].balance = body
           if (body.address) {
             if (allaccount[i].address === body.address) {
-              
+
               allaccount[i].balance = body.balance
               // const allparse = JSON.stringify(allaccount[i], null, 2)
               fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
@@ -326,9 +336,9 @@ ipcMain.on('balance:api', (e, options) => {
                     return console.log(err)
                   } else {
                     const readMore = fs.readFileSync(homedir + "/data/data.json", "utf-8")
-                    
+
                     win.webContents.send("list:file",  readMore)
-                   
+
                   }
                 })
               });
@@ -345,11 +355,11 @@ ipcMain.on('balance:api', (e, options) => {
           }
       });
       })
-        
+
       request.on('error', (error) => {
           console.log('An error', error);
           // win.webContents.send('response:balance', toString(0))
-          
+
       });
       request.end()
     }
