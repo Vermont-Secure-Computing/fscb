@@ -52,14 +52,15 @@ tabTogglers.forEach(function(toggler) {
 
         for (let i = 0; i < tabContents.children.length; i++) {
 
-        tabTogglers[i].parentElement.classList.remove("border-t", "border-r", "border-l", "-mb-px", "bg-white");  tabContents.children[i].classList.remove("hidden");
-        if ("#" + tabContents.children[i].id === tabName) {
-            continue;
-        }
-        tabContents.children[i].classList.add("hidden");
+          tabTogglers[i].parentElement.classList.remove("border-t", "border-b", "border-l", "bg-gradient-to-l", "from-gray-300");
+          tabContents.children[i].classList.remove("hidden");
+          if ("#" + tabContents.children[i].id === tabName) {
+              continue;
+          }
+          tabContents.children[i].classList.add("hidden");
 
         }
-        e.target.parentElement.classList.add("border-t", "border-r", "border-l", "-mb-px", "bg-white");
+        e.target.parentElement.classList.add("border-t", "border-b", "border-l", "bg-gradient-to-l", "from-gray-300");
     });
 });
 
