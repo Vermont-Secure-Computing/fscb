@@ -64,10 +64,15 @@
         <!-- Tab Contents -->
         <div class="bg-gray-700 col-span-9" id="tab-contents" >
           <div id="importText" class="hidden p-4">
-            <form id="import-text-form">
-              <textarea name="" id="import-text" cols="30" rows="10" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Paste text here..."></textarea>
-              <button type="submit" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900 hover:bg-blue-800">import</button>
-            </form>
+            <div class="mx-auto" id="import-area">
+              <form id="import-text-form">
+                <textarea name="" id="import-text" cols="30" rows="10" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Paste text here..."></textarea>
+                <button type="submit" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900 hover:bg-blue-800">import</button>
+              </form>
+            </div>
+            <div class="mx-auto hidden" id="import-show">
+              <p>please copy the line below and send it to.</p><span id="email-show"></span><br />
+            </div>
           </div>
           <div id="first" class="p-4">
             <div id="accounts-list">
