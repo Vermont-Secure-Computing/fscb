@@ -1,4 +1,5 @@
 const { contextBridge, ipcRenderer } = require('electron');
+const Toastify = require('toastify-js');
 
 
 contextBridge.exposeInMainWorld('ipcRenderer', {
@@ -7,4 +8,8 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
   removeAllListeners: (channel, func) => {
       ipcRenderer.removeAllListeners(channel)
   }
+});
+
+contextBridge.exposeInMainWorld('Toastify', {
+  toast: (options) => Toastify(options).showToast(),
 });
