@@ -366,6 +366,32 @@ ipcMain.on('balance:api', (e, options) => {
   }
 })
 
+
+ipcMain.on('unspent:api', (e, address) => {
+  console.log("ipc main address: ", address)
+  try {
+    const request = https.request(`https://api.logbin.org/api?address=${address}`, (response) => {
+      console.log("im here")
+      let data = '';
+      response.on('data', (chunk) => {
+          data = data + chunk.toString();
+      });
+
+      response.on('end', async () => {
+          const body = await JSON.parse(data);
+          console.log("unspent body: ", body.message.address)
+      });
+   })
+
+    request.on('error', (error) => {
+        console.log('An error', error);
+    });
+    request.end()
+  } catch(e) {
+    console.log("error : ", e)
+  }
+})
+
 async function bankerPubkeyResponse(evt) {
   // console.log(evt)
   if (fs.existsSync(homedir + "/data/banker.json")) {
@@ -381,6 +407,8 @@ async function bankerPubkeyResponse(evt) {
             console.log(err)
           } else {
             console.log("successful")
+            // send
+            win.webContents.send('addBanker:pubkey', {})
           }
         })
       }

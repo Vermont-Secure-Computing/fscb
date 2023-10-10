@@ -50,9 +50,13 @@ tabTogglers.forEach(function(toggler) {
             ipcRenderer.send("balance:api", {"send": "get"})
             let accountList = document.getElementById('accounts-list')
             let accountDetails = document.getElementById('account-details')
+            let accountActions = document.getElementById('account-actions')
+            let accountWithdrawal = document.getElementById('account-withdrawal')
 
             accountList.classList.remove("hidden")
             accountDetails.classList.add("hidden")
+            accountActions.classList.add("hidden")
+            accountWithdrawal.classList.add("hidden")
         }
         if (tabName === "#addbanker") {
             getBanker()
@@ -183,7 +187,7 @@ ipcRenderer.on("list:file", function(e, evt){
             let viewAccountDetailsButton = document.createElement('button')
             viewAccountDetailsButton.innerHTML = "view all"
             veiwall.appendChild(viewAccountDetailsButton)
-            viewAccountDetailsButton.addEventListener('click', getAccountDetails)
+            //viewAccountDetailsButton.addEventListener('click', getAccountDetails)
             let details = convertToJson[x]
             viewAccountDetailsButton.addEventListener("click", function() {getAccountDetails(details);}, false);
             // ipcRenderer.on('response:balance', function(e, arg) {
@@ -213,6 +217,31 @@ ipcRenderer.on("list:file", function(e, evt){
     // accountBody.appendChild(accountTr)
 
 })
+
+function listAccountActions(actions){
+  console.log("actions: ", actions)
+  let accountDetails = document.getElementById('account-details')
+  let accountWithdrawal = document.getElementById('account-withdrawal')
+  let accountActions = document.getElementById('account-actions')
+
+  accountDetails.classList.add("hidden")
+  accountWithdrawal.classList.add("hidden")
+  accountActions.classList.remove("hidden")
+}
+
+function accountWithdrawal(address){
+  console.log("withdrawal: ", address)
+
+  ipcRenderer.send("unspent:api", address)
+
+  let accountDetails = document.getElementById('account-details')
+  let accountWithdrawal = document.getElementById('account-withdrawal')
+  let accountActions = document.getElementById('account-actions')
+
+  accountDetails.classList.add("hidden")
+  accountWithdrawal.classList.remove("hidden")
+  accountActions.classList.add("hidden")
+}
 
 function getAccountDetails(account){
   console.log("get account details: ", account)
@@ -258,6 +287,27 @@ function getAccountDetails(account){
         signature.innerHTML = bankers[x].signature ? bankers[x].signature : 'no signature yet'
       }
     }
+
+    // Generate action and withdrawal buttons
+    let buttonContainer = document.getElementById('account-buttons')
+    buttonContainer.innerHTML = ''
+
+    let viewActionsButton = document.createElement('button')
+    viewActionsButton.classList.add("inline-flex", "items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-yellow-700", "rounded-lg", "focus:ring-2", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
+    viewActionsButton.innerHTML = "Actions"
+    let actions = account.signatures
+    viewActionsButton.addEventListener("click", function() {listAccountActions(actions);}, false);
+
+    let withdrawalButton = document.createElement('button')
+    withdrawalButton.classList.add("inline-flex", "items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-yellow-700", "rounded-lg", "focus:ring-2", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
+    withdrawalButton.innerHTML = "Withdrawal"
+    let address = account.address
+    withdrawalButton.addEventListener("click", function() {accountWithdrawal(address);}, false);
+
+
+    buttonContainer.appendChild(viewActionsButton)
+    buttonContainer.appendChild(withdrawalButton)
+
   }
 }
 
@@ -688,14 +738,23 @@ ipcRenderer.on('response:pubkey', (e, evt) => {
     importAgain.addEventListener('click', importAgainShow)
 });
 
+//
+// When the banker's pubkey is successfully added, clear the textarea
+// and show success toast message
+//
+ipcRenderer.on('addBanker:pubkey', (e, evt) => {
+  importText.value = ''
+  alertSuccess("Successfully added banker's publick key.")
+
+})
+
 function importAgainShow(div, button) {
     const textId = document.getElementById('import-show')
     const textImport = document.getElementById('import-area')
     const textBody = document.getElementById('text-show')
     textId.classList.add('hidden')
     textImport.classList.remove('hidden')
-    textBody.removeChild(div)
-    textBody.removeChild(button)
+    textBody.innerHTML = ''
 
 }
 
