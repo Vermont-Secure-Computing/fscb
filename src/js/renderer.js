@@ -5,6 +5,8 @@
 
 
 
+
+
 //  Start Tab Pannels
 
 const importText =   document.getElementById('import-text');
@@ -22,6 +24,7 @@ const minusButton = document.getElementById('multikeys');
 const addMinus = document.getElementById('multikeys').getElementsByClassName('pubkeyAdd')[0]
 const getbankerClick = document.getElementsByClassName('getbankerClick')[0]
 const getListClick = document.getElementsByClassName('getlistClick')[0]
+
 // console.log(getListClick)
 // const accountList = document.getElementById('accounts-list');
 
@@ -544,7 +547,7 @@ function parseTextArea(e) {
     const endIndex = jsonString.lastIndexOf('}');
     if (startIndex !== -1 && endIndex !== -1) {
         let jsonStr = jsonString.substring(startIndex, endIndex + 1);
-        jsonStr = jsonStr.replace(/\s/g, "")
+        jsonStr = jsonStr.replace(/\s/g, " ")
         console.log(typeof(jsonStr))
         ipcRenderer.send("banker:addorsig", jsonStr)
     }
@@ -586,6 +589,62 @@ async function createUserProfile(e) {
     })
 }
 
+ipcRenderer.on('response:pubkey', (e, evt) => {
+    // const accountUser = JSON.parse(evt)
+    console.log(evt)
+    const textBody = document.getElementById('text-show')
+    const textId = document.getElementById('import-show')
+    const textImport = document.getElementById('import-area')
+    const textImportArea = document.getElementById('import-text')
+    const div = document.createElement('div')
+    div.setAttribute('class', 'bg-white p-3 rounded-md')
+    const button = document.createElement('button')
+    button.setAttribute('class', 'py-2 px-3 rounded bg-orange-500')
+    button.setAttribute('id', "import-again-button")
+    button.textContent = "Import Again"
+    const p = document.createElement('p')
+    const br = document.createElement('br')
+    const p1 = document.createElement('p')
+    const p2 = document.createElement('p')
+    const p3 = document.createElement('p')
+    const p4 = document.createElement('p')
+    const p5 = document.createElement('p')
+    textId.classList.remove('hidden')
+    textImport.classList.add('hidden')
+    textImportArea.value = ''
+    p.innerHTML = "Please copy the line below and send it to " + evt.creator_name;
+    p1.innerHTML = evt.banker_name + "public key response to" + evt.creator_name + "request";
+    p2.innerHTML = "Please copy the message inside and import in FSCB";
+    p3.innerHTML = "-----Begin fscb message-----";
+    p4.innerHTML = JSON.stringify(evt);
+    p5.innerHTML = "-----End fscb message-----";
+    // p4.setAttribute("class", "w-10")
+    div.appendChild(p)
+    div.appendChild(br)
+    div.appendChild(p1)
+    div.appendChild(p2)
+    div.appendChild(p3)
+    div.appendChild(p4)
+    div.appendChild(p5)
+    textBody.appendChild(div)
+    textBody.appendChild(button)
+    const importAgain = document.getElementById('import-again-button')
+    importAgain.addEventListener('click', importAgainShow)
+});
+
+function importAgainShow(div, button) {
+    const textId = document.getElementById('import-show')
+    const textImport = document.getElementById('import-area')
+    const textBody = document.getElementById('text-show')
+    textId.classList.add('hidden')
+    textImport.classList.remove('hidden')
+    textBody.removeChild(div)
+    textBody.removeChild(button)
+
+}
+
+
+
 function alertSuccess(message) {
     Toastify.toast({
       text: message,
@@ -599,18 +658,18 @@ function alertSuccess(message) {
     });
   }
 
-  function alertError(message) {
+function alertError(message) {
     Toastify.toast({
-      text: message,
-      duration: 5000,
-      close: false,
-      style: {
-        background: 'red',
-        color: 'white',
-        textAlign: 'center',
-      },
+        text: message,
+        duration: 5000,
+        close: false,
+        style: {
+            background: 'red',
+            color: 'white',
+            textAlign: 'center',
+        },
     });
-  }
+};
 
 
 
