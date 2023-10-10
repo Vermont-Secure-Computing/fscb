@@ -93,6 +93,39 @@
                 </tbody>
               </table>
             </div>
+            <div id="account-details" class="hidden">
+              <p>Account details</p>
+              <div id="main-container">
+                <div id="left-container">
+                  <p><span>Account Name: </span><span id="account-name"></span></p>
+                  <p><span>Creator Name: </span><span id="creator-name"></span></p>
+                  <p><span>Account E-mail: </span><span id="account-email"></span></p>
+                </div>
+                <div id="right-container">
+                  <p><span>Balance: </span><span id="account-balance"></span></p>
+                  <p><span>Address: </span><span id="account-address"></span></p>
+                  <p><span>Redeen script: </span><span id="account-redeem-script"></span></p>
+                  <p><span>Currency: </span><span id="account-currency"></span></p>
+                </div>
+              </div>
+              <table class="min-w-full text-left text-sm font-light">
+                <thead class="border-b font-medium dark:border-neutral-500">
+                  <tr>
+                    <th scope="col" class="px-6 py-4">Name</th>
+                    <th scope="col" class="px-6 py-4">E-mail</th>
+                    <th scope="col" class="px-6 py-4">Public key</th>
+                    <th scope="col" class="px-6 py-4">Signature</th>
+                  </tr>
+                </thead>
+                <tbody id="account-bankers-list">
+                </tbody>
+              </table>
+              <div>
+                <button class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-yellow-700 rounded-lg focus:ring-4 focus:ring-yellow-200 dark:focus:ring-yellow-900 hover:bg-yellow-800">Instructions</button>
+                <button class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-yellow-700 rounded-lg focus:ring-4 focus:ring-yellow-200 dark:focus:ring-yellow-900 hover:bg-yellow-800">Transactions</button>
+                <button class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-yellow-700 rounded-lg focus:ring-4 focus:ring-yellow-200 dark:focus:ring-yellow-900 hover:bg-yellow-800">Withdrawal</button>
+              </div>
+            </div>
           </div>
           <div id="second" class="hidden p-4">
             <form id="create-new-form">

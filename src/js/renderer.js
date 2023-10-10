@@ -33,7 +33,8 @@ const currency = document.getElementById('coin-currency')
 let tabsContainer = document.getElementById('tabs');
 let tabTogglers = tabsContainer.querySelectorAll("aside #tabs a");
 let bankersArray
-let openTab =
+let openTab
+let selectedAccountDetails = {}
 
 
 
@@ -47,6 +48,11 @@ tabTogglers.forEach(function(toggler) {
         openTab = tabName;
         if (tabName === "#first") {
             ipcRenderer.send("balance:api", {"send": "get"})
+            let accountList = document.getElementById('accounts-list')
+            let accountDetails = document.getElementById('account-details')
+
+            accountList.classList.remove("hidden")
+            accountDetails.classList.add("hidden")
         }
         if (tabName === "#addbanker") {
             getBanker()
@@ -174,9 +180,12 @@ ipcRenderer.on("list:file", function(e, evt){
             let balance = row.insertCell(2);
             balance.innerHTML = convertToJson[x].balance
             let veiwall = row.insertCell(3)
-            let buttonall = document.createElement('button')
-            buttonall.innerHTML = "view all"
-            veiwall.appendChild(buttonall)
+            let viewAccountDetailsButton = document.createElement('button')
+            viewAccountDetailsButton.innerHTML = "view all"
+            veiwall.appendChild(viewAccountDetailsButton)
+            viewAccountDetailsButton.addEventListener('click', getAccountDetails)
+            let details = convertToJson[x]
+            viewAccountDetailsButton.addEventListener("click", function() {getAccountDetails(details);}, false);
             // ipcRenderer.on('response:balance', function(e, arg) {
             //     console.log(e)
             //     if (e.error) {
@@ -204,6 +213,53 @@ ipcRenderer.on("list:file", function(e, evt){
     // accountBody.appendChild(accountTr)
 
 })
+
+function getAccountDetails(account){
+  console.log("get account details: ", account)
+  if (account.hasOwnProperty('id')) {
+    let accountList = document.getElementById('accounts-list')
+    let accountDetails = document.getElementById('account-details')
+
+    accountList.classList.add("hidden")
+    accountDetails.classList.remove("hidden")
+
+    //accountDetails.innerHTML = ""
+    let accountName = document.getElementById('account-name')
+    let creatorName = document.getElementById('creator-name')
+    let accountEmail = document.getElementById('account-email')
+    let accountBalance = document.getElementById('account-balance')
+    let accountAddress = document.getElementById('account-address')
+    let accountRedeemScript = document.getElementById('account-redeem-script')
+    let accountCurrency = document.getElementById('account-currency')
+
+    accountName.innerHTML = account.contract_name
+    creatorName.innerHTML = account.creator_name
+    accountEmail.innerHTML = account.creator_email
+    accountBalance.innerHTML = account.balance
+    accountAddress.innerHTML = account.address
+    accountRedeemScript.innerHTML = account.redeem_script
+    accountCurrency.innerHTML = account.currency
+
+
+    let tableBody = document.getElementById('account-bankers-list')
+    tableBody.innerHTML = ''
+    let bankers = account.bankers
+    for(let x in bankers) {
+      if(bankers.hasOwnProperty(x)){
+        let pubkey = bankers[x].pubkey.substring(0, 20) + '...'
+        let row = tableBody.insertRow();
+        let name = row.insertCell(0);
+        name.innerHTML = bankers[x].banker_name
+        let email = row.insertCell(1);
+        email.innerHTML = bankers[x].banker_email
+        let publicKey = row.insertCell(2);
+        publicKey.innerHTML = pubkey
+        let signature = row.insertCell(3);
+        signature.innerHTML = bankers[x].signature ? bankers[x].signature : 'no signature yet'
+      }
+    }
+  }
+}
 
 // ipcRenderer.on('list:file', function(evt) {
 //     console.log(evt)
