@@ -52,31 +52,32 @@
           <!-- </div> -->
           <!-- Tabs -->
             <ul id="tabs">
-              <li class="px-4 text-white font-semibold py-2 rounded-t"><a href="#importText">Import Text</a></li>
-              <li class="px-4 text-white font-semibold py-2 rounded-t"><a class="getlistClick" href="#first">Account List</a></li>
-              <li class="px-4 text-white font-semibold py-2 rounded-t"><a class="getbankerClick" href="#second">New File</a></li>
-              <li class="px-4 text-white font-semibold py-2 rounded-t"><a href="#addbanker">Add Banker</a></li>
-              <li class="px-4 text-white font-semibold py-2 rounded-t"><a href="#third">About FSCB</a></li>
-              <li class="px-4 text-white font-semibold py-2 rounded-t"><a href="#fourth">How it works</a></li>
+              <li class="px-8 text-white font-semibold py-2 rounded-t"><a href="#importText">Import Text</a></li>
+              <li class="px-8 text-white font-semibold py-2 rounded-t list-disc"><a class="getlistClick" href="#first">Account List</a></li>
+              <li class="px-8 text-white font-semibold py-2 rounded-t"><a class="getbankerClick" href="#second">New File</a></li>
+              <li class="px-8 text-white font-semibold py-2 rounded-t"><a href="#addbanker">Add Banker</a></li>
+              <li class="px-8 text-white font-semibold py-2 rounded-t"><a href="#third">About FSCB</a></li>
+              <li class="px-8 text-white font-semibold py-2 rounded-t"><a href="#fourth">How it works</a></li>
             </ul>
         </aside>
 
         <!-- Tab Contents -->
-        <div class="bg-gray-700 col-span-9" id="tab-contents" >
+        <div class="bg-[#1a1a1a] col-span-9" id="tab-contents" >
           <div id="importText" class="hidden p-4">
             <div class="mx-auto" id="import-area">
               <form id="import-text-form">
                 <textarea name="" id="import-text" cols="30" rows="10" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Paste text here..."></textarea>
-                <button type="submit" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900 hover:bg-blue-800">import</button>
+                <button type="submit" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Import</button>
               </form>
             </div>
             <div class="mx-auto hidden" id="import-show">
-              <p>please copy the line below and send it to.</p><span id="email-show"></span><br />
+              <p>please copy the line below and send it to.</p><span id="email-show"></span><br/>
             </div>
+            
           </div>
           <div id="first" class="p-4">
             <div id="accounts-list">
-              <table class="min-w-full text-left text-sm font-light">
+              <table class="min-w-full text-left text-sm font-light text-white">
                 <thead class="border-b font-medium dark:border-neutral-500">
                   <tr>
                     <th scope="col" class="px-6 py-4">Account Name</th>
@@ -103,29 +104,20 @@
                 <input
                   type="text"
                   id="contract-name"
-                  class="relative ml-20 mr-20 mt-10 block w-[1px] min-w-0 flex-auto rounded-r border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-primary focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-200 dark:focus:border-primary"
-                  placeholder="Name Of Contract"
-                  aria-label="NameOfContract"
-                  aria-describedby="basic-addon1" />
+                  type="text" id="banker-name-add" class="col-span-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-1" placeholder="Name of Contract">
 
               </div>
               <div class="relative mb-4 flex flex-wrap items-stretch">
                 <input
                 type="text"
                 id="creator-name"
-                class="relative ml-20 mr-20 block w-[1px] min-w-0 flex-auto rounded-r border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-primary focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-200 dark:focus:border-primary"
-                placeholder="Creator Name"
-                aria-label="CreatorName"
-                aria-describedby="basic-addon2" />
+                type="text" id="banker-name-add" class="col-span-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-1" placeholder="Creator Name">
               </div>
               <div class="relative mb-4 flex flex-wrap items-stretch">
                 <input
                 type="text"
                 id="creator-email"
-                class="relative ml-20 mr-20 block w-[1px] min-w-0 flex-auto rounded-r border border-solid border-neutral-300 bg-transparent bg-clip-padding px-3 py-[0.25rem] text-base font-normal leading-[1.6] text-neutral-700 outline-none transition duration-200 ease-in-out focus:z-[3] focus:border-primary focus:text-neutral-700 focus:shadow-[inset_0_0_0_1px_rgb(59,113,202)] focus:outline-none dark:border-neutral-600 dark:text-neutral-200 dark:placeholder:text-neutral-200 dark:focus:border-primary"
-                placeholder="Creator Email"
-                aria-label="CreatorEmail"
-                aria-describedby="basic-addon3" />
+                type="text" id="banker-name-add" class="col-span-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-1" placeholder="Creator E-mail">
               </div>
               <div id="multikeys">
                     <!-- <input type="text" id="bankers-name" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name" placeholder="Bankers Name">
@@ -140,7 +132,7 @@
 
 
                     <!-- <a class="pubkeyAdd"><object data="./images/plus.svg" width="50" height="50" class="green" id="img-anchor"></object></a> -->
-                    <div class="col-span-1">
+                    <div class="col-span-1 text-white">
                       <label for="#releaseCoins">Enter the amount of signatures required to release the coins</label>
                       <div class="col-span-3">
                         <select id="releaseCoins" class="px-5 py-2 border border-gray-400">
@@ -161,16 +153,14 @@
                           <option>15</option>
                         </select>
                       </div>
-                      <button type="submit">
-                        Create File
-                      </button>
+                      <button type="submit" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Create File</button>
                     </div>
                   </div>
               </div>
 
             </form>
           </div>
-          <div id="addbanker" class="hidden p-4">
+          <div id="addbanker" class="hidden p-4 text-white" >
             Add Banker
             <form id="add-banker-form">
               <select name="" id="banker-currency">
@@ -178,13 +168,13 @@
                 <option value="bitcoin">bitcoin</option>
                 <option value="litecoin">litecoin</option>
               </select>
-              <input type="text" id="banker-name-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add" placeholder="Bankers Name">
-              <input type="email" id="banker-email-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email-add" placeholder="Bankers Email">
-              <button type="submit" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-blue-700 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-blue-900 hover:bg-blue-800">Submit</button>
+              <input type="text" id="banker-name-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Bankers Name">
+              <input type="email" id="banker-email-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email-add absoulte mt-2" placeholder="Bankers Email">
+              <button type="submit" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-orange-500 rounded-lg focus:ring-4 focus:ring-orange-500 dark:focus:bg-orange-500 hover:bg-orange absolute mt-2 right-5">Submit</button>
 
             </form>
 
-            <table class="min-w-full text-left text-sm font-light">
+            <table class="min-w-full text-left text-sm font-light mt-11">
               <thead class="border-b font-medium dark:border-neutral-500">
                 <tr>
                   <th scope="col" class="px-6 py-4">Name</th>
