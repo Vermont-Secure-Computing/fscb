@@ -394,6 +394,10 @@ async function bankerPubkeyRequest(evt) {
   if (fs.existsSync(homedir + "/data/user.json")) {
     const user = await JSON.parse(fs.readFileSync(homedir + "/data/user.json", "utf-8"))
     console.log(user)
+    evt.message = "response-pubkey"
+    evt.pubkey = user.pubkey
+    console.log(JSON.stringify(evt))
+    win.webContents.send('response:pubkey', evt)
   }
 }
 
@@ -417,7 +421,7 @@ ipcMain.on("banker:addorsig", (e, options) => {
 ipcMain.on('user:address', (e, options) => {
   let data = {
     "user_name": options.userName,
-    "user_email": options.userEmmail,
+    "user_email": options.userEmail,
     "address": options.userAddress.address,
     "pubkey": options.userAddress.pubkey,
     "wif": options.userAddress.wif,
