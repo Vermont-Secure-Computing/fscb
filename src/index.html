@@ -41,7 +41,7 @@
         <aside class="col-span-3 bg-black" id="aside">
           <div>
           <img src="./images/Group 28.png" alt="fscb">
-          <button type="submit" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center absolute left-20 -mt-16  text-black bg-gray-300 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-gray-300 hover:bg-gray-300">Import Text</button>
+          <button id="import-text-button" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center absolute left-20 -mt-16  text-black bg-gray-300 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-gray-300 hover:bg-gray-300">Import Text</button>
           </div>
           <!-- <div class="ml-5 w-1"> -->
             <!-- <label
@@ -56,7 +56,7 @@
           <!-- Tabs -->
           <ul class='list-outside list-disc ml-6'>
             <ul id="tabs">
-              <li class="list-disc marker:text-orange-500 mt-2 px-3 text-white font-semibold py-2 rounded-t"><a class="getlistClick" href="#first">Account List</a></li>
+              <li class="list-disc marker:text-orange-500 mt-2 px-3 text-white font-semibold py-2 rounded-t" id="account-list-tab"><a class="getlistClick" href="#first">Account List</a></li>
               <li class="list-disc marker:text-red-500 px-3 text-white font-semibold py-2 rounded-t"><a class="getbankerClick" href="#second">New Account</a></li>
               <li class="list-disc marker:text-gray-500 px-3 text-white font-semibold py-2 rounded-t"><a href="#addbanker">Add Banker</a></li>
               <li class="list-disc marker:text-green-500 px-3 text-white font-semibold py-2 rounded-t"><a href="#third">Instructions</a></li>
@@ -132,6 +132,19 @@
             </div>
             <div id="account-actions" class="hidden">
               <h1>Account actions</h1>
+              <table class="min-w-full text-left text-sm font-light text-white">
+                <thead class="border-b font-medium dark:border-neutral-500">
+                  <tr>
+                    <th scope="col" class="px-6 py-4">Date</th>
+                    <th scope="col" class="px-6 py-4">Type</th>
+                    <th scope="col" class="px-6 py-4">Note</th>
+                    <th scope="col" class="px-6 py-4">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="actions-list-body">
+                </tbody>
+              </table>
+
             </div>
             <div id="account-withdrawal" class="hidden">
               <h1>Withdrawal</h1>
@@ -220,30 +233,35 @@
             </form>
 
             <div class="mx-auto hidden" id="banker-message-container">
-              <div id="add-banker-message"></div>
-              <div id="banker-message-close-button"></div>  
+              <!--div id="add-banker-message"></div-->
+              <div id="banker-message-close-button"></div>
             </div>
 
-            <p>List of Bankers</p>
-            <table class="min-w-full text-left text-sm font-light mt-11">
-              <thead class="border-b font-medium dark:border-neutral-500">
-                <tr>
-                  <th scope="col" class="px-6 py-4">Name</th>
-                  <th scope="col" class="px-6 py-4">Email</th>
-                  <th scope="col" class="px-6 py-4">Public Key</th>
-                  <th scope="col" class="px-6 py-4">Currency</th>
-                </tr>
-              </thead>
-              <tbody id="bankers-list-body">
-              </tbody>
-            </table>
+            <div id="bankers-list" class="mt-11">
+              <p>Banker's List</p>
+              <table class="min-w-full text-left text-sm font-light">
+                <thead class="border-b font-medium dark:border-neutral-500">
+                  <tr>
+                    <th scope="col" class="px-6 py-4">Name</th>
+                    <th scope="col" class="px-6 py-4">Email</th>
+                    <th scope="col" class="px-6 py-4">Public Key</th>
+                    <th scope="col" class="px-6 py-4">Currency</th>
+                  </tr>
+                </thead>
+                <tbody id="bankers-list-body">
+                </tbody>
+              </table>
+            </div>
 
           </div>
           <div id="third" class="hidden p-4">
+            Instructions
+          </div>
+          <div id="fourth" class="hidden p-4">
             About FSCB
             <table id="data-container"></table>
           </div>
-          <div id="fourth" class="hidden p-4">
+          <div id="fifth" class="hidden p-4">
             How it works
           </div>
         </div>
