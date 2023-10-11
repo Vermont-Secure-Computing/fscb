@@ -177,6 +177,7 @@ ipcMain.on("message:contractnew", (e, options) => {
               // console.log(fs.readFileSync("./data/data.json", "utf8"));
               const accounts = fs.readFileSync(homedir + "/data/data.json", "utf-8")
               win.webContents.send("list:file", accounts)
+              win.webContents.send("send:newAccountSuccess", {})
             }
           })
       });
@@ -194,7 +195,7 @@ ipcMain.on("message:contractnew", (e, options) => {
             const accounts = fs.readFileSync(homedir + "/data/data.json", "utf-8")
 
             win.webContents.send("list:file", accounts)
-
+            win.webContents.send("send:newAccountSuccess", {})
           }
         });
       }
