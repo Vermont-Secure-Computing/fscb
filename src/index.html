@@ -54,7 +54,7 @@
             <!-- <button>Import Text</button> -->
           <!-- </div> -->
           <!-- Tabs -->
-          <ul class='list-outside list-disc ml-6'>
+          <ul class='list-outside list-disc ml-12 h-80'>
             <ul id="tabs">
               <li class="list-disc marker:text-orange-500 mt-2 px-3 text-white font-semibold py-2 rounded-t" id="account-list-tab"><a class="getlistClick" href="#first">Account List</a></li>
               <li class="list-disc marker:text-red-500 px-3 text-white font-semibold py-2 rounded-t"><a class="getbankerClick" href="#second">New Account</a></li>
@@ -62,12 +62,13 @@
               <li class="list-disc marker:text-green-500 px-3 text-white font-semibold py-2 rounded-t"><a href="#third">Instructions</a></li>
               <li class="list-disc marker:text-purple-500 px-3 text-white font-semibold py-2 rounded-t"><a href="#fourth">About FSCB</a></li>
               <li class="list-disc marker:text-yellow-500 px-3 text-white font-semibold py-2 rounded-t"><a href="#fifth">How it works</a></li>
+              <button type="submit" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center 'fixed left-16 bottom-12 w-full' text-black bg-gray-300 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-gray-300 hover:bg-gray-300">Backup/Restore</button>
             </ul>
           </ul>
         </aside>
 
         <!-- Tab Contents -->
-        <div class="bg-[#1a1a1a] col-span-9" id="tab-contents" >
+        <div class="bg-[#1a1a1a] col-span-9 h-auto" id="tab-contents" >
           <div id="importText" class="hidden p-4">
             <div class="mx-auto" id="import-area">
               <form id="import-text-form">
@@ -83,7 +84,7 @@
             </div>
 
           </div>
-          <div id="first" class="p-4 text-white">
+          <div id="first" class="p-4 text-black">
             <div id="accounts-list">
               <table class="min-w-full text-left text-sm font-light text-white">
                 <thead class="border-b font-medium dark:border-neutral-500">
@@ -98,7 +99,7 @@
                 </tbody>
               </table>
             </div>
-            <div id="account-details" class="hidden">
+            <div id="account-details" class="hidden bg-white">
               <p>Account details</p>
               <div id="main-container">
                 <div id="left-container">
@@ -212,24 +213,25 @@
                           <option>15</option>
                         </select>
                       </div>
-                      <button type="submit" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Create File</button>
+                      <button type="submit" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500 rounded-full">Create File</button>
                     </div>
                   </div>
               </div>
 
             </form>
           </div>
-          <div id="addbanker" class="hidden p-4 text-white" >
+          <div id="addbanker" class="hidden p-4 text-xl text-white">
             Add Banker
-            <form id="add-banker-form">
-              <select name="" id="banker-currency">
+            <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
+            <form class="mt-2" id="add-banker-form">
+              <select class="text-black" name="" id="banker-currency">
                 <option value="woodcoin" selected>woodcoin</option>
                 <option value="bitcoin">bitcoin</option>
                 <option value="litecoin">litecoin</option>
               </select>
               <input type="text" id="banker-name-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Bankers Name">
               <input type="email" id="banker-email-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email-add absoulte mt-2" placeholder="Bankers Email">
-              <button type="submit" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-orange-500 rounded-lg focus:ring-4 focus:ring-orange-500 dark:focus:bg-orange-500 hover:bg-orange absolute mt-2 right-5">Submit</button>
+              <button type="submit" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-orange-500 focus:ring-4 focus:ring-orange-500 dark:focus:bg-orange-500 hover:bg-orange absolute mt-5 right-5 rounded-full">Submit</button>
             </form>
 
             <div class="mx-auto hidden" id="banker-message-container">
@@ -237,6 +239,7 @@
               <div id="banker-message-close-button"></div>
             </div>
 
+<<<<<<< HEAD
             <div id="bankers-list" class="mt-11">
               <p>Banker's List</p>
               <table class="min-w-full text-left text-sm font-light">
@@ -252,6 +255,20 @@
                 </tbody>
               </table>
             </div>
+=======
+            <table class="min-w-full text-left text-sm font-light mt-2">
+              <thead class="border-b font-medium dark:border-neutral-500">
+                <div before="List of Bankers" of Bankers class="before:content-[attr(before)] mt-28"></div><tr>
+                  <th scope="col" class="px-6 py-4">Name</th>
+                  <th scope="col" class="px-6 py-4">Email</th>
+                  <th scope="col" class="px-6 py-4">Public Key</th>
+                  <th scope="col" class="px-6 py-4">Currency</th>
+                </tr>
+              </thead>
+              <tbody id="bankers-list-body">
+              </tbody>
+            </table>
+>>>>>>> update design
 
           </div>
           <div id="third" class="hidden p-4">
