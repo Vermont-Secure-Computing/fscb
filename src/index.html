@@ -39,7 +39,10 @@
 
       <div class="rounded border mx-auto grid grid-cols-12">
         <aside class="col-span-3 bg-black" id="aside">
-          <img src="./images/fscb logo.png" alt="fscb">
+          <div>
+          <img src="./images/Group 28.png" alt="fscb">
+          <button type="submit" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center absolute left-20 -mt-16  text-black bg-gray-300 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-gray-300 hover:bg-gray-300">Import Text</button>
+          </div>
           <!-- <div class="ml-5 w-1"> -->
             <!-- <label
               class="w-1.5  text-gray-800 font-semibold py-2 rounded-t"
@@ -51,14 +54,16 @@
             <!-- <button>Import Text</button> -->
           <!-- </div> -->
           <!-- Tabs -->
+          <ul class='list-outside list-disc ml-6'>
             <ul id="tabs">
-              <li class="px-8 text-white font-semibold py-2 rounded-t"><a href="#importText">Import Text</a></li>
-              <li class="px-8 text-white font-semibold py-2 rounded-t list-disc"><a class="getlistClick" href="#first">Account List</a></li>
-              <li class="px-8 text-white font-semibold py-2 rounded-t"><a class="getbankerClick" href="#second">New File</a></li>
-              <li class="px-8 text-white font-semibold py-2 rounded-t"><a href="#addbanker">Add Banker</a></li>
-              <li class="px-8 text-white font-semibold py-2 rounded-t"><a href="#third">About FSCB</a></li>
-              <li class="px-8 text-white font-semibold py-2 rounded-t"><a href="#fourth">How it works</a></li>
+              <li class="list-disc marker:text-orange-500 mt-2 px-3 text-white font-semibold py-2 rounded-t"><a class="getlistClick" href="#first">Account List</a></li>
+              <li class="list-disc marker:text-red-500 px-3 text-white font-semibold py-2 rounded-t"><a class="getbankerClick" href="#second">New Account</a></li>
+              <li class="list-disc marker:text-gray-500 px-3 text-white font-semibold py-2 rounded-t"><a href="#addbanker">Add Banker</a></li>
+              <li class="list-disc marker:text-green-500 px-3 text-white font-semibold py-2 rounded-t"><a href="#third">Instructions</a></li>
+              <li class="list-disc marker:text-purple-500 px-3 text-white font-semibold py-2 rounded-t"><a href="#fourth">About FSCB</a></li>
+              <li class="list-disc marker:text-yellow-500 px-3 text-white font-semibold py-2 rounded-t"><a href="#fifth">How it works</a></li>
             </ul>
+          </ul>
         </aside>
 
         <!-- Tab Contents -->
@@ -78,7 +83,7 @@
             </div>
 
           </div>
-          <div id="first" class="p-4">
+          <div id="first" class="p-4 text-white">
             <div id="accounts-list">
               <table class="min-w-full text-left text-sm font-light text-white">
                 <thead class="border-b font-medium dark:border-neutral-500">
@@ -104,7 +109,7 @@
                 <div id="right-container">
                   <p><span>Balance: </span><span id="account-balance"></span></p>
                   <p><span>Address: </span><span id="account-address"></span></p>
-                  <p><span>Redeen script: </span><span id="account-redeem-script"></span></p>
+                  <p><span>Redeem script: </span><span id="account-redeem-script"></span></p>
                   <p><span>Currency: </span><span id="account-currency"></span></p>
                 </div>
               </div>
@@ -148,7 +153,7 @@
                   type="text" id="banker-name-add" class="col-span-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-1" placeholder="Name of Contract">
 
               </div>
-              <div class="relative mb-4 flex flex-wrap items-stretch">
+              <!-- <div class="relative mb-4 flex flex-wrap items-stretch">
                 <input
                 type="text"
                 id="creator-name"
@@ -159,7 +164,7 @@
                 type="text"
                 id="creator-email"
                 type="text" id="banker-name-add" class="col-span-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-1" placeholder="Creator E-mail">
-              </div>
+              </div> -->
               <div id="multikeys">
                     <!-- <input type="text" id="bankers-name" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name" placeholder="Bankers Name">
 
