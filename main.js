@@ -233,6 +233,7 @@ ipcMain.on('message:addBanker', (e, options) => {
           const wData = JSON.stringify(jdata, null, 2)
           fs.writeFile(homedir + "/" + path +"/"+ fileName, wData, function writeJson() {
             if (err) return console.log(err);
+            win.webContents.send("send:newBanker", data)
             readBankersFile()
           })
       });
@@ -247,6 +248,7 @@ ipcMain.on('message:addBanker', (e, options) => {
           if (err) return console.log(err);
           // console.log(JSON.stringify(sData));
           console.log('writing to ' + fileName);
+          win.webContents.send("send:newBanker", data)
           readBankersFile()
         });
 
@@ -389,6 +391,16 @@ ipcMain.on('unspent:api', (e, address) => {
     request.end()
   } catch(e) {
     console.log("error : ", e)
+  }
+})
+
+ipcMain.on('get:user', async() => {
+  if (fs.existsSync(homedir + "/data/user.json")) {
+    const user = await JSON.parse(fs.readFileSync(homedir + "/data/user.json", "utf-8"))
+    console.log("user data: ", user)
+    win.webContents.send('response:user', user)
+  }else {
+    console.log()
   }
 })
 
