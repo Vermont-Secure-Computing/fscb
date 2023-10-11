@@ -35,6 +35,7 @@ let tabTogglers = tabsContainer.querySelectorAll("aside #tabs a");
 let bankersArray
 let openTab
 let selectedAccountDetails = {}
+let USER = {}
 
 
 
@@ -60,6 +61,7 @@ tabTogglers.forEach(function(toggler) {
         }
         if (tabName === "#addbanker") {
             getBanker()
+            getUserData()
         }
         let tabContents = document.querySelector("#tab-contents");
 
@@ -94,6 +96,15 @@ function isFileTxt(file) {
     const acceptedTextType = ['text/plain'];
     return file && acceptedTextType.includes(file['type']);
   }
+
+
+function slicePubkey(pubkey) {
+  if (pubkey) {
+    return pubkey.substring(0, 20) + '...'
+  } else {
+    return "No pubkey yet"
+  }
+}
 
 async function saveAndCreateText(e) {
     e.preventDefault();
@@ -275,7 +286,7 @@ function getAccountDetails(account){
     let bankers = account.bankers
     for(let x in bankers) {
       if(bankers.hasOwnProperty(x)){
-        let pubkey = bankers[x].pubkey.substring(0, 20) + '...'
+        let pubkey = slicePubkey(bankers[x].pubkey)
         let row = tableBody.insertRow();
         let name = row.insertCell(0);
         name.innerHTML = bankers[x].banker_name
@@ -391,7 +402,25 @@ function addBanker(e) {
 
     const bankerName = nameInput.value
     const bankerEmail = emailInput.value
-    console.log("add banker: ", bankerName, bankerEmail)
+
+    /**
+      Add banker form validation
+    **/
+    if (bankerName == "" || bankerEmail == "") {
+      console.log("User name and email is required.")
+      alertError("User name and email is required.")
+      return
+    }
+    if (bankerEmail) {
+      let validEmail = isEmailValid(bankerEmail)
+      if (!validEmail) {
+        console.log("Please enter a valid email")
+        alertError("Please enter a valid email")
+        return
+      }
+    }
+
+
     ipcRenderer.send('message:addBanker', {
         bankerName,
         bankerEmail,
@@ -408,6 +437,78 @@ function getBanker() {
     ipcRenderer.send('click:addBanker', {})
 }
 
+function getUserData() {
+  ipcRenderer.send('get:user', {})
+}
+
+ipcRenderer.on('response:user', function(e, evt){
+  if (evt) {
+    USER = evt
+    console.log("USER: ", USER)
+  }
+})
+
+
+ipcRenderer.on('send:newBanker', function(e, evt) {
+    let bankerForm = document.getElementById('add-banker-form')
+    let bankerMessage = document.getElementById('banker-message-container')
+
+    bankerForm.classList.add('hidden')
+    bankerMessage.classList.remove('hidden')
+
+    const div = document.createElement('div')
+    div.setAttribute('class', 'bg-white p-3 rounded-md text-black')
+    const p = document.createElement('p')
+    const br = document.createElement('br')
+    const p1 = document.createElement('p')
+    const p2 = document.createElement('p')
+    const p3 = document.createElement('p')
+    const p4 = document.createElement('pre')
+    const p5 = document.createElement('p')
+
+    console.log('new banker message: ', evt)
+    let userName = USER.user_name
+    let message = {
+      "header": "free_state_central_bank",
+      "message": "request_pubkey",
+      "creator_name": USER.user_name,
+      "creator_email": USER.user_email,
+      "banker_id": 5,
+      "banker_name": evt.banker_name,
+       "banker_email": evt.banker_email,
+      "currency": evt.currency
+    }
+
+
+    bankerMessage.innerHTML = ''
+    p.innerHTML = "Please copy the line below and send it to " + message.banker_email;
+    p1.innerHTML = USER.user_name + " is requesting for you to become a banker.";
+    p2.innerHTML = "Please copy the message inside and import in FSCB";
+    p3.innerHTML = "-----Begin fscb message-----";
+    p4.innerHTML = JSON.stringify(message, undefined, 2);
+    p5.innerHTML = "-----End fscb message-----";
+
+    div.appendChild(p)
+    div.appendChild(br)
+    div.appendChild(p1)
+    div.appendChild(p2)
+    div.appendChild(p3)
+    div.appendChild(p4)
+    div.appendChild(p5)
+
+    bankerMessage.appendChild(div)
+
+    let buttonDiv = document.getElementById('banker-message-close-button')
+    let closeButton = document.createElement('button')
+    closeButton.classList.add("inline-flex", "items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "absolute", "right-5", "mt-5", "text-white", "bg-orange-500", "rounded-lg", "focus:ring-4", "focus:ring-blue-200", "dark:focus:ring-orange-500", "hover:bg-orange-500")
+    closeButton.innerHTML = "Close"
+    closeButton.addEventListener("click", function() {
+      bankerForm.classList.remove('hidden')
+      bankerMessage.classList.add('hidden')
+    }, false);
+})
+
+
 ipcRenderer.on('send:bankers', function(e, evt) {
     bankersArray = evt
     //
@@ -418,13 +519,14 @@ ipcRenderer.on('send:bankers', function(e, evt) {
     bankersBody.innerHTML = ""
     for(let x in bankersArray) {
         if(bankersArray.hasOwnProperty(x)){
+            let pubkey = slicePubkey(bankersArray[x].pubkey)
             let row = bankersBody.insertRow();
             let name = row.insertCell(0);
             name.innerHTML = bankersArray[x].banker_name
             let email = row.insertCell(1);
             email.innerHTML = bankersArray[x].banker_email
             let pubKey = row.insertCell(2);
-            pubKey.innerHTML = bankersArray[x].pubkey
+            pubKey.innerHTML = pubkey
             let currency = row.insertCell(3)
             currency.innerHTML = bankersArray[x].currency
         }
@@ -766,8 +868,9 @@ function alertSuccess(message) {
       duration: 5000,
       close: false,
       style: {
-        background: 'green',
-        color: 'white',
+        background: '#d4edda',
+        borderColor: '#c3e6cb',
+        color: '#155724',
         textAlign: 'center',
       },
     });
@@ -779,12 +882,28 @@ function alertError(message) {
         duration: 5000,
         close: false,
         style: {
-            background: 'red',
-            color: 'white',
+            background: '#f8d7da',
+            borderColor: '#f5c6cb',
+            color: '#721c24',
             textAlign: 'center',
         },
     });
 };
+
+
+/**
+  Helper functions
+**/
+function isEmailValid(email) {
+  var validRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+  if (email.match(validRegex)) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+
 
 
 
