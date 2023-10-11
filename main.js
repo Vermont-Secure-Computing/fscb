@@ -382,6 +382,7 @@ ipcMain.on('unspent:api', (e, address) => {
       response.on('end', async () => {
           const body = await JSON.parse(data);
           console.log("unspent body: ", body.message.address)
+          win.webContents.send()
       });
    })
 
