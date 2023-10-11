@@ -65,7 +65,7 @@ tabTogglers.forEach(function(toggler) {
 
         for (let i = 0; i < tabContents.children.length; i++) {
 
-          tabTogglers[i].parentElement.classList.remove("border-t", "border-b", "border-l", "bg-gradient-to-l", "from-gray-300");
+          tabTogglers[i].parentElement.classList.remove("bg-gradient-to-l", "from-gray-500");
           tabContents.children[i].classList.remove("hidden");
           if ("#" + tabContents.children[i].id === tabName) {
               continue;
@@ -73,7 +73,7 @@ tabTogglers.forEach(function(toggler) {
           tabContents.children[i].classList.add("hidden");
 
         }
-        e.target.parentElement.classList.add("border-t", "border-b", "border-l", "bg-gradient-to-l", "from-gray-300");
+        e.target.parentElement.classList.add("bg-gradient-to-l", "from-gray-500");
     });
 });
 
