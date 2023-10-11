@@ -13,6 +13,7 @@ const importText =   document.getElementById('import-text');
 // const bankersClick = document.getElementById('bakers-address').getElementsByClassName('pubkeyAdd')[0];
 
 const formCreateAccount =   document.getElementById('create-new-form');
+const importTextButton = document.getElementById('import-text-button')
 const importTextForm = document.getElementById('import-text-form');
 const userProfileForm = document.getElementById('user-profile-form')
 const formAddBanker = document.getElementById('add-banker-form');
@@ -25,6 +26,17 @@ const addMinus = document.getElementById('multikeys').getElementsByClassName('pu
 const getbankerClick = document.getElementsByClassName('getbankerClick')[0]
 const getListClick = document.getElementsByClassName('getlistClick')[0]
 
+/**
+  Tabs container ids
+**/
+let importTextTab = document.getElementById('importText')
+let firstTab = document.getElementById('first')
+let secondTab = document.getElementById('second')
+let addBankerTab = document.getElementById('addbanker')
+let thirdTab = document.getElementById('third')
+let fourthTab = document.getElementById('fourth')
+let fifthTab = document.getElementById('fifth')
+
 // console.log(getListClick)
 // const accountList = document.getElementById('accounts-list');
 
@@ -36,6 +48,7 @@ let bankersArray
 let openTab
 let selectedAccountDetails = {}
 let USER = {}
+let BANKERS
 
 
 
@@ -44,7 +57,7 @@ tabTogglers.forEach(function(toggler) {
     toggler.addEventListener("click", function(e) {
         e.preventDefault();
         console.log('click button')
-
+        importTextTab.classList.add('hidden')
         let tabName = this.getAttribute("href");
         openTab = tabName;
         if (tabName === "#first") {
@@ -65,8 +78,7 @@ tabTogglers.forEach(function(toggler) {
         }
         let tabContents = document.querySelector("#tab-contents");
 
-        for (let i = 0; i < tabContents.children.length; i++) {
-
+        for (let i = 0; i < tabContents.children.length-1; i++) {
           tabTogglers[i].parentElement.classList.remove("bg-gradient-to-l", "from-gray-500");
           tabContents.children[i].classList.remove("hidden");
           if ("#" + tabContents.children[i].id === tabName) {
@@ -102,7 +114,7 @@ function slicePubkey(pubkey) {
   if (pubkey) {
     return pubkey.substring(0, 20) + '...'
   } else {
-    return "No pubkey yet"
+    return "Pending ..."
   }
 }
 
@@ -110,8 +122,8 @@ async function saveAndCreateText(e) {
     e.preventDefault();
     // console.log(contractName.value, " ", creatorName.value, " ", creatorEmail.value)
     const contractSendName = contractName.value;
-    const creatorSendName = creatorName.value;
-    const creatorSendEmail = creatorEmail.value;
+    const creatorSendName = USER.user_name;
+    const creatorSendEmail = USER.user_email;
 
     coinjs.compressed = true
     const creatorAddressDetail = await coinjs.newKeys()
@@ -120,6 +132,13 @@ async function saveAndCreateText(e) {
     const coinCurrencySend = currency.options[currency.selectedIndex].text;
     const innerMultiKey = document.querySelectorAll('.active a')
     console.log(innerMultiKey)
+
+    /**
+      New account data validation
+    **/
+    if (contractSendName == "") return alertError("Contract name is required.")
+    if (innerMultiKey.length == 0) return alertError("Please select a banker")
+
     let bankersMerge = [];
     for (let i = 0; i < innerMultiKey.length; i++) {
     //     bankersMerge.push({"banker_id": contractSendName.split(' ').join('_') + "-" + innerMultiKey[i].querySelector('.banker-email').value + "-" + (Math.floor(1000000000 + Math.random() * 9000000000)),
@@ -155,8 +174,26 @@ async function saveAndCreateText(e) {
     });
 }
 
+ipcRenderer.on("send:newAccountSuccess", function() {
+  alertSuccess("Account successfully created.")
+  importTextTab.classList.add('hidden')
+  firstTab.classList.remove('hidden')
+  secondTab.classList.add('hidden')
+  addBankerTab.classList.add('hidden')
+  thirdTab.classList.add('hidden')
+  fourthTab.classList.add('hidden')
+  fifthTab.classList.add('hidden')
+
+  let tabContents = document.querySelector("#tab-contents");
+  for (let i = 0; i < tabContents.children.length-1; i++) {
+    tabTogglers[i].parentElement.classList.remove("bg-gradient-to-l", "from-gray-500");
+  }
+  let accountListTab = document.getElementById('account-list-tab')
+  accountListTab.classList.add("bg-gradient-to-l", "from-gray-500");
+})
+
 ipcRenderer.on("list:file", function(e, evt){
-    console.log(e)
+    //console.log(e)
     const convertToJson = JSON.parse(evt)
     // console.log(convertToJson)
     // let text = ""
@@ -185,7 +222,7 @@ ipcRenderer.on("list:file", function(e, evt){
     accountBody.innerHTML = ""
     for(let x in convertToJson) {
         if(convertToJson.hasOwnProperty(x)){
-            console.log("convert to json", convertToJson[x])
+            //console.log("convert to json", convertToJson[x])
             // ipcRenderer.send("get:balance", {"pubkey": convertToJson[x].address})
             let row = accountBody.insertRow();
             let name = row.insertCell(0);
@@ -307,13 +344,13 @@ function getAccountDetails(account){
     buttonContainer.innerHTML = ''
 
     let viewActionsButton = document.createElement('button')
-    viewActionsButton.classList.add("inline-flex", "items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-yellow-700", "rounded-lg", "focus:ring-2", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
+    viewActionsButton.classList.add("inline-flex", "items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-lg", "focus:ring-4", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
     viewActionsButton.innerHTML = "Actions"
     let actions = account.signatures
     viewActionsButton.addEventListener("click", function() {listAccountActions(actions);}, false);
 
     let withdrawalButton = document.createElement('button')
-    withdrawalButton.classList.add("inline-flex", "items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-yellow-700", "rounded-lg", "focus:ring-2", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
+    withdrawalButton.classList.add("inline-flex", "items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-lg", "focus:ring-4", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
     withdrawalButton.innerHTML = "Withdrawal"
     let address = {
         "address": account.address,
@@ -425,7 +462,19 @@ function addBanker(e) {
         return
       }
     }
-
+    /**
+      Check the banker to be add is already in the bankers,json
+    **/
+    if (BANKERS) {
+      for(let x in BANKERS) {
+          if(BANKERS.hasOwnProperty(x)){
+              if (BANKERS[x].banker_name == bankerName && BANKERS[x].banker_email == bankerEmail && BANKERS[x].currency == bankerCurrency) {
+                alertError("You are trying to add a banker that is already in the list.")
+                return
+              }
+          }
+      }
+    }
 
     ipcRenderer.send('message:addBanker', {
         bankerName,
@@ -457,11 +506,15 @@ ipcRenderer.on('response:user', function(e, evt){
 
 ipcRenderer.on('send:newBanker', function(e, evt) {
     let bankerForm = document.getElementById('add-banker-form')
+    let bankersList = document.getElementById('bankers-list')
     let bankerMessage = document.getElementById('banker-message-container')
 
     bankerForm.classList.add('hidden')
+    bankersList.classList.add('hidden')
     bankerMessage.classList.remove('hidden')
 
+
+    let buttonDiv = document.getElementById('banker-message-close-button')
     const div = document.createElement('div')
     div.setAttribute('class', 'bg-white p-3 rounded-md text-black')
     const p = document.createElement('p')
@@ -504,19 +557,25 @@ ipcRenderer.on('send:newBanker', function(e, evt) {
 
     bankerMessage.appendChild(div)
 
-    let buttonDiv = document.getElementById('banker-message-close-button')
+
     let closeButton = document.createElement('button')
     closeButton.classList.add("inline-flex", "items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "absolute", "right-5", "mt-5", "text-white", "bg-orange-500", "rounded-lg", "focus:ring-4", "focus:ring-blue-200", "dark:focus:ring-orange-500", "hover:bg-orange-500")
     closeButton.innerHTML = "Close"
     closeButton.addEventListener("click", function() {
       bankerForm.classList.remove('hidden')
+      bankersList.classList.remove('hidden')
       bankerMessage.classList.add('hidden')
     }, false);
+
+    console.log("div button: ", buttonDiv)
+    buttonDiv.appendChild(closeButton)
+    bankerMessage.appendChild(buttonDiv)
 })
 
 
 ipcRenderer.on('send:bankers', function(e, evt) {
     bankersArray = evt
+    BANKERS = evt
     //
     // Start of Banker's table
     //
@@ -583,7 +642,7 @@ ipcRenderer.on('send:bankers', function(e, evt) {
       active.appendChild(span);
 
       selectOptions.forEach((option) => {
-          console.log(option)
+          //console.log(option)
           let text = option.innerText;
           if(option.selected){
               let tag = document.createElement('a');
@@ -866,12 +925,27 @@ function importAgainShow(div, button) {
 
 }
 
+function openImportTextTab() {
+  importTextTab.classList.remove('hidden')
+  firstTab.classList.add('hidden')
+  secondTab.classList.add('hidden')
+  addBankerTab.classList.add('hidden')
+  thirdTab.classList.add('hidden')
+  fourthTab.classList.add('hidden')
+  fifthTab.classList.add('hidden')
+
+  let tabContents = document.querySelector("#tab-contents");
+  for (let i = 0; i < tabContents.children.length-1; i++) {
+    tabTogglers[i].parentElement.classList.remove("bg-gradient-to-l", "from-gray-500");
+  }
+}
+
 
 
 function alertSuccess(message) {
     Toastify.toast({
       text: message,
-      duration: 5000,
+      duration: 10000,
       close: false,
       style: {
         background: '#d4edda',
@@ -885,7 +959,7 @@ function alertSuccess(message) {
 function alertError(message) {
     Toastify.toast({
         text: message,
-        duration: 5000,
+        duration: 10000,
         close: false,
         style: {
             background: '#f8d7da',
@@ -924,3 +998,4 @@ userProfileForm.addEventListener('submit', createUserProfile);
 formAddBanker.addEventListener('submit', addBanker);
 getbankerClick.addEventListener('click', getBanker)
 getListClick.addEventListener('click', getList)
+importTextButton.addEventListener('click', openImportTextTab)
