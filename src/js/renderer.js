@@ -241,9 +241,12 @@ function listAccountActions(actions){
 }
 
 function accountWithdrawal(address){
-  console.log("withdrawal: ", address)
+  console.log("withdrawal: ", address.address)
 
-  ipcRenderer.send("unspent:api", address)
+  ipcRenderer.send("unspent:api", address.address)
+  const script = coinjs.script()
+  const addressScript = script.decodeRedeemScript(address.redeemscript)
+  console.log("redeem script res ", addressScript)
 
   let accountDetails = document.getElementById('account-details')
   let accountWithdrawal = document.getElementById('account-withdrawal')
@@ -312,7 +315,10 @@ function getAccountDetails(account){
     let withdrawalButton = document.createElement('button')
     withdrawalButton.classList.add("inline-flex", "items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-yellow-700", "rounded-lg", "focus:ring-2", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
     withdrawalButton.innerHTML = "Withdrawal"
-    let address = account.address
+    let address = {
+        "address": account.address,
+        "redeemscript": account.redeem_script
+    }
     withdrawalButton.addEventListener("click", function() {accountWithdrawal(address);}, false);
 
 
