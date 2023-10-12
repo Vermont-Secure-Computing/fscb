@@ -17,6 +17,7 @@ const importTextButton = document.getElementById('import-text-button')
 const importTextForm = document.getElementById('import-text-form');
 const userProfileForm = document.getElementById('user-profile-form')
 const formAddBanker = document.getElementById('add-banker-form');
+const formWithdraw = document.getElementById('withdraw-submit')
 const contractName = document.getElementById("contract-name");
 const creatorName = document.getElementById("creator-name");
 const creatorEmail = document.getElementById("creator-email");
@@ -271,7 +272,6 @@ function listAccountActions(actions){
   let accountDetails = document.getElementById('account-details')
   let accountWithdrawal = document.getElementById('account-withdrawal')
   let accountActions = document.getElementById('account-actions')
-
   accountDetails.classList.add("hidden")
   accountWithdrawal.classList.add("hidden")
   accountActions.classList.remove("hidden")
@@ -279,19 +279,59 @@ function listAccountActions(actions){
 
 function accountWithdrawal(address){
   console.log("withdrawal: ", address.address)
-
   ipcRenderer.send("unspent:api", address.address)
   const script = coinjs.script()
   const addressScript = script.decodeRedeemScript(address.redeemscript)
   console.log("redeem script res ", addressScript)
-
+//   let combinedList = []
   let accountDetails = document.getElementById('account-details')
   let accountWithdrawal = document.getElementById('account-withdrawal')
   let accountActions = document.getElementById('account-actions')
-
+  let unspentdiv = document.getElementById('list-unspent')
+  let tx = coinjs.transaction();
   accountDetails.classList.add("hidden")
   accountWithdrawal.classList.remove("hidden")
   accountActions.classList.add("hidden")
+  ipcRenderer.on('unspent:address', (e, evt) => {
+    // const listParse = JSON.parse(evt)
+    const listP = evt;
+    // console.log(typeof(evt))
+    for (let i = 0; i < listP.length; i++) {
+        console.log(listP[i].txid)
+        // let row = tableBody.insertRow()
+        // let transactionId = row.insertCell(0)
+        // transactionId.innerHTML = listP[i].txid.substring(0,30)+"..."
+        // let vout = row.insertCell(1)
+        // vout.innerHTML = listP[i].vout
+        // let script = row.insertCell(2)
+        // script.innerHTML = addressScript.redeemscript.substring(0,20)+"..."
+        // let amount = row.insertCell(3)
+        // amount.innerHTML = listP[i].amount
+        // tx.addinput(listP[i].txid, listP[i].vout, addressScript.redeemscript, null)
+        // tx.addoutput("WdBb5rTtXjDYGHBZvXHbhxyUar1n7RA1VJ", 1.99)
+        // console.log("tx log test: ", tx.serialize())
+        let input1 = document.createElement('input')
+        input1.setAttribute('class', 'txid-withdraw, text-black')
+        input1.setAttribute('id', 'txid-withdraw')
+        input1.value = listP[i].txid
+        let input2 = document.createElement('input')
+        input2.setAttribute('class', 'text-black')
+        input2.setAttribute('id', 'vout-withdraw')
+        input2.value = listP[i].vout
+        let input3 = document.createElement('input')
+        input3.setAttribute('class', 'text-black')
+        input3.setAttribute('id', 'script-withdraw')
+        input3.value = addressScript.redeemscript
+        let input4 = document.createElement('input')
+        input4.setAttribute('class', 'text-black')
+        input4.setAttribute('id', 'amount-withdraw')
+        input4.value = listP[i].amount
+        unspentdiv.appendChild(input1)
+        unspentdiv.appendChild(input2)
+        unspentdiv.appendChild(input3)
+        unspentdiv.appendChild(input4)
+    }
+  })
 }
 
 function getAccountDetails(account){
@@ -983,6 +1023,25 @@ function isEmailValid(email) {
   }
 }
 
+async function generateClaim(e) {
+  e.preventDefault()
+  const txid = document.getElementById('txid-withdraw').value
+  const vout = document.getElementById('vout-withdraw').value
+  const script = document.getElementById('script-withdraw').value
+  const amount = document.getElementById('amount-withdraw').value
+  const address = document.getElementById('withdraw-address').value
+  const amountWithdraw = document.getElementById('withdraw-amount').value
+  // console.log("txid ", txid)
+  // console.log('address ', address)
+  let tx = coinjs.transaction();
+  let scriptN = coinjs.script()
+  tx.addinput(txid, vout, script, amount, null)
+  tx.addoutput(address, amountWithdraw)
+  const out = await tx.serialize()
+  console.log("tx serialize", out)
+  console.log("decode tx serialize", tx.deserialize(out))
+}
+
 
 
 
@@ -999,3 +1058,6 @@ formAddBanker.addEventListener('submit', addBanker);
 getbankerClick.addEventListener('click', getBanker)
 getListClick.addEventListener('click', getList)
 importTextButton.addEventListener('click', openImportTextTab)
+getbankerClick.addEventListener('click', getBanker);
+getListClick.addEventListener('click', getList);
+formWithdraw.addEventListener('submit', generateClaim);
