@@ -149,6 +149,41 @@
             </div>
             <div id="account-withdrawal" class="hidden">
               <h1>Withdrawal</h1>
+              <hr>
+              <!-- <table class="min-w-full text-left text-sm font-light max-h-96">
+                <thead class="border-b font-medium dark:border-neutral-500">
+                  <tr>
+                    <th scope="col" class="px-6 py-4">Transaction ID</th>
+                    <th scope="col" class="px-6 py-4">No.</th>
+                    <th scope="col" class="px-6 py-4">Script</th>
+                    <th scope="col" class="px-6 py-4">Amount</th>
+                  </tr>
+                </thead>
+                <tbody id="unspent-table">
+                </tbody>
+              </table> -->
+              <div class="grid md:grid-cols-4 gap-3">
+                <label for="">Transaction Id</label>
+                <label for="">No.</label>
+                <label for="">Script</label>
+                <label for="">Amount</label>
+              </div>
+              <div id="list-unspent" class="grid md:grid-cols-4 gap-3"></div>
+              <form class="mt-10" id="withdraw-submit">
+                <label for="withdraw-address">Address</label>
+                <input type="text" placeholder="Enter Address" id="withdraw-address" class="text-black">
+                <br>
+                <label for="withdraw-amount">Amount</label>
+                <input type="text" placeholder="Enter Amount" id="withdraw-amount" class="text-black">
+                <br>
+                <label for="withdraw-fee">Fee</label>
+                <input type="text" placeholder="0.001" id="withdraw-fee">
+                <br>
+                <button type="submit">Submit</button>
+              </form>
+            </div>
+            <div id="withdraw-reference" class="hidden">
+              <h1>Withdrawal Reference</h1>
             </div>
           </div>
           <div id="second" class="hidden p-4">
