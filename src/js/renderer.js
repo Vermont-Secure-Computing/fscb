@@ -534,7 +534,7 @@ ipcRenderer.on('send:newBanker', function(e, evt) {
       "creator_email": USER.user_email,
       "banker_id": 5,
       "banker_name": evt.banker_name,
-       "banker_email": evt.banker_email,
+      "banker_email": evt.banker_email,
       "currency": evt.currency
     }
 
