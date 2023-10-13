@@ -118,7 +118,18 @@
               <button id="banker-sign-button" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Sign</button>
 
             </div>
-            <!---->
+            <!--End of Bankers View - Verify Withdrawal-->
+
+            <!--Bankers view - Message to send - Sign tx Response-->
+            <div class="mx-auto hidden" id="banker-message-signtx-container">
+              <p class="text-xl text-white font-bold">Response to Withdrawal Signature request</p>
+              <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
+              <p class="text-l text-white my-1" id="sign-response-title"></p>
+              <div id="banker-message-signtx-body">
+                <div id="banker-message--signtx-close-button"></div>
+              </div>
+            </div>
+            <!--End of Bankers view - Message to send - Sign tx Response-->
 
           </div>
           <div id="first" class="p-4 text-black leading-relaxed">
