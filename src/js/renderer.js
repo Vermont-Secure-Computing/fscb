@@ -53,7 +53,6 @@ let BANKERS
 
 
 
-
 tabTogglers.forEach(function(toggler) {
     toggler.addEventListener("click", function(e) {
         e.preventDefault();
@@ -865,6 +864,100 @@ function parseTextArea(e) {
         ipcRenderer.send("banker:addorsig", jsonStr)
     }
 }
+
+
+/**
+BANKER
+-----Begin fscb message-----
+{"header": "free_state_central_bank",
+"message":"request-signature",
+"id": "183698202",
+"banker_id": "stargazer-robert@email.com-2797298723",
+ "creator_name": "jon jon",
+ "creator_email": "jon@email.com",
+"banker_name": "robert gludo",
+ "banker_email": "robert@email.com",
+"transaction_id_for_signature":"01000000017dbf3d88276b81fd8a346d8411da5aebed6beb8ca074a7020643f005f22c42d2000000001976a914cf3d8592f8d55488faab8c054c97688e30acd86e88acffffffff0180969800000000001976a914f86bf35fd9c115c69b4842b130ed5df294ca7eb388ac00000000",
+"currency":"woodcoin"}
+-----End fscb message-----
+
+
+  const tx = coinjs.transaction()
+  const scriptToSign = tx.deserialize(message.transaction_id_for_signature)
+  const signedTX = scirptToSign.sign(USER.privkey, "ALL")
+
+  BANKER message to OWNER
+
+  {"header": free_state_central_bank
+  "message”: response_signature_stargazer-robert@email.com
+  "banker_id”: stargazer-robert@email.com-2797298723
+ ”creator_name”: jon jon
+ ”creator_email”: jon@email.com
+  "banker_name”: robert gludo 
+  ”banker_email”: robert@email.com
+  "transaction_id”:1w01000000017dbf3d88276b81fd8a346d8411da5aebed6beb8ca074a7020643f005f22c42d2000000001976a914cf3d8592f8d55488faab8c054c97688e30acd86e88acffffffff0180969800000000001976a914f86bf35fd9c115c69b4842b130ed5df294ca7eb388ac00000000
+  "currency”:woodcoin
+  }
+  "contract_id”: 2
+  -----End fscb message-----
+**/
+
+/**
+  Banker Function (Withdrawal - request for signature)
+  Sign the txid from account owner
+**/
+ipcRenderer.on('request:banker-signature', (e, message) => {
+  console.log("request:banker-signature: ", message)
+  const tx = coinjs.transaction()
+  const deserializeTx = tx.deserialize(message.transaction_id_for_signature)
+  console.log("deserialize tx: ", deserializeTx)
+
+  let inputs = deserializeTx.ins
+  let outputs = deserializeTx.outs
+
+  for (let i = 0; i < inputs.length; i++) {
+    var s = deserializeTx.extractScriptKey(i);
+    let input = inputs[i]
+    console.log("s: ", s.script)
+    console.log(input.outpoint.hash)
+  }
+
+  for (let i = 0; i < outputs.length; i++) {
+
+    let output = outputs[i]
+      console.log("output: ", output)
+    if(output.script.chunks.length==2 && output.script.chunks[0]==106){ // OP_RETURN
+
+      var data = Crypto.util.bytesToHex(output.script.chunks[1]);
+      var dataascii = hex2ascii(data);
+
+      if(dataascii.match(/^[\s\d\w]+$/ig)){
+        data = dataascii;
+      }
+      console.log("address: ", data)
+      console.log("amount: ", (output.value/100000000).toFixed(8))
+      console.log("script: ", Crypto.util.bytesToHex(output.script.buffer))
+    } else {
+
+      var addr = '';
+      if(output.script.chunks.length==5){
+        addr = coinjs.scripthash2address(Crypto.util.bytesToHex(output.script.chunks[2]));
+      } else if((output.script.chunks.length==2) && output.script.chunks[0]==0){
+        addr = coinjs.bech32_encode(coinjs.bech32.hrp, [coinjs.bech32.version].concat(coinjs.bech32_convert(output.script.chunks[1], 8, 5, true)));
+      } else {
+        var pub = coinjs.pub;
+        coinjs.pub = coinjs.multisig;
+        addr = coinjs.scripthash2address(Crypto.util.bytesToHex(output.script.chunks[1]));
+        coinjs.pub = pub;
+      }
+
+      console.log("address: ", addr)
+      console.log("amount: ", (output.value/100000000).toFixed(8))
+      console.log("script: ", Crypto.util.bytesToHex(output.script.buffer))
+    }
+  }
+  //const signedTX = scirptToSign.sign(USER.privkey, "ALL")
+})
 
 ipcRenderer.on('user:profile', (evt) => {
     const userProfile = document.getElementById('user-profile')

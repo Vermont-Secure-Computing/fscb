@@ -455,6 +455,7 @@ ipcMain.on("banker:addorsig", (e, options) => {
     bankerPubkeyResponse(banker)
   }else if (banker.message === "request-signature") {
     console.log("request signature")
+    win.webContents.send('request:banker-signature', banker)
   }else {
     console.log("signature")
   }
