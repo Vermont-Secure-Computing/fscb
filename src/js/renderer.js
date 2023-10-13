@@ -43,6 +43,7 @@ let fifthTab = document.getElementById('fifth')
 **/
 let importArea = document.getElementById('import-area')
 let bankerVerifyWithdrawal = document.getElementById('banker-verify-withdrawal')
+let bankerMessageSignTx = document.getElementById('banker-message-signtx-container')
 
 
 
@@ -880,6 +881,7 @@ BANKER
 {"header": "free_state_central_bank",
 "message":"request-signature",
 "id": "183698202",
+"account_name": "Stargazer",
 "banker_id": "stargazer-robert@email.com-2797298723",
  "creator_name": "jon jon",
  "creator_email": "jon@email.com",
@@ -1005,15 +1007,68 @@ ipcRenderer.on('request:banker-signature', (e, message) => {
   }
 
   let signButton = document.getElementById("banker-sign-button")
-  signButton.addEventListener('click', () => {bankerSignTransaction(deserializeTx)})
-  //const signedTX = scirptToSign.sign(USER.privkey, "ALL")
+  signButton.addEventListener('click', () => {bankerSignTransaction(message)})
+
 })
 
-function bankerSignTransaction(txid) {
-  console.log("sign tx: ", txid)
+function bankerSignTransaction(message) {
+  console.log("sign tx: ", message.transaction_id_for_signature)
   console.log("user privkey: ", USER.privkey)
-  const signedTX = txid.sign(USER.privkey)
+
+  const tx = coinjs.transaction()
+  const scriptToSign = tx.deserialize(message.transaction_id_for_signature)
+  const signedTX = scriptToSign.sign(USER.privkey, "ALL")
+
   console.log("signed: ", signedTX)
+
+  bankerVerifyWithdrawal.classList.add('hidden')
+  bankerMessageSignTx.classList.remove('hidden')
+
+  let bankerMessageSignTxBody = document.getElementById('banker-message-signtx-body')
+  let signResponseTitle = document.getElementById('sign-response-title')
+  let buttonDiv = document.getElementById('banker-message-signtx-close-button')
+  const div = document.createElement('div')
+  div.setAttribute('class', 'bg-white p-3 rounded-md text-black')
+
+  const p1 = document.createElement('p')
+  const p2 = document.createElement('p')
+  const p3 = document.createElement('p')
+  const p4 = document.createElement('pre')
+  const p5 = document.createElement('p')
+
+  delete message.transaction_id_for_signature
+  message.message = "response_signature_" + message.banker_id
+  message.transaction_id = signedTX
+
+  bankerMessageSignTxBody.innerHTML = ''
+
+  signResponseTitle.innerHTML = "Please copy the line below and send it to " + message.creator_email;
+  p1.innerHTML = USER.user_name + " response for your withdrawal signature request for " + message.account_name;
+  p2.innerHTML = "Please copy the message inside and import in FSCB";
+  p3.innerHTML = "-----Begin fscb message-----";
+  p4.innerHTML = JSON.stringify(message, undefined, 2);
+  p5.innerHTML = "-----End fscb message-----";
+
+  p1.classList.add('my-1')
+  p4.classList.add('whitespace-pre-wrap', 'break-all')
+  div.appendChild(p1)
+  div.appendChild(p2)
+  div.appendChild(p3)
+  div.appendChild(p4)
+  div.appendChild(p5)
+
+  bankerMessageSignTxBody.appendChild(div)
+
+
+  let closeButton = document.createElement('button')
+  closeButton.classList.add("inline-flex", "items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "absolute", "right-5", "mt-5", "text-white", "bg-orange-500", "rounded-lg", "focus:ring-4", "focus:ring-blue-200", "dark:focus:ring-orange-500", "hover:bg-orange-500")
+  closeButton.innerHTML = "Close"
+  closeButton.addEventListener("click", function() {
+    // bankerForm.classList.remove('hidden')
+    // bankersList.classList.remove('hidden')
+    // bankerMessage.classList.add('hidden')
+    console.log("close sign response message")
+  }, false);
 }
 
 ipcRenderer.on('user:profile', (evt) => {
