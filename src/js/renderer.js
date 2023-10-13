@@ -38,6 +38,14 @@ let thirdTab = document.getElementById('third')
 let fourthTab = document.getElementById('fourth')
 let fifthTab = document.getElementById('fifth')
 
+/**
+  Import Text screen
+**/
+let importArea = document.getElementById('import-area')
+let bankerVerifyWithdrawal = document.getElementById('banker-verify-withdrawal')
+
+
+
 // console.log(getListClick)
 // const accountList = document.getElementById('accounts-list');
 
@@ -52,7 +60,7 @@ let USER = {}
 let BANKERS
 
 
-
+getUserData()
 tabTogglers.forEach(function(toggler) {
     toggler.addEventListener("click", function(e) {
         e.preventDefault();
@@ -74,7 +82,7 @@ tabTogglers.forEach(function(toggler) {
         }
         if (tabName === "#addbanker") {
             getBanker()
-            getUserData()
+            //getUserData()
         }
         let tabContents = document.querySelector("#tab-contents");
 
@@ -877,7 +885,7 @@ BANKER
  "creator_email": "jon@email.com",
 "banker_name": "robert gludo",
  "banker_email": "robert@email.com",
-"transaction_id_for_signature":"01000000017dbf3d88276b81fd8a346d8411da5aebed6beb8ca074a7020643f005f22c42d2000000001976a914cf3d8592f8d55488faab8c054c97688e30acd86e88acffffffff0180969800000000001976a914f86bf35fd9c115c69b4842b130ed5df294ca7eb388ac00000000",
+"transaction_id_for_signature":"0100000003658b21a68ca8f9fceb7c5051b53be3b46b88111f24648afebb6dd0bf144270780000000069522103417eb8968ac166dd9586f24fef4889fda053b251a886761cb9003d41fc3dd4ea2103577b26b2ced3512d76bc65efae1f32bee2b1fee422a146e5f59fa704d7c7f9de2102d25fb998eb19a2be9e33fdb62d0d779b9cf45f868fcf87988ad7682c0a1a611653ae00e1f5057ef7db4eb47c24191c2f650fdb4361ce932a2f7f9cac8f49a881a0ca5c96471d0000000069522103417eb8968ac166dd9586f24fef4889fda053b251a886761cb9003d41fc3dd4ea2103577b26b2ced3512d76bc65efae1f32bee2b1fee422a146e5f59fa704d7c7f9de2102d25fb998eb19a2be9e33fdb62d0d779b9cf45f868fcf87988ad7682c0a1a611653ae00e1f505627b5a06e8521614c0886d167bff911a5a137c5ce8ce538954b835ba0a5ce6c30000000069522103417eb8968ac166dd9586f24fef4889fda053b251a886761cb9003d41fc3dd4ea2103577b26b2ced3512d76bc65efae1f32bee2b1fee422a146e5f59fa704d7c7f9de2102d25fb998eb19a2be9e33fdb62d0d779b9cf45f868fcf87988ad7682c0a1a611653ae00c2eb0b01c041c817000000001976a914aac6a113dc48cd1a26dd55c68323bb4ec68f9b0f88ac00000000",
 "currency":"woodcoin"}
 -----End fscb message-----
 
@@ -908,6 +916,13 @@ BANKER
 **/
 ipcRenderer.on('request:banker-signature', (e, message) => {
   console.log("request:banker-signature: ", message)
+
+  importArea.classList.add('hidden')
+  bankerVerifyWithdrawal.classList.remove('hidden')
+
+  let inputsTable = document.getElementById('banker-verify-inputs')
+  let outputsTable = document.getElementById('banker-verify-outputs')
+
   const tx = coinjs.transaction()
   const deserializeTx = tx.deserialize(message.transaction_id_for_signature)
   console.log("deserialize tx: ", deserializeTx)
@@ -919,7 +934,19 @@ ipcRenderer.on('request:banker-signature', (e, message) => {
     var s = deserializeTx.extractScriptKey(i);
     let input = inputs[i]
     console.log("s: ", s.script)
+    console.log("N: ", input.outpoint.index)
     console.log(input.outpoint.hash)
+
+    let row = inputsTable.insertRow();
+    let txid = row.insertCell(0);
+    txid.innerHTML = input.outpoint.hash
+    txid.setAttribute('width', '45%')
+    let indexNo = row.insertCell(1);
+    indexNo.innerHTML = input.outpoint.index
+    indexNo.setAttribute('width', '10%')
+    let script = row.insertCell(2);
+    script.innerHTML = s.script
+    script.setAttribute('width', '45%')
   }
 
   for (let i = 0; i < outputs.length; i++) {
@@ -937,6 +964,16 @@ ipcRenderer.on('request:banker-signature', (e, message) => {
       console.log("address: ", data)
       console.log("amount: ", (output.value/100000000).toFixed(8))
       console.log("script: ", Crypto.util.bytesToHex(output.script.buffer))
+      let row = outputsTable.insertRow();
+      let address = row.insertCell(0);
+      address.innerHTML = data
+      address.setAttribute('width', '45%')
+      let amount = row.insertCell(1);
+      amount.innerHTML = (output.value/100000000).toFixed(8)
+      amount.setAttribute('width', '10%')
+      let script = row.insertCell(2);
+      script.innerHTML = Crypto.util.bytesToHex(output.script.buffer)
+      script.setAttribute('width', '45%')
     } else {
 
       var addr = '';
@@ -954,10 +991,30 @@ ipcRenderer.on('request:banker-signature', (e, message) => {
       console.log("address: ", addr)
       console.log("amount: ", (output.value/100000000).toFixed(8))
       console.log("script: ", Crypto.util.bytesToHex(output.script.buffer))
+      let row = outputsTable.insertRow();
+      let address = row.insertCell(0);
+      address.setAttribute('width', '45%')
+      address.innerHTML = addr
+      let amount = row.insertCell(1);
+      amount.innerHTML = (output.value/100000000).toFixed(8)
+      amount.setAttribute('width', '10%')
+      let script = row.insertCell(2);
+      script.innerHTML = Crypto.util.bytesToHex(output.script.buffer)
+      script.setAttribute('width', '45%')
     }
   }
+
+  let signButton = document.getElementById("banker-sign-button")
+  signButton.addEventListener('click', () => {bankerSignTransaction(deserializeTx)})
   //const signedTX = scirptToSign.sign(USER.privkey, "ALL")
 })
+
+function bankerSignTransaction(txid) {
+  console.log("sign tx: ", txid)
+  console.log("user privkey: ", USER.privkey)
+  const signedTX = txid.sign(USER.privkey)
+  console.log("signed: ", signedTX)
+}
 
 ipcRenderer.on('user:profile', (evt) => {
     const userProfile = document.getElementById('user-profile')

@@ -84,6 +84,42 @@
               <p>Please copy the message below and paste it in import text box on FSCB</p> -->
             </div>
 
+            <!--Bankers view - Verify Withdrawal-->
+            <div class="hidden p-4 text-xl text-white font-bold" id="banker-verify-withdrawal">
+              Verify Withdrawal
+              <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
+              <div>
+                <table class="min-w-full text-left text-sm font-light mt-2">
+                  <thead class="border-b font-medium dark:border-neutral-500">
+                    <div before="Inputs" of Bankers class="before:content-[attr(before)] mt-24"></div><tr>
+                      <th scope="col" class="px-6 py-4">TxId</th>
+                      <th scope="col" class="px-6 py-4">N</th>
+                      <th scope="col" class="px-6 py-4">Script</th>
+                    </tr>
+                  </thead>
+                  <tbody id="banker-verify-inputs">
+                  </tbody>
+                </table>
+              </div>
+              <div>
+                <table class="min-w-full text-left text-sm font-light mt-2">
+                  <thead class="border-b font-medium dark:border-neutral-500">
+                    <div before="Outputs" of Bankers class="before:content-[attr(before)] mt-24"></div><tr>
+                      <th scope="col" class="px-6 py-4">Address</th>
+                      <th scope="col" class="px-6 py-4">Amount</th>
+                      <th scope="col" class="px-6 py-4">Script</th>
+                    </tr>
+                  </thead>
+                  <tbody id="banker-verify-outputs">
+                  </tbody>
+                </table>
+              </div>
+
+              <button id="banker-sign-button" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Sign</button>
+
+            </div>
+            <!---->
+
           </div>
           <div id="first" class="p-4 text-black leading-relaxed">
             <div id="accounts-list">
@@ -277,7 +313,7 @@
               <div id="banker-message-close-button"></div>
             </div>
 
-            
+
             <table class="min-w-full text-left text-sm font-light mt-2">
               <thead class="border-b font-medium dark:border-neutral-500">
                 <div before="List of Bankers" of Bankers class="before:content-[attr(before)] mt-24"></div><tr>
