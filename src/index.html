@@ -37,7 +37,7 @@
   <body>
     <div>
 
-      <div class="rounded border mx-auto grid grid-cols-12">
+      <div class="rounded border mx-auto grid h-auto grid-cols-12">
         <aside class="col-span-3 bg-black" id="aside">
           <div>
           <img src="./images/Group 28.png" alt="fscb">
@@ -56,13 +56,14 @@
           <!-- Tabs -->
           <ul class='list-outside list-disc ml-12 h-80'>
             <ul id="tabs">
-              <li class="list-disc marker:text-orange-500 mt-2 px-3 text-white font-semibold py-2 rounded-t" id="account-list-tab"><a class="getlistClick" href="#first">Account List</a></li>
-              <li class="list-disc marker:text-red-500 px-3 text-white font-semibold py-2 rounded-t"><a class="getbankerClick" href="#second">New Account</a></li>
-              <li class="list-disc marker:text-gray-500 px-3 text-white font-semibold py-2 rounded-t"><a href="#addbanker">Add Banker</a></li>
-              <li class="list-disc marker:text-green-500 px-3 text-white font-semibold py-2 rounded-t"><a href="#third">Instructions</a></li>
-              <li class="list-disc marker:text-purple-500 px-3 text-white font-semibold py-2 rounded-t"><a href="#fourth">About FSCB</a></li>
-              <li class="list-disc marker:text-yellow-500 px-3 text-white font-semibold py-2 rounded-t"><a href="#fifth">How it works</a></li>
-              <button type="submit" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center 'fixed left-16 bottom-12 w-full' text-black bg-gray-300 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-gray-300 hover:bg-gray-300">Backup/Restore</button>
+              <li class="list-disc marker:text-orange-500 -mt-0 px-4 text-white font-semibold py-2 rounded-t" id="account-list-tab"><a class="getlistClick" href="#first">Account List</a></li>
+              <li class="list-disc marker:text-red-500 px-4 text-white font-semibold py-2 rounded-t"><a class="getbankerClick" href="#second">New Account</a></li>
+              <li class="list-disc marker:text-gray-500 px-4 text-white font-semibold py-2 rounded-t"><a href="#addbanker">Add Banker</a></li>
+              <li class="list-disc marker:text-green-500 px-4 text-white font-semibold py-2 rounded-t"><a href="#third">Instructions</a></li>
+              <li class="list-disc marker:text-purple-500 px-4 text-white font-semibold py-2 rounded-t"><a href="#fourth">About FSCB</a></li>
+              <li class="list-disc marker:text-yellow-500 px-4 text-white font-semibold py-2 rounded-t"><a href="#fifth">How it works</a></li>
+              <li class="list-disc marker:text-gray-800 px-4 text-white font-semibold py-2 rounded-t"><a href="#sixth">Backup</a></li>
+              <li class="list-disc marker:text-teal-300 px-4 text-white font-semibold py-2 rounded-t"><a href="#seventh">Restore</a></li>
             </ul>
           </ul>
         </aside>
@@ -84,7 +85,7 @@
             </div>
 
           </div>
-          <div id="first" class="p-4 text-black">
+          <div id="first" class="p-4 text-black leading-relaxed">
             <div id="accounts-list">
               <table class="min-w-full text-left text-sm font-light text-white">
                 <thead class="border-b font-medium dark:border-neutral-500">
@@ -186,10 +187,12 @@
               <h1>Withdrawal Reference</h1>
             </div>
           </div>
-          <div id="second" class="hidden p-4">
+          <div id="second" class="hidden p-4 text-white text-xl font-bold">
+            Create Account
+            <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
             <form id="create-new-form">
               <div class="relative mb-4 flex flex-wrap items-stretch">
-                <select name="currency" id="coin-currency">
+                <select class="text-black" name="currency" id="coin-currency">
                   <option value="woodcoin" selected>woodcoin</option>
                   <option value="bitcoin">bitcoin</option>
                   <option value="litecoin">litecoin</option>
@@ -219,7 +222,7 @@
 
                     <input type="text" id="bankers-email" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email" placeholder="Bankers Email"> -->
                   <div class="grid md:grid-cols-2 md:gap-6 multikeysInner">
-                    <div class="col-span-1" id="banker-select">
+                    <div class="col-span-1 text-gray-900" id="banker-select">
                       <!-- <select data-placeholder="Choose Bankers" multiple>
                         <option value="" disabled selected hidden>Choose Bankers</option>
                       </select> -->
@@ -227,10 +230,10 @@
 
 
                     <!-- <a class="pubkeyAdd"><object data="./images/plus.svg" width="50" height="50" class="green" id="img-anchor"></object></a> -->
-                    <div class="col-span-1 text-white">
+                    <div class="col-span-1 text-white text-xs font-bold py-1 m-1">
                       <label for="#releaseCoins">Enter the amount of signatures required to release the coins</label>
-                      <div class="col-span-3">
-                        <select id="releaseCoins" class="px-5 py-2 border border-gray-400">
+                      <div class="col-span-3 py-2 text-black font-lg">
+                        <select id="releaseCoins" class="px-40 py-2 border border-gray-400">
                           <option>1</option>
                           <option selected>2</option>
                           <option>3</option>
@@ -255,7 +258,7 @@
 
             </form>
           </div>
-          <div id="addbanker" class="hidden p-4 text-xl text-white">
+          <div id="addbanker" class="hidden p-4 text-xl text-white font-bold">
             Add Banker
             <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
             <form class="mt-2" id="add-banker-form">
@@ -290,15 +293,32 @@
 
 
           </div>
-          <div id="third" class="hidden p-4">
+          <div id="third" class="hidden p-4 text-white text-xl font-bold">
             Instructions
+            <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
+            <div class="h-96 bg-white">
+             <p class="text-black py-2 px-5 font-bold">Requesting for Bankers Public key:</p>
+             <p class="text-black px-5 absolute mt-5 font-normal text-base">Please copy the line below and send it to robert@email.com</p>
+             <p class="text-black px-5 absolute mt-14 font-normal text-base">Jon Jon is requesting for you to become a banker at this Stargazer</p>
+             <p class="text-black px-5 absolute mt-24 font-normal text-base">Please copy the message inside and import in FSCB</p>
+            </div>
           </div>
-          <div id="fourth" class="hidden p-4">
+          <div id="fourth" class="hidden p-4 text-white text-xl font-bold">
             About FSCB
+            <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
             <table id="data-container"></table>
           </div>
-          <div id="fifth" class="hidden p-4">
+          <div id="fifth" class="hidden p-4 text-white text-xl font-bold">
             How it works
+            <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
+          </div>
+          <div id="sixth" class="hidden p-4 text-white text-xl font-bold">
+            Backup
+            <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
+          </div>
+          <div id="seventh" class="hidden p-4 text-white text-xl font-bold">
+            Restore
+            <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
           </div>
         </div>
       </div>
