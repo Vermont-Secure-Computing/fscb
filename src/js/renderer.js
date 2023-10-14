@@ -10,7 +10,7 @@
 //  Start Tab Pannels
 
 const importText =   document.getElementById('import-text');
-// const bankersClick = document.getElementById('bakers-address').getElementsByClassName('pubkeyAdd')[0];
+// const bankersClick = document.getElementsByClassName('pubkeyAdd')[0];
 
 const formCreateAccount =   document.getElementById('create-new-form');
 const importTextButton = document.getElementById('import-text-button')
@@ -22,8 +22,9 @@ const contractName = document.getElementById("contract-name");
 const creatorName = document.getElementById("creator-name");
 const creatorEmail = document.getElementById("creator-email");
 const creatorAddress = document.getElementById("creator-address");
-const minusButton = document.getElementById('multikeys');
-const addMinus = document.getElementById('multikeys').getElementsByClassName('pubkeyAdd')[0]
+const minusButton = document.getElementById('address-amount');
+const addMinus = document.getElementsByClassName('pubkeyAdd')[0]
+console.log(addMinus)
 const getbankerClick = document.getElementsByClassName('getbankerClick')[0]
 const getListClick = document.getElementsByClassName('getlistClick')[0]
 
@@ -285,6 +286,11 @@ function listAccountActions(actions){
   accountActions.classList.remove("hidden")
 }
 
+function outputsAddress(e) {
+  console.log(e)
+
+}
+
 function accountWithdrawal(address){
   console.log("withdrawal: ", address.address)
   ipcRenderer.send("unspent:api", address.address)
@@ -296,6 +302,10 @@ function accountWithdrawal(address){
   let accountWithdrawal = document.getElementById('account-withdrawal')
   let accountActions = document.getElementById('account-actions')
   let unspentdiv = document.getElementById('list-unspent')
+  // let getuserinput = document.getElementsByClassName('user-input-amount')
+  // console.log("get user input", getuserinput)
+  let unspentAmountTotal = 0
+  let userInputAmountTotal = 0
   let tx = coinjs.transaction();
   accountDetails.classList.add("hidden")
   accountWithdrawal.classList.remove("hidden")
@@ -306,6 +316,7 @@ function accountWithdrawal(address){
     // console.log(typeof(evt))
     for (let i = 0; i < listP.length; i++) {
         console.log(listP[i].txid)
+        unspentAmountTotal += listP[i].amount
         // let row = tableBody.insertRow()
         // let transactionId = row.insertCell(0)
         // transactionId.innerHTML = listP[i].txid.substring(0,30)+"..."
@@ -318,27 +329,47 @@ function accountWithdrawal(address){
         // tx.addinput(listP[i].txid, listP[i].vout, addressScript.redeemscript, null)
         // tx.addoutput("WdBb5rTtXjDYGHBZvXHbhxyUar1n7RA1VJ", 1.99)
         // console.log("tx log test: ", tx.serialize())
+        let div = document.createElement('div')
+        div.setAttribute('id', 'inner-unspent')
+        div.setAttribute('class', 'grid md:grid-cols-3 gap-3')
         let input1 = document.createElement('input')
         input1.setAttribute('class', 'txid-withdraw, text-black')
         input1.setAttribute('id', 'txid-withdraw')
         input1.value = listP[i].txid
         let input2 = document.createElement('input')
         input2.setAttribute('class', 'text-black')
+        input2.setAttribute('class', 'hidden')
         input2.setAttribute('id', 'vout-withdraw')
         input2.value = listP[i].vout
         let input3 = document.createElement('input')
         input3.setAttribute('class', 'text-black')
+        input3.setAttribute('class', 'hidden')
         input3.setAttribute('id', 'script-withdraw')
         input3.value = addressScript.redeemscript
         let input4 = document.createElement('input')
         input4.setAttribute('class', 'text-black')
         input4.setAttribute('id', 'amount-withdraw')
         input4.value = listP[i].amount
-        unspentdiv.appendChild(input1)
-        unspentdiv.appendChild(input2)
-        unspentdiv.appendChild(input3)
-        unspentdiv.appendChild(input4)
+        let check = document.createElement('input')
+        check.setAttribute('type', 'checkbox')
+        check.setAttribute('checked', '')
+        check.addEventListener('change', (e, evt) => {
+          console.log("e testing ", e)
+          console.log("evt testing ", evt)
+          if(e.target.defaultChecked) {
+            check.removeAttribute('checked', '')
+          } else {
+            check.setAttribute('checked', '')
+          }
+        })
+        div.appendChild(input1)
+        div.appendChild(input2)
+        div.appendChild(input3)
+        div.appendChild(input4)
+        div.appendChild(check)
+        unspentdiv.appendChild(div)
     }
+    console.log("total unspent: ", unspentAmountTotal)
   })
 }
 
@@ -420,66 +451,86 @@ function getAccountDetails(account){
 
 // })
 
-// function addOrDelete() {
-//     console.log("click add or delete")
-//     const mainKey = document.getElementById('multikeys')
-//     let displayButton = document.querySelector("form button");
-//     // const bankers = document.querySelectorAll('.banker')
-//     // if (bankers.length >= 28 ) return;
-//     // innerKey.getElementsByClassName('green')[0]
-//     // const clone = '<div class="grid md:grid-cols-7 md:gap-6" id="multikeysInner">'+innerKey.innerHTML+'</div>'
-//     // mainKey.innerHTML += clone
-//     // document.getElementById('multikeys', 'img-anchor').dataset('./assets/imgs/minus.svg')
-//     let div = document.createElement('div');
-//     div.setAttribute("class", "grid md:grid-cols-7 md:gap-6 multikeysInner");
-//     // let input1 = document.createElement('input')
-//     // input1.setAttribute('class', 'col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name')
-//     // input1.setAttribute('placeholder', 'Bankers Name')
-//     // input1.setAttribute('required', '')
-//     // let input2 = document.createElement('input')
-//     // input2.setAttribute('class', 'col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email')
-//     // input2.setAttribute('placeholder', 'Bankers Email')
-//     // input2.setAttribute('required', '')
-//     let select = document.createElement('select')
-//     select.setAttribute('name', 'banker-name1')
-//     select.setAttribute('id', 'bankers-name')
-//     select.setAttribute('class', 'col-span-6 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500')
-//     let option = document.createElement('option')
-//     option.setAttribute('value', '')
-//     option.setAttribute('disabled', 'disabled')
-//     option.setAttribute('hidden', 'hidden')
-//     option.setAttribute('selected', 'selected')
-//     option.innerHTML = "Choose Banker"
-//     select.appendChild(option)
-//     // option.setAttribute('data-dept', 'Choose Banker')
-//     for (const key in bankersArray) {
-//         const opt = bankersArray[key].banker_email
-//         console.log(opt)
-//         let option1 = document.createElement('option')
-//         option1.textContent = opt;
-//         option1.value = opt;
-//         select.appendChild(option1)
-//     }
-//     let anchor = document.createElement('a')
-//     anchor.setAttribute('class', 'pubkeyRemove')
-//     let minus = document.createElement('object')
-//     minus.setAttribute('data', './images/minus.svg')
-//     minus.setAttribute('width', '50')
-//     minus.setAttribute('height', '50')
-//     minus.setAttribute('class', 'red')
-//     anchor.appendChild(minus)
-//     div.appendChild(select)
-//     // div.appendChild(input2)
-//     div.appendChild(anchor)
-//     mainKey.appendChild(div)
-// }
+function addOrDelete(e) {
+    console.log("click add or delete")
+    const mainKey = document.getElementById('address-amount')
+    // let displayButton = document.querySelector("form button");
+    // // const bankers = document.querySelectorAll('.banker')
+    // // if (bankers.length >= 28 ) return;
+    // // innerKey.getElementsByClassName('green')[0]
+    // // const clone = '<div class="grid md:grid-cols-7 md:gap-6" id="multikeysInner">'+innerKey.innerHTML+'</div>'
+    // // mainKey.innerHTML += clone
+    // // document.getElementById('multikeys', 'img-anchor').dataset('./assets/imgs/minus.svg')
+    let div = document.createElement('div');
+    div.setAttribute("class", "grid md:grid-cols-3 gap-2");
+    div.setAttribute('id', 'address-keys')
+    // // let input1 = document.createElement('input')
+    // // input1.setAttribute('class', 'col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name')
+    // // input1.setAttribute('placeholder', 'Bankers Name')
+    // // input1.setAttribute('required', '')
+    // // let input2 = document.createElement('input')
+    // // input2.setAttribute('class', 'col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email')
+    // // input2.setAttribute('placeholder', 'Bankers Email')
+    // // input2.setAttribute('required', '')
+    // let select = document.createElement('select')
+    // select.setAttribute('name', 'banker-name1')
+    // select.setAttribute('id', 'bankers-name')
+    // select.setAttribute('class', 'col-span-6 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500')
+    // let option = document.createElement('option')
+    // option.setAttribute('value', '')
+    // option.setAttribute('disabled', 'disabled')
+    // option.setAttribute('hidden', 'hidden')
+    // option.setAttribute('selected', 'selected')
+    // option.innerHTML = "Choose Banker"
+    // select.appendChild(option)
+    // // option.setAttribute('data-dept', 'Choose Banker')
+    // for (const key in bankersArray) {
+    //     const opt = bankersArray[key].banker_email
+    //     console.log(opt)
+    //     let option1 = document.createElement('option')
+    //     option1.textContent = opt;
+    //     option1.value = opt;
+    //     select.appendChild(option1)
+    // }
+    // let anchor = document.createElement('a')
+    // anchor.setAttribute('class', 'pubkeyRemove')
+    // let minus = document.createElement('object')
+    // minus.setAttribute('data', './images/minus.svg')
+    // minus.setAttribute('width', '50')
+    // minus.setAttribute('height', '50')
+    // minus.setAttribute('class', 'red')
+    // anchor.appendChild(minus)
+    // div.appendChild(select)
+    // // div.appendChild(input2)
+    // div.appendChild(anchor)
+    // mainKey.appendChild(div)
+    let input1 = document.createElement('input')
+    input1.setAttribute('class', 'text-black col-span-1 mt-2')
+    input1.setAttribute('placeholder', 'Enter Address')
+    let input2 = document.createElement('input')
+    input2.setAttribute('class', 'text-black col-span-1 mt-2 user-input-amount')
+    input2.setAttribute('placeholder', 'Enter Amount')
+    let anchor = document.createElement('a')
+    anchor.setAttribute('class', 'pubkeyRemove')
+    let minus = document.createElement('object')
+    minus.setAttribute('data', './images/minus.svg')
+    minus.setAttribute('width', '50')
+    minus.setAttribute('height', '50')
+    minus.setAttribute('class', 'red')
+    anchor.appendChild(minus)
+    div.appendChild(input1)
+    div.appendChild(input2)
+    div.appendChild(anchor)
+    mainKey.appendChild(div)
+}
 
-// function deleteInput(e) {
-//     const remove = e.target.classList.contains('pubkeyRemove')
-//     if (!remove) return;
-//     const removeEl = e.target.parentNode;
-//     document.getElementById('multikeys').removeChild(removeEl);
-// }
+function deleteInput(e) {
+    const remove = e.target.classList.contains('pubkeyRemove')
+    console.log(e.target)
+    if (!remove) return;
+    const removeEl = e.target.parentNode;
+    document.getElementById('address-amount').removeChild(removeEl);
+}
 
 function addBanker(e) {
     e.preventDefault()
@@ -679,7 +730,7 @@ ipcRenderer.on('send:bankers', function(e, evt) {
 
       const selectOptions = select.querySelectorAll('option');
       const newSelect = document.createElement('div');
-      newSelect.classList.add('selectMultiple');
+      newSelect.setAttribute('class', 'selectMultiple')
       const active = document.createElement('div');
       active.classList.add('active');
       const optionList = document.createElement('ul');
@@ -1230,21 +1281,56 @@ function isEmailValid(email) {
 
 async function generateClaim(e) {
   e.preventDefault()
-  const txid = document.getElementById('txid-withdraw').value
-  const vout = document.getElementById('vout-withdraw').value
-  const script = document.getElementById('script-withdraw').value
-  const amount = document.getElementById('amount-withdraw').value
+  // const txid = document.getElementById('txid-withdraw').value
+  // const vout = document.getElementById('vout-withdraw').value
+  // const script = document.getElementById('script-withdraw').value
+  // const amount = document.getElementById('amount-withdraw').value
   const address = document.getElementById('withdraw-address').value
   const amountWithdraw = document.getElementById('withdraw-amount').value
   // console.log("txid ", txid)
   // console.log('address ', address)
-  let tx = coinjs.transaction();
-  let scriptN = coinjs.script()
-  tx.addinput(txid, vout, script, amount, null)
-  tx.addoutput(address, amountWithdraw)
-  const out = await tx.serialize()
-  console.log("tx serialize", out)
-  console.log("decode tx serialize", tx.deserialize(out))
+  // let tx = coinjs.transaction();
+  // let scriptN = coinjs.script()
+  // tx.addinput(txid, vout, script, amount, null)
+  // tx.addoutput(address, amountWithdraw)
+  // const out = await tx.serialize()
+  // console.log("tx serialize", out)
+  // console.log("decode tx serialize", tx.deserialize(out))
+  let tx = coinjs.transaction()
+  const getunspent = document.querySelectorAll('#inner-unspent')
+  const getuserinput = document.querySelectorAll('#address-keys')
+  let userunspentindex;
+  let userinputindex;
+  let unspentindexsum = 0;
+  let userinputsum = 0 ;
+  console.log(getunspent)
+  for(let i = 0; i < getunspent.length; i++) {
+    if(getunspent[i].children[4].defaultChecked) {
+      userunspentindex = i
+      unspentindexsum += getunspent[i].children[3].value
+      tx.addinput(getunspent[i].children[0].value, getunspent[i].children[1].value, getunspent[i].children[2].value, getunspent[i].children[3].value, null)
+    }
+    // if(i === getunspent.length -1) {
+    //   tx.addoutput(address, amountWithdraw)
+    //   const out = await tx.serialize()
+    //   console.log(out)
+    // }
+  }
+  console.log(getuserinput)
+  for (let i = 0; i < getuserinput.length; i++) {
+    userinputindex = i
+    userinputsum += getuserinput[i].children[1].value
+    tx.addoutput(getuserinput[i].children[0].value, getuserinput[i].children[1].value)
+  }
+
+  if (userunspentindex === getunspent.length -1 && userinputindex === getuserinput.length -1) {
+    console.log(tx.serialize())
+  }
+
+  if (userinputsum > unspentindexsum) {
+    alertError("You are spending more than you have")
+  }
+  
 }
 
 
@@ -1257,8 +1343,8 @@ async function generateClaim(e) {
 formCreateAccount.addEventListener("submit", saveAndCreateText);
 importTextForm.addEventListener('submit', parseTextArea);
 userProfileForm.addEventListener('submit', createUserProfile);
-// addMinus.addEventListener('click', addOrDelete);
-// minusButton.addEventListener('click', deleteInput);
+addMinus.addEventListener('click', addOrDelete);
+minusButton.addEventListener('click', deleteInput);
 formAddBanker.addEventListener('submit', addBanker);
 getbankerClick.addEventListener('click', getBanker)
 getListClick.addEventListener('click', getList)
