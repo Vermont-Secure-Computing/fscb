@@ -240,10 +240,13 @@ ipcRenderer.on("list:file", function(e, evt){
             let address = row.insertCell(1);
             address.innerHTML = convertToJson[x].address
             let balance = row.insertCell(2);
+            balance.setAttribute('class', 'text-center')
             balance.innerHTML = convertToJson[x].balance
             let veiwall = row.insertCell(3)
+            veiwall.setAttribute('class', 'text-center')
             let viewAccountDetailsButton = document.createElement('button')
-            viewAccountDetailsButton.innerHTML = "view all"
+            viewAccountDetailsButton.setAttribute('class', "inline-flex items-center px-10 py-2.5 text-sm font-medium text-center absolute w-32 right-5 -mt-12 text-white bg-orange-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500 rounded-full")
+            viewAccountDetailsButton.innerHTML = "view"
             veiwall.appendChild(viewAccountDetailsButton)
             //viewAccountDetailsButton.addEventListener('click', getAccountDetails)
             let details = convertToJson[x]
