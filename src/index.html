@@ -74,7 +74,7 @@
             <div class="mx-auto" id="import-area">
               <form id="import-text-form">
                 <textarea name="" id="import-text" cols="30" rows="10" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Paste text here..."></textarea>
-                <button type="submit" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Import</button>
+                <button type="submit" class="inline-flex items-center px-12 py-3 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Import</button>
               </form>
             </div>
             <div class="mx-auto hidden" id="import-show">
@@ -143,10 +143,12 @@
             <!--End of Bankers view - Message to send - Sign tx Response-->
 
           </div>
-          <div id="first" class="p-4 text-black leading-relaxed">
+          <div id="first" class="p-4 text-white font-bold text-xl leading-relaxed">
+            Account list
+              <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
             <div id="accounts-list">
-              <table class="border-collapse border border-slate-400 text-left text-sm font-light text-black bg-white mt-2 ml-20 table-auto">
-                <thead class="border-b pr-2 font-medium dark:border-neutral-500">
+              <table class="border-collapse border border-slate-400 text-left text-sm font-light text-black bg-white mt-2 ml-20 pl-96table-auto">
+                <thead class="border-b pr-2 font-medium text-black dark:border-neutral-500">
                   <tr>
                     <th scope="col" class="border border-slate-500 px-6 py-2">Account Name</th>
                     <th scope="col" class="border border-slate-500 px-32 py-2">Address</th>
@@ -158,7 +160,7 @@
                 </tbody>
               </table>
             </div>
-            <div id="account-details" class="hidden bg-white">
+            <div id="account-details" class="hidden font-normal text-sm text-black bg-white h-90 w-auto mt-4">
               <p>Account details</p>
               <div id="main-container">
                 <div id="left-container">
@@ -173,8 +175,8 @@
                   <p><span>Currency: </span><span id="account-currency"></span></p>
                 </div>
               </div>
-              <table class="min-w-full text-left text-sm font-light">
-                <thead class="border-collapse border border-slate-400 text-left text-sm font-light text-black bg-white mt-2 ml-20 table-auto">
+              <table class="min-w-full text-left text-sm font-light mt-8">
+                <thead class="border-collapse border border-slate-400 text-left text-sm font-light text-black mt-20 ml-20 table-auto">
                   <tr>
                     <th scope="col" class="px-6 py-4">Name</th>
                     <th scope="col" class="px-6 py-4">E-mail</th>
@@ -185,7 +187,7 @@
                 <tbody id="account-bankers-list">
                 </tbody>
               </table>
-              <div id="account-buttons">
+              <div  class="absolute h-96 mt-5" id="account-buttons">
                 <!--button class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-yellow-700 rounded-lg focus:ring-4 focus:ring-yellow-200 dark:focus:ring-yellow-900 hover:bg-yellow-800">Transactions</button>
                 <button class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-yellow-700 rounded-lg focus:ring-4 focus:ring-yellow-200 dark:focus:ring-yellow-900 hover:bg-yellow-800">Withdrawal</button-->
               </div>
@@ -236,6 +238,27 @@
                   </div>
                 </div>
                 <br>
+<<<<<<< HEAD
+=======
+                
+               <div class="grid md:grid-cols-4 gap-3 py-3 font-normal text-sm">
+                 <label for="">Transaction Id</label>
+                 <label for="">Amount</label>
+               </div>
+              <div id="list-unspent" class="grid md:grid-cols-4 gap-3 font-normal text-sm h-10"></div>
+              
+              <form class="mt-20" id="withdraw-submit">
+                <div class="grid gap-3 grid-cols-4 font-normal text-sm pr-96">
+                 <label for="withdraw-address">Address</label>
+                 <input type="text" id="enter-address" class="bg-gray-50 border border-gray-300 text-gray-900 font-normal text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-8 ml-14" placeholder="Enter Address">
+                 <label for="withdraw-amount">Amount</label>
+                 <input type="text" placeholder="Enter Amount" id="withdraw-amount" class="text-black  font-normal text-sm h-8 w-18 mt-8">
+                </div>
+                <div class="mt-14">
+                  <label for="withdraw-fee">Fee</label>
+                  <input type="text" placeholder="0.001" id="withdraw-fee">
+                </div>
+>>>>>>> oct162023
                 <button type="submit">Submit</button>
               </form>
               <br>
@@ -331,7 +354,7 @@
               </select>
               <input type="text" id="banker-name-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Bankers Name">
               <input type="email" id="banker-email-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email-add absoulte mt-2" placeholder="Bankers Email">
-              <button type="submit" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-orange-500 focus:ring-4 focus:ring-orange-500 dark:focus:bg-orange-500 hover:bg-orange absolute mt-5 right-5 rounded-full">Submit</button>
+              <button type="submit" class="inline-flex items-center px-10 py-3 text-sm font-medium text-center text-white bg-orange-500 focus:ring-4 focus:ring-orange-500 dark:focus:bg-orange-500 hover:bg-orange absolute mt-5 right-5 rounded-full">Submit</button>
             </form>
 
             <div class="mx-auto hidden" id="banker-message-container">

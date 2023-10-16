@@ -237,6 +237,7 @@ ipcRenderer.on("list:file", function(e, evt){
             // ipcRenderer.send("get:balance", {"pubkey": convertToJson[x].address})
             let row = accountBody.insertRow();
             let name = row.insertCell(0);
+            name.setAttribute('class', 'pl-6')
             name.innerHTML = convertToJson[x].contract_name
             let address = row.insertCell(1);
             address.innerHTML = convertToJson[x].address
@@ -246,7 +247,7 @@ ipcRenderer.on("list:file", function(e, evt){
             let veiwall = row.insertCell(3)
             veiwall.setAttribute('class', 'text-center')
             let viewAccountDetailsButton = document.createElement('button')
-            viewAccountDetailsButton.setAttribute('class', "inline-flex items-center px-10 py-2.5 text-sm font-medium text-center absolute w-32 right-5 -mt-12 text-white bg-orange-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500 rounded-full")
+            viewAccountDetailsButton.setAttribute('class', "px-5 py-0.5 font-small text-white bg-orange-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500 rounded-full")
             viewAccountDetailsButton.innerHTML = "view"
             veiwall.appendChild(viewAccountDetailsButton)
             //viewAccountDetailsButton.addEventListener('click', getAccountDetails)
@@ -427,13 +428,13 @@ function getAccountDetails(account){
     buttonContainer.innerHTML = ''
 
     let viewActionsButton = document.createElement('button')
-    viewActionsButton.classList.add("inline-flex", "items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-lg", "focus:ring-4", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
+    viewActionsButton.classList.add("inline-flex", "items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-full", "focus:ring-4", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
     viewActionsButton.innerHTML = "Actions"
     let actions = account.signatures
     viewActionsButton.addEventListener("click", function() {listAccountActions(actions);}, false);
 
     let withdrawalButton = document.createElement('button')
-    withdrawalButton.classList.add("inline-flex", "items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-lg", "focus:ring-4", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
+    withdrawalButton.classList.add("inline-flex", "items-center", "m-2", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-full", "focus:ring-4", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
     withdrawalButton.innerHTML = "Withdrawal"
     let address = {
         "address": account.address,
