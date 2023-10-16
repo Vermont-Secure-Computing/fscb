@@ -45,6 +45,7 @@ let fifthTab = document.getElementById('fifth')
 let importArea = document.getElementById('import-area')
 let bankerVerifyWithdrawal = document.getElementById('banker-verify-withdrawal')
 let bankerMessageSignTx = document.getElementById('banker-message-signtx-container')
+let ownerMessageSignRequest = document.getElementById('owner-message-sign-request-container')
 
 
 
@@ -511,6 +512,7 @@ function addOrDelete(e) {
     input1.setAttribute('class', 'text-black col-span-1 mt-2')
     input1.setAttribute('placeholder', 'Enter Address')
     let input2 = document.createElement('input')
+    input2.addEventListener('onchange', ()=> {console.log("amount: ", input2.value)})
     input2.setAttribute('class', 'text-black col-span-1 mt-2 user-input-amount')
     input2.setAttribute('placeholder', 'Enter Amount')
     let anchor = document.createElement('a')
@@ -526,6 +528,15 @@ function addOrDelete(e) {
     div.appendChild(anchor)
     mainKey.appendChild(div)
 }
+
+function amountOnchange(amount) {
+  console.log('amount change: ', amount)
+}
+
+
+let withdrawAmountInput = document.getElementById('withdraw-amount')
+console.log("withdrawAmountInput: ", withdrawAmountInput.value)
+withdrawAmountInput.addEventListener('input', amountOnchange(withdrawAmountInput.value))
 
 function deleteInput(e) {
     const remove = e.target.classList.contains('pubkeyRemove')
@@ -934,36 +945,34 @@ BANKER
 -----Begin fscb message-----
 {"header": "free_state_central_bank",
 "message":"request-signature",
-"id": "183698202",
-"account_name": "Stargazer",
-"banker_id": "stargazer-robert@email.com-2797298723",
- "creator_name": "jon jon",
- "creator_email": "jon@email.com",
-"banker_name": "robert gludo",
- "banker_email": "robert@email.com",
+"id": "3607096450",
+"account_name": "more list contract",
+"banker_id": "8",
+ "creator_name": "Robert Gludo",
+ "creator_email": "robert@email.com",
+"banker_name": "gripter",
+ "banker_email": "gripter@email.com",
 "transaction_id_for_signature":"0100000003658b21a68ca8f9fceb7c5051b53be3b46b88111f24648afebb6dd0bf144270780000000069522103417eb8968ac166dd9586f24fef4889fda053b251a886761cb9003d41fc3dd4ea2103577b26b2ced3512d76bc65efae1f32bee2b1fee422a146e5f59fa704d7c7f9de2102d25fb998eb19a2be9e33fdb62d0d779b9cf45f868fcf87988ad7682c0a1a611653ae00e1f5057ef7db4eb47c24191c2f650fdb4361ce932a2f7f9cac8f49a881a0ca5c96471d0000000069522103417eb8968ac166dd9586f24fef4889fda053b251a886761cb9003d41fc3dd4ea2103577b26b2ced3512d76bc65efae1f32bee2b1fee422a146e5f59fa704d7c7f9de2102d25fb998eb19a2be9e33fdb62d0d779b9cf45f868fcf87988ad7682c0a1a611653ae00e1f505627b5a06e8521614c0886d167bff911a5a137c5ce8ce538954b835ba0a5ce6c30000000069522103417eb8968ac166dd9586f24fef4889fda053b251a886761cb9003d41fc3dd4ea2103577b26b2ced3512d76bc65efae1f32bee2b1fee422a146e5f59fa704d7c7f9de2102d25fb998eb19a2be9e33fdb62d0d779b9cf45f868fcf87988ad7682c0a1a611653ae00c2eb0b01c041c817000000001976a914aac6a113dc48cd1a26dd55c68323bb4ec68f9b0f88ac00000000",
 "currency":"woodcoin"}
 -----End fscb message-----
 
 
-  const tx = coinjs.transaction()
-  const scriptToSign = tx.deserialize(message.transaction_id_for_signature)
-  const signedTX = scirptToSign.sign(USER.privkey, "ALL")
 
-  BANKER message to OWNER
-
-  {"header": free_state_central_bank
-  "message”: response_signature_stargazer-robert@email.com
-  "banker_id”: stargazer-robert@email.com-2797298723
- ”creator_name”: jon jon
- ”creator_email”: jon@email.com
-  "banker_name”: robert gludo 
-  ”banker_email”: robert@email.com
-  "transaction_id”:1w01000000017dbf3d88276b81fd8a346d8411da5aebed6beb8ca074a7020643f005f22c42d2000000001976a914cf3d8592f8d55488faab8c054c97688e30acd86e88acffffffff0180969800000000001976a914f86bf35fd9c115c69b4842b130ed5df294ca7eb388ac00000000
-  "currency”:woodcoin
-  }
-  "contract_id”: 2
-  -----End fscb message-----
+-----Begin fscb message-----
+{
+  "header": "free_state_central_bank",
+  "message": "response-signature-stargazer-robert@email.com-2797298723",
+  "id": "3607096450",
+  "account_name": "more list contract",
+  "banker_id": "8",
+  "creator_name": "Robert Gludo",
+  "creator_email": "robert@email.com",
+  "banker_name": "gripter",
+  "banker_email": "gripter@email.com",
+  "currency": "woodcoin",
+  "transaction_id": "0100000003658b21a68ca8f9fceb7c5051b53be3b46b88111f24648afebb6dd0bf14427078000000006c004c69522103417eb8968ac166dd9586f24fef4889fda053b251a886761cb9003d41fc3dd4ea2103577b26b2ced3512d76bc65efae1f32bee2b1fee422a146e5f59fa704d7c7f9de2102d25fb998eb19a2be9e33fdb62d0d779b9cf45f868fcf87988ad7682c0a1a611653ae00e1f5057ef7db4eb47c24191c2f650fdb4361ce932a2f7f9cac8f49a881a0ca5c96471d000000006c004c69522103417eb8968ac166dd9586f24fef4889fda053b251a886761cb9003d41fc3dd4ea2103577b26b2ced3512d76bc65efae1f32bee2b1fee422a146e5f59fa704d7c7f9de2102d25fb998eb19a2be9e33fdb62d0d779b9cf45f868fcf87988ad7682c0a1a611653ae00e1f505627b5a06e8521614c0886d167bff911a5a137c5ce8ce538954b835ba0a5ce6c3000000006c004c69522103417eb8968ac166dd9586f24fef4889fda053b251a886761cb9003d41fc3dd4ea2103577b26b2ced3512d76bc65efae1f32bee2b1fee422a146e5f59fa704d7c7f9de2102d25fb998eb19a2be9e33fdb62d0d779b9cf45f868fcf87988ad7682c0a1a611653ae00c2eb0b01c041c817000000001976a914aac6a113dc48cd1a26dd55c68323bb4ec68f9b0f88ac00000000"
+}
+-----End fscb message-----
 **/
 
 /**
@@ -1091,7 +1100,7 @@ function bankerSignTransaction(message) {
   const p5 = document.createElement('p')
 
   delete message.transaction_id_for_signature
-  message.message = "response_signature_" + message.banker_id
+  message.message = "response-signature-" + message.banker_id
   message.transaction_id = signedTX
 
   bankerMessageSignTxBody.innerHTML = ''
@@ -1123,7 +1132,65 @@ function bankerSignTransaction(message) {
     // bankerMessage.classList.add('hidden')
     console.log("close sign response message")
   }, false);
-}
+};
+
+
+ipcRenderer.on('response:banker-signature', (e, message) => {
+  console.log("response:banker-signature: ", message)
+
+  alertSuccess("Banker signature successfully updated.")
+
+  ownerMessageSignRequest.classList.remove('hidden')
+  importArea.classList.add('hidden')
+
+  let ownerMessageSignRequestBody = document.getElementById('owner-message-sign-request-body')
+  let signResponseTitle = document.getElementById('sign-request-title')
+  let buttonDiv = document.getElementById('owner-message-sign-request-close-button')
+  const div = document.createElement('div')
+  div.setAttribute('class', 'bg-white p-3 rounded-md text-black')
+
+  const p1 = document.createElement('p')
+  const p2 = document.createElement('p')
+  const p3 = document.createElement('p')
+  const p4 = document.createElement('pre')
+  const p5 = document.createElement('p')
+
+  ownerMessageSignRequestBody.innerHTML = ''
+
+  signResponseTitle.innerHTML = "Please copy the line below and send it to " + message.banker_email;
+  p1.innerHTML = USER.user_name + " is requesting for a withdrawal transaction from " + message.account_name;
+  p2.innerHTML = "Please copy the message inside and import in FSCB";
+  p3.innerHTML = "-----Begin fscb message-----";
+  p4.innerHTML = JSON.stringify(message, undefined, 2);
+  p5.innerHTML = "-----End fscb message-----";
+
+  p1.classList.add('my-1')
+  p4.classList.add('whitespace-pre-wrap', 'break-all')
+  div.appendChild(p1)
+  div.appendChild(p2)
+  div.appendChild(p3)
+  div.appendChild(p4)
+  div.appendChild(p5)
+
+  ownerMessageSignRequestBody.appendChild(div)
+
+
+  let closeButton = document.createElement('button')
+  closeButton.classList.add("inline-flex", "items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "absolute", "right-5", "mt-5", "text-white", "bg-orange-500", "rounded-lg", "focus:ring-4", "focus:ring-blue-200", "dark:focus:ring-orange-500", "hover:bg-orange-500")
+  closeButton.innerHTML = "Close"
+  closeButton.addEventListener("click", function() {
+    // bankerForm.classList.remove('hidden')
+    // bankersList.classList.remove('hidden')
+    // bankerMessage.classList.add('hidden')
+    console.log("close sign request message")
+  }, false);
+})
+
+ipcRenderer.on('withdrawal:ready-to-broadcast', (e, message) => {
+  console.log("withdrawal:ready-to-broadcast: ", message)
+})
+
+
 
 ipcRenderer.on('user:profile', (evt) => {
     const userProfile = document.getElementById('user-profile')
@@ -1333,7 +1400,7 @@ async function generateClaim(e) {
   if (userinputsum > unspentindexsum) {
     alertError("You are spending more than you have")
   }
-  
+
 }
 
 
