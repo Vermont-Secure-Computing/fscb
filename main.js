@@ -489,7 +489,7 @@ async function bankerSignatureResponse(message) {
                         "creator_name": message.creator_name,
                         "creator_email": message.creator_email,
                         "banker_name": next_banker.banker_name,
-                         "banker_email": next_banker.banker_email,
+                        "banker_email": next_banker.banker_email,
                         "transaction_id_for_signature": message.transaction_id,
                         "currency":message.currency
                       }
@@ -557,6 +557,17 @@ ipcMain.on('user:address', (e, options) => {
     console.log(e)
   }
 })
+
+ipcMain.on('getredeemscript:redeemscript', (e, options) => {
+  console.log("options script: ", options.script)
+  const accounts = JSON.parse(fs.readFileSync(homedir + "/data/data.json", "utf-8"))
+  const accountFilter = Object.values(accounts).filter(value => {
+    console.log(value);
+    return value.redeem_script === options.script;
+  });
+  console.log("account filter: ",JSON.stringify(accountFilter))
+  win.webContents.send('account:filterSig', JSON.stringify(accountFilter))
+});
 
 
 app.on('window-all-closed', () => {
