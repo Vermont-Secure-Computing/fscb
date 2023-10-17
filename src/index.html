@@ -147,7 +147,7 @@
             Account list
               <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
             <div id="accounts-list">
-              <table class="border-collapse border border-slate-400 text-left text-sm font-light text-black bg-white mt-2 ml-20 pl-96table-auto">
+              <table class="relative w-full border-collapse border border-slate-400 text-center text-sm font-light text-black bg-white mt-4">
                 <thead class="border-b pr-2 font-medium text-black dark:border-neutral-500">
                   <tr>
                     <th scope="col" class="border border-slate-500 px-6 py-2">Account Name</th>
@@ -395,16 +395,17 @@
             </div>
 
 
-            <table class="min-w-full text-left text-sm font-light mt-2">
-              <thead class="border-b font-medium dark:border-neutral-500">
-                <div before="List of Bankers" of Bankers class="before:content-[attr(before)] mt-24"></div><tr>
-                  <th scope="col" class="px-6 py-4">Name</th>
-                  <th scope="col" class="px-6 py-4">Email</th>
-                  <th scope="col" class="px-6 py-4">Public Key</th>
-                  <th scope="col" class="px-6 py-4">Currency</th>
+            <table class="relative w-full pl-96 flex-col border-collapse border border-slate-400 text-center text-sm font-light text-black bg-white mt-4">
+              <thead class="border-b font-medium dark:border-neutral-950">
+                <div before="List of Bankers" of Bankers class="before:content-[attr(before)] mt-20"></div><tr>
+                  <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-100"/>
+                  <th scope="col" class="px-6 py-2">Name</th>
+                  <th scope="col" class="px-6 py-2">Email</th>
+                  <th scope="col" class="px-6 py-2">Public Key</th>
+                  <th scope="col" class="px-6 py-2">Currency</th>
                 </tr>
               </thead>
-              <tbody id="bankers-list-body">
+              <tbody class="text-black bg-white" id="bankers-list-body">
               </tbody>
             </table>
 
