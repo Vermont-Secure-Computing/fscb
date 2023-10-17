@@ -463,7 +463,7 @@ async function bankerPubkeyResponse(evt) {
 async function bankerPubkeyRequest(evt) {
   if (fs.existsSync(homedir + "/data/user.json")) {
     const user = await JSON.parse(fs.readFileSync(homedir + "/data/user.json", "utf-8"))
-    console.log(user)
+    console.log("user log", user)
     evt.message = "response-pubkey"
     evt.pubkey = user.pubkey
     console.log(JSON.stringify(evt))
@@ -543,13 +543,13 @@ ipcMain.on("banker:addorsig", (e, options) => {
   e.preventDefault()
   // console.log(typeof(options))
   const banker = JSON.parse(options)
-  // console.log(banker)
-  if (banker.message === "request-pubkey") {
+  console.log(banker)
+  if (banker.message.includes("request-pubkey")) {
     bankerPubkeyRequest(banker)
-  }else if (banker.message === "response-pubkey") {
+  }else if (banker.message.includes("response-pubkey")) {
     // console.log("response pubkey")
     bankerPubkeyResponse(banker)
-  }else if (banker.message === "request-signature") {
+  }else if (banker.message.includes("request-signature")) {
     console.log("request signature")
     win.webContents.send('request:banker-signature', banker)
   } else if (banker.message.includes("response-signature")) {
