@@ -645,10 +645,10 @@ ipcRenderer.on('send:newBanker', function(e, evt) {
     let userName = USER.user_name
     let message = {
       "header": "free_state_central_bank",
-      "message": "request_pubkey",
+      "message": "request-pubkey",
       "creator_name": USER.user_name,
       "creator_email": USER.user_email,
-      "banker_id": 5,
+      "banker_id": evt.banker_id,
       "banker_name": evt.banker_name,
       "banker_email": evt.banker_email,
       "currency": evt.currency
@@ -1575,7 +1575,7 @@ function requestSignatureWindow(tx, account) {
   const p4 = document.createElement('p')
   p4.innerHTML = "-----Begin fscb message-----"
   const p5 = document.createElement('p')
-  p5.innerHTML = "{" + '"header":"free_state_central_bank,"'
+  p5.innerHTML = "{" + '"header":"free_state_central_bank",'
   const p6 = document.createElement('p')
   p6.innerHTML = '"message": "request-signature",'
   const p7 = document.createElement('p')
