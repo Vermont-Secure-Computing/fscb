@@ -937,7 +937,7 @@ function parseTextArea(e) {
     if (startIndex !== -1 && endIndex !== -1) {
         let jsonStr = jsonString.substring(startIndex, endIndex + 1);
         jsonStr = jsonStr.replace(/\s/g, " ")
-        console.log(typeof(jsonStr))
+        console.log("json str", jsonStr)
         ipcRenderer.send("banker:addorsig", jsonStr)
     }
 }
