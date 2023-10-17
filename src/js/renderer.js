@@ -947,23 +947,13 @@ BANKER
 -----Begin fscb message-----
 {"header": "free_state_central_bank",
 "message":"request-signature",
-<<<<<<< HEAD
-"id": "3607096450",
-"account_name": "more list contract",
+"id": "183698202",
+"contract_name": "Stargazer",
 "banker_id": "8",
 "creator_name": "Robert Gludo",
 "creator_email": "robert@email.com",
 "banker_name": "gripter",
 "banker_email": "gripter@email.com",
-=======
-"id": "183698202",
-"account_name": "Stargazer",
-"banker_id": "stargazer-robert@email.com-2797298723",
-"creator_name": "jon jon",
-"creator_email": "jon@email.com",
-"banker_name": "robert gludo",
-"banker_email": "robert@email.com",
->>>>>>> a225d8c (request signaturewindow)
 "transaction_id_for_signature":"0100000003658b21a68ca8f9fceb7c5051b53be3b46b88111f24648afebb6dd0bf144270780000000069522103417eb8968ac166dd9586f24fef4889fda053b251a886761cb9003d41fc3dd4ea2103577b26b2ced3512d76bc65efae1f32bee2b1fee422a146e5f59fa704d7c7f9de2102d25fb998eb19a2be9e33fdb62d0d779b9cf45f868fcf87988ad7682c0a1a611653ae00e1f5057ef7db4eb47c24191c2f650fdb4361ce932a2f7f9cac8f49a881a0ca5c96471d0000000069522103417eb8968ac166dd9586f24fef4889fda053b251a886761cb9003d41fc3dd4ea2103577b26b2ced3512d76bc65efae1f32bee2b1fee422a146e5f59fa704d7c7f9de2102d25fb998eb19a2be9e33fdb62d0d779b9cf45f868fcf87988ad7682c0a1a611653ae00e1f505627b5a06e8521614c0886d167bff911a5a137c5ce8ce538954b835ba0a5ce6c30000000069522103417eb8968ac166dd9586f24fef4889fda053b251a886761cb9003d41fc3dd4ea2103577b26b2ced3512d76bc65efae1f32bee2b1fee422a146e5f59fa704d7c7f9de2102d25fb998eb19a2be9e33fdb62d0d779b9cf45f868fcf87988ad7682c0a1a611653ae00c2eb0b01c041c817000000001976a914aac6a113dc48cd1a26dd55c68323bb4ec68f9b0f88ac00000000",
 "currency":"woodcoin"}
 -----End fscb message-----
@@ -976,7 +966,7 @@ BANKER
   "header": "free_state_central_bank",
   "message": "response-signature-stargazer-robert@email.com-2797298723",
   "id": "3607096450",
-  "account_name": "more list contract",
+  "contract_name": "more list contract",
   "banker_id": "8",
   "creator_name": "Robert Gludo",
   "creator_email": "robert@email.com",
@@ -1135,7 +1125,7 @@ function bankerSignTransaction(message) {
   bankerMessageSignTxBody.innerHTML = ''
 
   signResponseTitle.innerHTML = "Please copy the line below and send it to " + message.creator_email;
-  p1.innerHTML = USER.user_name + " response for your withdrawal signature request for " + message.account_name;
+  p1.innerHTML = USER.user_name + " response for your withdrawal signature request for " + message.contract_name;
   p2.innerHTML = "Please copy the message inside and import in FSCB";
   p3.innerHTML = "-----Begin fscb message-----";
   p4.innerHTML = JSON.stringify(message, undefined, 2);
@@ -1187,7 +1177,7 @@ ipcRenderer.on('response:banker-signature', (e, message) => {
   ownerMessageSignRequestBody.innerHTML = ''
 
   signResponseTitle.innerHTML = "Please copy the line below and send it to " + message.banker_email;
-  p1.innerHTML = USER.user_name + " is requesting for a withdrawal transaction from " + message.account_name;
+  p1.innerHTML = USER.user_name + " is requesting for a withdrawal transaction from " + message.contract_name;
   p2.innerHTML = "Please copy the message inside and import in FSCB";
   p3.innerHTML = "-----Begin fscb message-----";
   p4.innerHTML = JSON.stringify(message, undefined, 2);
@@ -1469,10 +1459,10 @@ async function generateClaim(e) {
       let output = outputs[i]
         console.log("output: ", output)
       if(output.script.chunks.length==2 && output.script.chunks[0]==106){ // OP_RETURN
-  
+
         var data = Crypto.util.bytesToHex(output.script.chunks[1]);
         var dataascii = hex2ascii(data);
-  
+
         if(dataascii.match(/^[\s\d\w]+$/ig)){
           data = dataascii;
         }
@@ -1490,7 +1480,7 @@ async function generateClaim(e) {
         script.innerHTML = Crypto.util.bytesToHex(output.script.buffer)
         script.setAttribute('width', '45%')
       } else {
-  
+
         var addr = '';
         if(output.script.chunks.length==5){
           addr = coinjs.scripthash2address(Crypto.util.bytesToHex(output.script.chunks[2]));
@@ -1502,7 +1492,7 @@ async function generateClaim(e) {
           addr = coinjs.scripthash2address(Crypto.util.bytesToHex(output.script.chunks[1]));
           coinjs.pub = pub;
         }
-  
+
         console.log("address: ", addr)
         console.log("amount: ", (output.value/100000000).toFixed(8))
         console.log("script: ", Crypto.util.bytesToHex(output.script.buffer))
@@ -1526,12 +1516,12 @@ async function generateClaim(e) {
     const generateButton = document.getElementById('generate-request-signature-message')
     generateButton.addEventListener('click', function() {requestSignatureWindow(txRedeemTransaction, accountSigFilter)}, false)
   }
-  
+
 
   // if (userinputsum > unspentindexsum) {
   //   alertError("You are spending more than you have")
   // }
-  
+
 }
 
 function requestSignatureWindow(tx, account) {
@@ -1554,7 +1544,7 @@ function requestSignatureWindow(tx, account) {
   const p1 = document.createElement('p')
   p1.innerHTML = "Please copy the line below and send it to" + " " + accountParse[0].bankers[0].banker_email
   const p2 = document.createElement('p')
-  p2.innerHTML = accountParse[0].creator_name + " is requesting for your banker signature at this " + accountParse[0].contract_name 
+  p2.innerHTML = accountParse[0].creator_name + " is requesting for your banker signature at this " + accountParse[0].contract_name
   messageSignature.appendChild(p1)
   messageSignature.appendChild(br)
   messageSignature.appendChild(br)
