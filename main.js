@@ -484,7 +484,7 @@ async function bankerSignatureResponse(message) {
                         "header": "free_state_central_bank",
                         "message":"request-signature",
                         "id": message.id,
-                        "account_name": message.account_name,
+                        "contract_name": message.contract_name,
                         "banker_id": next_banker.banker_id,
                         "creator_name": message.creator_name,
                         "creator_email": message.creator_email,
