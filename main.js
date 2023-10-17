@@ -369,6 +369,34 @@ ipcMain.on('balance:api', (e, options) => {
   }
 })
 
+
+ipcMain.on('withdrawal:api', (e, txid) => {
+  console.log("ipc main withdrawal txid: ", txid)
+  try {
+    const request = https.request(`https://api.logbin.org/api/broadcast/r?transaction=${txid}`, (response) => {
+      console.log("withdrawal response")
+      let data = '';
+      response.on('data', (chunk) => {
+          data = data + chunk.toString();
+      });
+
+      response.on('end', async () => {
+          const body = await JSON.parse(data);
+          console.log("withdrawal response message: ", body)
+          win.webContents.send('withdrawal:broadcast-response', body)
+      });
+   })
+
+    request.on('error', (error) => {
+        console.log('An error', error);
+        win.webContents.send('withdrawal:broadcast-response', body)
+    });
+    request.end()
+  } catch(e) {
+    console.log("error : ", e)
+  }
+})
+
 ipcMain.on('unspent:api', (e, address) => {
   console.log("ipc main address: ", address)
   try {
@@ -473,6 +501,7 @@ async function bankerSignatureResponse(message) {
                 // check number of signatures needed
                 if (account.signatures.length == account.signature_nedded) {
                   console.log("ready to broadcast")
+                  win.webContents.send('withdrawal:ready-to-broadcast', message)
                 } else {
                   console.log("request signature to next banker")
                   for (const [index, banker] of account.bankers.entries()) {
