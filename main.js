@@ -434,12 +434,13 @@ ipcMain.on('get:user', async() => {
 })
 
 async function bankerPubkeyResponse(evt) {
-  // console.log(evt)
+  console.log(evt)
   if (fs.existsSync(homedir + "/data/banker.json")) {
     const allbankers = await JSON.parse(fs.readFileSync(homedir + "/data/banker.json", "utf-8"))
-    // console.log(typeof(allbankers))
+    console.log("got all bankers")
     for (const i in allbankers) {
-      if (allbankers[i].id === evt.id) {
+      console.log("i: ", i)
+      if (allbankers[i].banker_id == evt.banker_id) {
         allbankers[i].pubkey = evt.pubkey
         const wData = JSON.stringify(allbankers, null, 2)
         console.log(wData)
@@ -455,7 +456,7 @@ async function bankerPubkeyResponse(evt) {
       }
     }
   }else {
-    console.log()
+    console.log("err in adding banker pubkey")
   }
 }
 
