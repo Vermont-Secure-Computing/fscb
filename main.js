@@ -569,6 +569,35 @@ ipcMain.on('getredeemscript:redeemscript', (e, options) => {
   win.webContents.send('account:filterSig', JSON.stringify(accountFilter))
 });
 
+ipcMain.on('signature:encode', (e, options) => {
+  console.log(options)
+  // const accounts = JSON.parse(fs.readFileSync(homedir + "/data/data.json", "utf-8"))
+  // const accountFilter = Object.values(accounts).filter(value => {
+  //   console.log(value);
+  //   return value.id === options;
+  // });
+  // console.log("account filter: ",JSON.stringify(accountFilter))
+  const path = "data"
+  const fileName = "data.json"
+  fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
+    jdata = JSON.parse(jdata);
+    //Step 3: append contract variable to list
+    jdata["contract" + options.id] = options.contract
+    // console.log(jdata);
+    const wData = JSON.stringify(jdata, null, 2)
+    fs.writeFile(homedir + "/" + path +"/"+ fileName, wData, function writeJson() {
+      if (err) {
+        console.log(err)
+      } else {
+        console.log("successfully updated");
+        // const accounts = fs.readFileSync(homedir + "/data/data.json", "utf-8")
+        // win.webContents.send("list:file", accounts)
+        // win.webContents.send("send:newAccountSuccess", {})
+      }
+    })
+  });
+})
+
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()

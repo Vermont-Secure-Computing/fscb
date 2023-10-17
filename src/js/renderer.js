@@ -960,23 +960,6 @@ BANKER
 
 
 
-<<<<<<< HEAD
------Begin fscb message-----
-{
-  "header": "free_state_central_bank",
-  "message": "response-signature-stargazer-robert@email.com-2797298723",
-  "id": "3607096450",
-  "contract_name": "more list contract",
-  "banker_id": "8",
-  "creator_name": "Robert Gludo",
-  "creator_email": "robert@email.com",
-  "banker_name": "gripter",
-  "banker_email": "gripter@email.com",
-  "currency": "woodcoin",
-  "transaction_id": "0100000003658b21a68ca8f9fceb7c5051b53be3b46b88111f24648afebb6dd0bf14427078000000006c004c69522103417eb8968ac166dd9586f24fef4889fda053b251a886761cb9003d41fc3dd4ea2103577b26b2ced3512d76bc65efae1f32bee2b1fee422a146e5f59fa704d7c7f9de2102d25fb998eb19a2be9e33fdb62d0d779b9cf45f868fcf87988ad7682c0a1a611653ae00e1f5057ef7db4eb47c24191c2f650fdb4361ce932a2f7f9cac8f49a881a0ca5c96471d000000006c004c69522103417eb8968ac166dd9586f24fef4889fda053b251a886761cb9003d41fc3dd4ea2103577b26b2ced3512d76bc65efae1f32bee2b1fee422a146e5f59fa704d7c7f9de2102d25fb998eb19a2be9e33fdb62d0d779b9cf45f868fcf87988ad7682c0a1a611653ae00e1f505627b5a06e8521614c0886d167bff911a5a137c5ce8ce538954b835ba0a5ce6c3000000006c004c69522103417eb8968ac166dd9586f24fef4889fda053b251a886761cb9003d41fc3dd4ea2103577b26b2ced3512d76bc65efae1f32bee2b1fee422a146e5f59fa704d7c7f9de2102d25fb998eb19a2be9e33fdb62d0d779b9cf45f868fcf87988ad7682c0a1a611653ae00c2eb0b01c041c817000000001976a914aac6a113dc48cd1a26dd55c68323bb4ec68f9b0f88ac00000000"
-}
------End fscb message-----
-=======
   BANKER message to OWNER
 
   {"header": free_state_central_bank
@@ -991,7 +974,6 @@ BANKER
   }
   "contract_id”: 2
   -----End fscb message-----
->>>>>>> a225d8c (request signaturewindow)
 **/
 
 /**
@@ -1544,16 +1526,61 @@ function requestSignatureWindow(tx, account) {
   const p1 = document.createElement('p')
   p1.innerHTML = "Please copy the line below and send it to" + " " + accountParse[0].bankers[0].banker_email
   const p2 = document.createElement('p')
-  p2.innerHTML = accountParse[0].creator_name + " is requesting for your banker signature at this " + accountParse[0].contract_name
+  p2.innerHTML = accountParse[0].creator_name + " is requesting for your banker signature at this " + accountParse[0].contract_name 
+  const p3 = document.createElement('p')
+  p3.innerHTML = "Please copy the message inside and import in FSCB"
+  const p4 = document.createElement('p')
+  p4.innerHTML = "-----Begin fscb message-----"
+  const p5 = document.createElement('p')
+  p5.innerHTML = "{" + '"header":"free_state_central_bank,"'
+  const p6 = document.createElement('p')
+  p6.innerHTML = '"message": "request-signature",'
+  const p7 = document.createElement('p')
+  p7.innerHTML = '"id":' + '"' + accountParse[0].id + '",'
+  const p8 = document.createElement('p')
+  p8.innerHTML = '"banker_id":' + accountParse[0].bankers[0].banker_id + ','
+  const p9 = document.createElement('p')
+  p9.innerHTML = '"creator_name":' + '"' + accountParse[0].creator_name + '",'
+  const p10 = document.createElement('p')
+  p10.innerHTML = '"creator_email":' + '"' + accountParse[0].creator_email + '",'
+  const p11 = document.createElement('p')
+  p11.innerHTML = '"banker_name":' + '"' + accountParse[0].bankers[0].banker_name + '",'
+  const p12 = document.createElement('p')
+  p12.innerHTML = '"banker_email":' + '"' + accountParse[0].bankers[0].banker_email + '",'
+  const p13 = document.createElement('p')
+  p13.innerHTML = '"transaction_id_for_signature":' + '"' + tx + '",'
+  const p14 = document.createElement('p')
+  p14.innerHTML = '"currency":' + '"' + accountParse[0].currency + '"}'
+  const p15 = document.createElement('p')
+  p15.innerHTML = '"contract_name":' + '"' + accountParse[0].contract_name + '",'
   messageSignature.appendChild(p1)
   messageSignature.appendChild(br)
   messageSignature.appendChild(br)
   messageSignature.appendChild(p2)
+  messageSignature.appendChild(p3)
+  messageSignature.appendChild(p4)
+  messageSignature.appendChild(p5)
+  messageSignature.appendChild(p6)
+  messageSignature.appendChild(p7)
+  messageSignature.appendChild(p15)
+  messageSignature.appendChild(p8)
+  messageSignature.appendChild(p9)
+  messageSignature.appendChild(p10)
+  messageSignature.appendChild(p11)
+  messageSignature.appendChild(p12)
+  messageSignature.appendChild(p13)
+  messageSignature.appendChild(p14)
+  const data = {
+    "banker_id": accountParse[0].bankers[0].banker_id,
+    "date_requested": Date.now(),
+    "date_signed": null,
+    "status": "PENDING",
+    "transaction_id": ""
+  }
+  accountParse[0].signatures.push(data) 
+  ipcRenderer.send('signature:encode', {"id": accountParse[0].contract_id, "contract": accountParse[0]})
+  // console.log("new account parse", JSON.stringify(accountParse[0]))
 }
-
-
-
-
 
 
 
