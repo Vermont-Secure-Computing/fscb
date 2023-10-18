@@ -162,7 +162,7 @@ async function saveAndCreateText(e) {
     // })
         bankersMerge.push(innerMultiKey[i].dataset.value)
     }
-    console.log["banker merge ", bankersMerge]
+    console.log("banker merge ", bankersMerge)
     const keys = bankersMerge;
     const multisig =  coinjs.pubkeys2MultisigAddress(keys, sigSendNumber);
     console.log("multisig ", multisig)
