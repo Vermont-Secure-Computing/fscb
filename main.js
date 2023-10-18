@@ -163,6 +163,7 @@ ipcMain.on("message:contractnew", (e, options) => {
   try {
     fs.mkdir(homedir + "/" + path, { recursive: true}, function (err) {
       if (err) return err;
+      // check if data.json is existing
       if (fs.existsSync(jsonFile)) {
         fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
           jdata = JSON.parse(jdata);
@@ -186,7 +187,7 @@ ipcMain.on("message:contractnew", (e, options) => {
           ["contract" + getIdNumber]: data
         }
         const sData = JSON.stringify(addContract, null, 2)
-        fs.writeFile(path +"/"+ fileName
+        fs.writeFile(homedir + "/" + path +"/"+ fileName
           , sData, function writeJson() {
           if (err)  {
             console.log(err)
@@ -196,6 +197,7 @@ ipcMain.on("message:contractnew", (e, options) => {
 
             win.webContents.send("list:file", accounts)
             win.webContents.send("send:newAccountSuccess", {})
+
           }
         });
       }
