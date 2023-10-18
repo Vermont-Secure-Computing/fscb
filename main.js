@@ -529,7 +529,26 @@ async function bankerSignatureResponse(message) {
                         "currency":message.currency
                       }
                       console.log("new message: ", newMessage)
-                      win.webContents.send('response:banker-signature', newMessage)
+
+                      // Create new signature object in the account signature array
+                      const newSignatory = {
+                        "banker_id": next_banker.banker_id,
+                        "date_requested": Date.now(),
+                        "date_signed": null,
+                        "status": "PENDING",
+                        "transaction_id": ""
+                      }
+                      account.signatures.push(newSignatory)
+                      const accountsNewSignatory = JSON.stringify(accounts, null, 2)
+                      fs.writeFile(homedir + "/data/data.json"
+                        , accountsNewSignatory, function writeJson(err) {
+                        if (err)  {
+                          console.log("updating signatures for next banker to sign error: ", err)
+                        } else {
+                          console.log("signature updated for next banker to sign: ")
+                          win.webContents.send('response:banker-signature', newMessage)
+                        }
+                      })
                     }
                   }
                 }
