@@ -83,7 +83,7 @@ tabTogglers.forEach(function(toggler) {
         }
         if (tabName === "#addbanker") {
             getBanker()
-            //getUserData()
+            getUserData()
         }
         let tabContents = document.querySelector("#tab-contents");
 
