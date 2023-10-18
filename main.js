@@ -572,8 +572,8 @@ ipcMain.on('user:address', (e, options) => {
     "user_email": options.userEmail,
     "address": options.userAddress.address,
     "pubkey": options.userAddress.pubkey,
-    "wif": options.userAddress.wif,
-    "privkey": options.userAddress.privkey
+    "privkey": options.userAddress.wif,
+    "wif": options.userAddress.privkey
   }
   try {
     // const fileName = "user.json"
