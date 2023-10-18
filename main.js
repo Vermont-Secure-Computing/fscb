@@ -263,13 +263,16 @@ ipcMain.on('message:addBanker', (e, options) => {
 function readBankersFile() {
   const fileName = "banker.json"
   const path = "data"
-  fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
-    jdata = JSON.parse(jdata);
-    //Step 3: append contract variable to list
-    // console.log(jdata);
-    // const wData = JSON.stringify(jdata, null, 2)
-    win.webContents.send('send:bankers', jdata)
-  })
+  if (fs.existsSync(homedir + "/" + path +"/"+ fileName)) {
+    fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
+      console.log("jdata: ", jdata)
+      jdata = JSON.parse(jdata);
+      //Step 3: append contract variable to list
+      // console.log(jdata);
+      // const wData = JSON.stringify(jdata, null, 2)
+      win.webContents.send('send:bankers', jdata)
+    })
+  }
   return
 }
 
