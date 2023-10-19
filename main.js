@@ -549,8 +549,10 @@ async function bankerSignatureResponse(message) {
                           win.webContents.send('response:banker-signature', newMessage)
                         }
                       })
-                    }
-                  }
+
+                      break
+                    } // end of if statement
+                  } // end of for loop
                 }
               }
             });

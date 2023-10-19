@@ -1082,7 +1082,7 @@ function bankerSignTransaction(message) {
 
   const tx = coinjs.transaction()
   const scriptToSign = tx.deserialize(message.transaction_id_for_signature)
-  const signedTX = scriptToSign.sign(USER.privkey, "ALL")
+  const signedTX = scriptToSign.sign(USER.privkey, 1)
 
   console.log("signed: ", signedTX)
 
@@ -1427,7 +1427,7 @@ async function generateClaim(e) {
       userunspentindex = i
       console.log(getunspent[i].children[3].value)
       unspentindexsum += getunspent[i].children[3].value
-      tx.addinput(getunspent[i].children[0].value, getunspent[i].children[1].value, getunspent[i].children[2].value, getunspent[i].children[3].value, null)
+      tx.addinput(getunspent[i].children[0].value, getunspent[i].children[1].value, getunspent[i].children[2].value, null)
     }
     // if(i === getunspent.length -1) {
     //   tx.addoutput(address, amountWithdraw)
@@ -1456,7 +1456,8 @@ async function generateClaim(e) {
     ipcRenderer.send('getredeemscript:redeemscript', {"script": getunspent[0].children[4].value});
     const deserializeTx = tx.deserialize(tx.serialize())
     console.log("deserialize tx: ", deserializeTx)
-
+    console.log("txRedeemTransaction: ", txRedeemTransaction)
+    console.log("tx size: ", tx.size())
     let inputs = deserializeTx.ins
     let outputs = deserializeTx.outs
 
