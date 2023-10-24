@@ -571,7 +571,11 @@ ipcMain.on("banker:addorsig", (e, options) => {
   const banker = JSON.parse(options)
   console.log(banker)
   if (banker.message.includes("request-pubkey")) {
-    bankerPubkeyRequest(banker)
+    //bankerPubkeyRequest(banker)
+    /**
+      Generate new keys for the account
+    **/
+    win.webContents.send('request:banker-pubkey', banker)
   }else if (banker.message.includes("response-pubkey")) {
     // console.log("response pubkey")
     bankerPubkeyResponse(banker)
@@ -588,13 +592,14 @@ ipcMain.on("banker:addorsig", (e, options) => {
 })
 
 ipcMain.on('user:address', (e, options) => {
+  console.log("user:address: ", options)
   let data = {
     "user_name": options.userName,
     "user_email": options.userEmail,
     "address": options.userAddress.address,
-    "pubkey": options.userAddress.pubkey,
-    "privkey": options.userAddress.wif,
-    "wif": options.userAddress.privkey
+    "pubkey": options.userAddress.pubkey, // pubkey compressed 66 chars
+    "privkey": options.userAddress.wif, // privkey 52 chars base58
+    "wif": options.userAddress.privkey // privkey hex 64 chars
   }
   try {
     // const fileName = "user.json"

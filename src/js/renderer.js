@@ -44,6 +44,7 @@ let bankerVerifyWithdrawal = document.getElementById('banker-verify-withdrawal')
 let bankerMessageSignTx = document.getElementById('banker-message-signtx-container')
 let ownerMessageSignRequest = document.getElementById('owner-message-sign-request-container')
 let ownerWithdrawalBroadcast = document.getElementById('owner-withdrawal-broadcast-container')
+let bankerGeneratePrivkey = document.getElementById('banker-privkey-generation')
 
 
 
@@ -59,7 +60,6 @@ let openTab
 let selectedAccountDetails = {}
 let USER = {}
 let BANKERS
-
 
 getUserData()
 tabTogglers.forEach(function(toggler) {
@@ -1272,7 +1272,70 @@ async function createUserProfile(e) {
     })
 }
 
-ipcRenderer.on('response:pubkey', (e, evt) => {
+
+function isKeyValid(hex) {
+  var key = hex.toString();
+  var isValidFormat = /^[0-9a-fA-F]{64}$/.test(key)
+  return isValidFormat
+}
+
+
+ipcRenderer.on('request:banker-pubkey', async(e, message) => {
+    importArea.classList.add('hidden')
+    bankerGeneratePrivkey.classList.remove('hidden')
+
+    coinjs.compressed = true
+    const userAddress = await coinjs.newKeys()
+    console.log(userAddress)
+
+    let privkeyHexInput = document.getElementById('pivkey-hex')
+    let privkeyWifInput = document.getElementById('pivkey-wif')
+    let pubkeyInput = document.getElementById('pubkey-compressed')
+    let accountOwner = document.getElementById('account-owner-name')
+    let accountOwner2 = document.getElementById('account-owner-name2')
+
+    privkeyHexInput.value = userAddress.privkey
+    privkeyWifInput.value = userAddress.wif
+    pubkeyInput.value = userAddress.pubkey
+    accountOwner.innerHTML = message.creator_name
+    accountOwner2.innerHTML = message.creator_name
+
+    let generatePrivkey = document.getElementById('banker-generate-privkey')
+    let finalizeKeys = document.getElementById('banker-finalize-keys')
+
+    generatePrivkey.addEventListener('click', async() => {
+      let updatedHex = privkeyHexInput.value
+      let isValid = isKeyValid(updatedHex)
+      if (!isValid) {
+        alertError("The text you entered is not a valid private key")
+        return
+      }
+
+      coinjs.compressed = true
+      const newKeys = await coinjs.newKeysFromHex(updatedHex)
+
+      privkeyHexInput.value = newKeys.privkey
+      privkeyWifInput.value = newKeys.wif
+      pubkeyInput.value = newKeys.pubkey
+
+      return
+
+    })
+
+    finalizeKeys.addEventListener('click', () => {
+
+      let pubkey = pubkeyInput.value
+      message.message = "response-pubkey"
+      message.pubkey = pubkey
+
+      bankerGeneratePrivkey.classList.add('hidden')
+      finalizeNewKeys(message)
+    })
+
+    return
+})
+
+function finalizeNewKeys(evt){
     // const accountUser = JSON.parse(evt)
     console.log(evt)
     const textBody = document.getElementById('text-show')
@@ -1290,18 +1353,19 @@ ipcRenderer.on('response:pubkey', (e, evt) => {
     const p1 = document.createElement('p')
     const p2 = document.createElement('p')
     const p3 = document.createElement('p')
-    const p4 = document.createElement('p')
+    const p4 = document.createElement('pre')
     const p5 = document.createElement('p')
     textId.classList.remove('hidden')
     textImport.classList.add('hidden')
     textImportArea.value = ''
     p.innerHTML = "Please copy the line below and send it to " + evt.creator_name;
-    p1.innerHTML = evt.banker_name + "public key response to" + evt.creator_name + "request";
+    p1.innerHTML = evt.banker_name + " public key response to " + evt.creator_name + " request";
     p2.innerHTML = "Please copy the message inside and import in FSCB";
     p3.innerHTML = "-----Begin fscb message-----";
-    p4.innerHTML = JSON.stringify(evt);
+    p4.innerHTML = JSON.stringify(evt, undefined, 2);
     p5.innerHTML = "-----End fscb message-----";
     // p4.setAttribute("class", "w-10")
+    p4.classList.add('whitespace-pre-wrap', 'break-all')
     div.appendChild(p)
     div.appendChild(br)
     div.appendChild(p1)
@@ -1313,7 +1377,8 @@ ipcRenderer.on('response:pubkey', (e, evt) => {
     textBody.appendChild(button)
     const importAgain = document.getElementById('import-again-button')
     importAgain.addEventListener('click', importAgainShow)
-});
+};
+
 
 //
 // When the banker's pubkey is successfully added, clear the textarea
