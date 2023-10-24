@@ -134,6 +134,34 @@
             </div>
             <!--End of Owners view - Signature complete - Ready to broadcast-->
 
+            <!--Bankers view - Private key generation-->
+            <div class="hidden p-4 text-xl text-white font-bold" id="banker-privkey-generation">
+              Import Text
+              <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
+              <div>
+                <p>Private Key Hexadecimal Format (64 characters [0-9A-F])</p>
+                <div>
+                  <input type="text" id="pivkey-hex" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  <button id="banker-generate-privkey" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Generate</button>
+                </div>
+
+                <p>WIF Private Key</p>
+                <input type="text" id="pivkey-wif" disabled class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+
+                <input type="text" id="pubkey-compressed" hidden>
+
+                <p>WARNING</p>
+                <p>You have been asked by <span id="account-owner-name"></span> to manage a private key as a banker. If you don't know what this means, you should tell <span id="account-owner-name2"></span> you politely refuse.</p>
+
+                <p>PRIVATE KEY</p>
+                <p>Please change it as you see fit and write it in stone as appropriate.
+                When you are satisfied with the private key, and have written it and saved it redundantly, press "finalize"</p>
+
+                <button id="banker-finalize-keys" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Finalize</button>
+              </div>
+            </div>
+            <!--End of Bankers View - Private key generation-->
+
             <!--Bankers view - Verify Withdrawal-->
             <div class="hidden p-4 text-xl text-white font-bold" id="banker-verify-withdrawal">
               Verify Withdrawal
