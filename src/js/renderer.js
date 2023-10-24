@@ -1072,17 +1072,31 @@ ipcRenderer.on('request:banker-signature', (e, message) => {
   }
 
   let signButton = document.getElementById("banker-sign-button")
-  signButton.addEventListener('click', () => {bankerSignTransaction(message)})
+  signButton.addEventListener('click', () => {
+
+    let pk = document.getElementById('banker-pivkey-for-signature')
+    let privkey = pk.value
+    if (privkey) {
+        if (isKeyValid(privkey)) {
+          bankerSignTransaction(message, privkey)
+        } else {
+          alertError('The text you entered is not a valid private key.')
+        }
+    } else {
+      alertError('Please enter your private key for this account.')
+    }
+
+  })
 
 })
 
-function bankerSignTransaction(message) {
+function bankerSignTransaction(message, privkey) {
   console.log("sign tx: ", message.transaction_id_for_signature)
-  console.log("user privkey: ", USER.privkey)
+  console.log("user privkey: ", privkey)
 
   const tx = coinjs.transaction()
   const scriptToSign = tx.deserialize(message.transaction_id_for_signature)
-  const signedTX = scriptToSign.sign(USER.privkey, 1)
+  const signedTX = scriptToSign.sign(privkey, 1)
 
   console.log("signed: ", signedTX)
 
