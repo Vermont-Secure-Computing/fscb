@@ -1076,9 +1076,11 @@ ipcRenderer.on('request:banker-signature', (e, message) => {
 
     let pk = document.getElementById('banker-pivkey-for-signature')
     let privkey = pk.value
+    // console.log("pk: ", privkey)
+    // console.log("is valid: ", isKeyValid(privkey))
     if (privkey) {
-        if (isKeyValid(privkey)) {
-          bankerSignTransaction(message, privkey)
+        if (isWifKeyValid(privkey)) {
+        bankerSignTransaction(message, privkey)
         } else {
           alertError('The text you entered is not a valid private key.')
         }
@@ -1290,6 +1292,12 @@ async function createUserProfile(e) {
 function isKeyValid(hex) {
   var key = hex.toString();
   var isValidFormat = /^[0-9a-fA-F]{64}$/.test(key)
+  return isValidFormat
+}
+
+function isWifKeyValid(hex) {
+  var key = hex.toString();
+  var isValidFormat = /^[0-9a-zA-Z]{52}$/.test(key)
   return isValidFormat
 }
 
