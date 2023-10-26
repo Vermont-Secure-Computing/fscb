@@ -20,8 +20,8 @@ const creatorName = document.getElementById("creator-name");
 const creatorEmail = document.getElementById("creator-email");
 const creatorAddress = document.getElementById("creator-address");
 const minusButton = document.getElementById('address-amount');
-const addMinus = document.getElementsByClassName('pubkeyAdd')[0]
-console.log(addMinus)
+//const addMinus = document.getElementsByClassName('pubkeyAdd')[0]
+const withdrawalAddBtn = document.getElementById('withdrawal-plus-icon')
 const getbankerClick = document.getElementsByClassName('getbankerClick')[0]
 const getListClick = document.getElementsByClassName('getlistClick')[0]
 
@@ -47,6 +47,13 @@ let ownerWithdrawalBroadcast = document.getElementById('owner-withdrawal-broadca
 let bankerGeneratePrivkey = document.getElementById('banker-privkey-generation')
 
 
+/**
+  Withdrawal screen
+**/
+let withdrawalFee = document.getElementById("withdraw-fee")
+let donateBtn = document.getElementById("donate-button")
+
+
 
 // console.log(getListClick)
 // const accountList = document.getElementById('accounts-list');
@@ -60,6 +67,17 @@ let openTab
 let selectedAccountDetails = {}
 let USER = {}
 let BANKERS
+
+/**
+  Withdrawal vars
+**/
+let unspentAmountTotal = 0
+let userInputAmountTotal = 0
+let TOTAL_AMOUNT_TO_WITHDRAW = 0
+let CHANGE_ADDRESS
+let CHANGE_AMOUNT
+let DONATION_ADDRESS = 'WhAiyvrEhG6Ty9AkTb1hnUwbT3PubdWkAg'
+let WITHDRAWAL_FEE = 0.01
 
 getUserData()
 tabTogglers.forEach(function(toggler) {
@@ -294,8 +312,12 @@ function outputsAddress(e) {
 
 }
 
+/**
+  Owner view - Account withdrawal
+**/
 function accountWithdrawal(address){
   console.log("withdrawal: ", address.address)
+  CHANGE_ADDRESS = address.address
   ipcRenderer.send("unspent:api", address.address)
   const script = coinjs.script()
   const addressScript = script.decodeRedeemScript(address.redeemscript)
@@ -307,19 +329,20 @@ function accountWithdrawal(address){
   let unspentdiv = document.getElementById('list-unspent')
   // let getuserinput = document.getElementsByClassName('user-input-amount')
   // console.log("get user input", getuserinput)
-  let unspentAmountTotal = 0
-  let userInputAmountTotal = 0
+  // let unspentAmountTotal = 0
+  // let userInputAmountTotal = 0
   let tx = coinjs.transaction();
   accountDetails.classList.add("hidden")
   accountWithdrawal.classList.remove("hidden")
   accountActions.classList.add("hidden")
+
   ipcRenderer.on('unspent:address', (e, evt) => {
     // const listParse = JSON.parse(evt)
     const listP = evt;
     // console.log(typeof(evt))
     for (let i = 0; i < listP.length; i++) {
         console.log(listP[i].txid)
-        unspentAmountTotal += listP[i].amount
+        unspentAmountTotal += listP[i].amount / 100000000
         // let row = tableBody.insertRow()
         // let transactionId = row.insertCell(0)
         // transactionId.innerHTML = listP[i].txid.substring(0,30)+"..."
@@ -334,9 +357,9 @@ function accountWithdrawal(address){
         // console.log("tx log test: ", tx.serialize())
         let div = document.createElement('div')
         div.setAttribute('id', 'inner-unspent')
-        div.setAttribute('class', 'grid md:grid-cols-3 gap-3')
+        div.setAttribute('class', 'grid md:grid-cols-4 gap-3')
         let input1 = document.createElement('input')
-        input1.setAttribute('class', 'txid-withdraw, text-black')
+        input1.setAttribute('class', 'col-span-2 txid-withdraw text-black')
         input1.setAttribute('id', 'txid-withdraw')
         input1.value = listP[i].txid
         let input2 = document.createElement('input')
@@ -350,9 +373,9 @@ function accountWithdrawal(address){
         input3.setAttribute('id', 'script-withdraw')
         input3.value = addressScript.redeemscript
         let input4 = document.createElement('input')
-        input4.setAttribute('class', 'text-black')
+        input4.setAttribute('class', 'col-span-1 text-black')
         input4.setAttribute('id', 'amount-withdraw')
-        input4.value = listP[i].amount
+        input4.value = listP[i].amount / 100000000
         let input5 = document.createElement('input')
         input5.setAttribute('class', 'hidden')
         input5.value = address.redeemscript
@@ -377,8 +400,42 @@ function accountWithdrawal(address){
         unspentdiv.appendChild(div)
     }
     console.log("total unspent: ", unspentAmountTotal)
+    withdrawalFee.value = unspentAmountTotal
   })
 }
+
+function amountOnInput(amount) {
+  if (!isNaN(amount)) {
+    withdrawalFee.value = unspentAmountTotal - (TOTAL_AMOUNT_TO_WITHDRAW + Number(amount))
+  }
+}
+
+function amountOnchange(amount) {
+
+  TOTAL_AMOUNT_TO_WITHDRAW += Number(amount)
+  withdrawalFee.value = unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW
+  // let change = unspentAmountTotal - amount
+  //
+  // if (change > WITHDRAWAL_FEE) {
+  //   CHANGE_AMOUNT = change - WITHDRAWAL_FEE
+  //   console.log("change: ", change)
+  //   console.log("withdrawal fee: ", WITHDRAWAL_FEE)
+  //   console.log("change amount: ", CHANGE_AMOUNT)
+  //   withdrawalFee.value = WITHDRAWAL_FEE
+  //   addOrDelete("change-address")
+  // }
+}
+
+function amountOnchangeSubtract(amount) {
+  TOTAL_AMOUNT_TO_WITHDRAW -= Number(amount)
+  withdrawalFee.value = unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW
+  console.log("amount to subtract: ", amount)
+  console.log("withdrawal fee: ", unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW)
+}
+
+let withdrawAmountInput = document.getElementById('withdraw-amount')
+withdrawAmountInput.addEventListener('input', () => {amountOnInput(withdrawAmountInput.value)})
+withdrawAmountInput.addEventListener('change', () => {amountOnchange(withdrawAmountInput.value)})
 
 function getAccountDetails(account){
   console.log("get account details: ", account)
@@ -458,94 +515,69 @@ function getAccountDetails(account){
 
 // })
 
-function addOrDelete(e) {
+function addDonationAddress() {
+  const addressInput = document.getElementById('withdraw-address')
+  if (addressInput.value) {
+    addOrDelete('donation-address')
+  } else {
+    addressInput.value = DONATION_ADDRESS
+  }
+}
+
+function addOrDelete(id) {
     console.log("click add or delete")
     const mainKey = document.getElementById('address-amount')
-    // let displayButton = document.querySelector("form button");
-    // // const bankers = document.querySelectorAll('.banker')
-    // // if (bankers.length >= 28 ) return;
-    // // innerKey.getElementsByClassName('green')[0]
-    // // const clone = '<div class="grid md:grid-cols-7 md:gap-6" id="multikeysInner">'+innerKey.innerHTML+'</div>'
-    // // mainKey.innerHTML += clone
-    // // document.getElementById('multikeys', 'img-anchor').dataset('./assets/imgs/minus.svg')
+
     let div = document.createElement('div');
-    div.setAttribute("class", "grid md:grid-cols-3 gap-2");
+    div.setAttribute("class", "grid md:grid-cols-4 gap-2");
     div.setAttribute('id', 'address-keys')
-    // // let input1 = document.createElement('input')
-    // // input1.setAttribute('class', 'col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name')
-    // // input1.setAttribute('placeholder', 'Bankers Name')
-    // // input1.setAttribute('required', '')
-    // // let input2 = document.createElement('input')
-    // // input2.setAttribute('class', 'col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email')
-    // // input2.setAttribute('placeholder', 'Bankers Email')
-    // // input2.setAttribute('required', '')
-    // let select = document.createElement('select')
-    // select.setAttribute('name', 'banker-name1')
-    // select.setAttribute('id', 'bankers-name')
-    // select.setAttribute('class', 'col-span-6 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500')
-    // let option = document.createElement('option')
-    // option.setAttribute('value', '')
-    // option.setAttribute('disabled', 'disabled')
-    // option.setAttribute('hidden', 'hidden')
-    // option.setAttribute('selected', 'selected')
-    // option.innerHTML = "Choose Banker"
-    // select.appendChild(option)
-    // // option.setAttribute('data-dept', 'Choose Banker')
-    // for (const key in bankersArray) {
-    //     const opt = bankersArray[key].banker_email
-    //     console.log(opt)
-    //     let option1 = document.createElement('option')
-    //     option1.textContent = opt;
-    //     option1.value = opt;
-    //     select.appendChild(option1)
-    // }
-    // let anchor = document.createElement('a')
-    // anchor.setAttribute('class', 'pubkeyRemove')
-    // let minus = document.createElement('object')
-    // minus.setAttribute('data', './images/minus.svg')
-    // minus.setAttribute('width', '50')
-    // minus.setAttribute('height', '50')
-    // minus.setAttribute('class', 'red')
-    // anchor.appendChild(minus)
-    // div.appendChild(select)
-    // // div.appendChild(input2)
-    // div.appendChild(anchor)
-    // mainKey.appendChild(div)
+
     let input1 = document.createElement('input')
-    input1.setAttribute('class', 'text-black col-span-1 mt-2')
+    input1.setAttribute('class', 'text-base text-black font-normal h-10 col-span-2 mt-2')
     input1.setAttribute('placeholder', 'Enter Address')
     let input2 = document.createElement('input')
-    input2.addEventListener('onchange', ()=> {console.log("amount: ", input2.value)})
-    input2.setAttribute('class', 'text-black col-span-1 mt-2 user-input-amount')
+    // input2.addEventListener('onchange', ()=> {console.log("amount: ", input2.value)})
+    input2.setAttribute('class', 'text-base text-black font-normal h-10 col-span-1 mt-2 user-input-amount')
     input2.setAttribute('placeholder', 'Enter Amount')
+
+    /**
+      Add event listener to the amount input
+    **/
+    input2.addEventListener('input', () => {amountOnInput(input2.value)})
+    input2.addEventListener('change', () => {amountOnchange(input2.value)})
+
+    if (id == "donation-address") {
+        input1.value = DONATION_ADDRESS
+    }
+
     let anchor = document.createElement('a')
-    anchor.setAttribute('class', 'pubkeyRemove')
-    let minus = document.createElement('object')
-    minus.setAttribute('data', './images/minus.svg')
+    anchor.setAttribute('class', 'red pubkeyRemove cursor-pointer')
+    //let minus = document.createElement('object')
+    let minus = document.createElement('img')
+    minus.setAttribute('src', './images/minus.svg')
     minus.setAttribute('width', '50')
     minus.setAttribute('height', '50')
-    minus.setAttribute('class', 'red')
-    anchor.appendChild(minus)
+    minus.setAttribute('class', 'red pubkeyRemove')
+
+
+
     div.appendChild(input1)
     div.appendChild(input2)
-    div.appendChild(anchor)
+    div.appendChild(minus)
     mainKey.appendChild(div)
+
+    minus.addEventListener('click', (e) => {
+      console.log('minus click')
+      deleteInput(e)
+      if (input2.value) amountOnchangeSubtract(input2.value)
+    })
 }
-
-function amountOnchange(amount) {
-  console.log('amount change: ', amount)
-}
-
-
-let withdrawAmountInput = document.getElementById('withdraw-amount')
-console.log("withdrawAmountInput: ", withdrawAmountInput.value)
-withdrawAmountInput.addEventListener('input', amountOnchange(withdrawAmountInput.value))
 
 function deleteInput(e) {
-    const remove = e.target.classList.contains('pubkeyRemove')
-    console.log(e.target)
-    if (!remove) return;
     const removeEl = e.target.parentNode;
+    const remove = e.target.classList.contains('pubkeyRemove')
+    if (!remove) return;
+
     document.getElementById('address-amount').removeChild(removeEl);
 }
 
@@ -1500,6 +1532,7 @@ async function generateClaim(e) {
   let tx = coinjs.transaction()
   const getunspent = document.querySelectorAll('#inner-unspent')
   const getuserinput = document.querySelectorAll('#address-keys')
+  //const changeAddressinput = document.getElementById('change-address')
   let userunspentindex;
   let userinputindex;
   let unspentindexsum = 0;
@@ -1513,7 +1546,7 @@ async function generateClaim(e) {
     if(getunspent[i].children[5].defaultChecked) {
       userunspentindex = i
       console.log(getunspent[i].children[3].value)
-      unspentindexsum += getunspent[i].children[3].value
+      unspentindexsum += Number(getunspent[i].children[3].value)
       tx.addinput(getunspent[i].children[0].value, getunspent[i].children[1].value, getunspent[i].children[2].value, null)
     }
     // if(i === getunspent.length -1) {
@@ -1524,9 +1557,41 @@ async function generateClaim(e) {
   }
   console.log(getuserinput)
   for (let i = 0; i < getuserinput.length; i++) {
+    let address = getuserinput[i].children[0].value
+    let amount = getuserinput[i].children[1].value
+
     userinputindex = i
-    userinputsum += getuserinput[i].children[1].value
-    tx.addoutput(getuserinput[i].children[0].value, getuserinput[i].children[1].value)
+    userinputsum += Number(amount)
+    console.log(address, amount)
+
+    let isValidAddress = coinjs.addressDecode(address)
+    if (isValidAddress == false) {
+      alertError("Address is not valid")
+      return
+    } else {
+      tx.addoutput(address, amount)
+    }
+  }
+
+  // if (changeAddressinput) {
+  //   console.log("changeAddressinput amount: ", changeAddressinput.children[1].value)
+  //   console.log("changeAddressinput address: ", changeAddressinput.children[0].value)
+  //   userinputsum += changeAddressinput.children[1].value
+  //   tx.addoutput(changeAddressinput.children[0].value, changeAddressinput.children[1].value)
+  // }
+
+  /**
+    Add a change address to the tx.addoutput if change is greater than withdrawal fee
+  **/
+  console.log("unspentindexsum: ", unspentindexsum)
+  console.log("userinputsum: ", userinputsum)
+  let change = unspentindexsum - userinputsum
+  console.log("change: ", change)
+  let change_amount = change - WITHDRAWAL_FEE
+  console.log("change_amount: ", change_amount)
+  if (change_amount > 0.01) {
+    console.log('add ouput: ', CHANGE_ADDRESS, change_amount)
+    tx.addoutput(CHANGE_ADDRESS, change_amount)
   }
 
   if (userunspentindex === getunspent.length -1 && userinputindex === getuserinput.length -1) {
@@ -1719,8 +1784,8 @@ function requestSignatureWindow(tx, account) {
 formCreateAccount.addEventListener("submit", saveAndCreateText);
 importTextForm.addEventListener('submit', parseTextArea);
 userProfileForm.addEventListener('submit', createUserProfile);
-addMinus.addEventListener('click', addOrDelete);
-minusButton.addEventListener('click', deleteInput);
+withdrawalAddBtn.addEventListener('click', () => {addOrDelete('address-keys')});
+//minusButton.addEventListener('click', deleteInput);
 formAddBanker.addEventListener('submit', addBanker);
 getbankerClick.addEventListener('click', getBanker)
 getListClick.addEventListener('click', getList)
@@ -1728,3 +1793,4 @@ importTextButton.addEventListener('click', openImportTextTab)
 getbankerClick.addEventListener('click', getBanker);
 getListClick.addEventListener('click', getList);
 formWithdraw.addEventListener('submit', generateClaim);
+donateBtn.addEventListener('click', addDonationAddress)
