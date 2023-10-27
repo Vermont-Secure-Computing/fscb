@@ -3,6 +3,7 @@ const path = require('path');
 const https = require('https');
 const homedir = require('os').homedir();
 const fs = require("fs");
+const contextMenu = require('electron-context-menu');
 const jsonFile = homedir + "/data/data.json"
 const jsonFileBanker = homedir + "/data/banker.json"
 console.log(homedir)
@@ -10,6 +11,10 @@ console.log(homedir)
 const isDev = process.env.NODE_ENV !== 'production';
 
 let win;
+
+contextMenu({
+	showSaveImageAs: true
+});
 
 const createWindow = () => {
   win = new BrowserWindow({
