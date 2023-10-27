@@ -157,7 +157,7 @@ async function saveAndCreateText(e) {
     // console.log("New Key ", creatorAddressDetail)
     const sigSendNumber = sigNumber.options[sigNumber.selectedIndex].text;
     const coinCurrencySend = currency.options[currency.selectedIndex].text;
-    const innerMultiKey = document.querySelectorAll('.active a')
+    const innerMultiKey = document.querySelectorAll('.activeClass a')
     console.log(innerMultiKey)
 
     /**
@@ -756,6 +756,7 @@ ipcRenderer.on('send:bankers', function(e, evt) {
 
 
       var select =  document.createElement("select");
+      select.classList.add('hidden')
       select.setAttribute('multiple', '');
       select.dataset.placeholder = 'Choose Bankers'
 
@@ -772,20 +773,26 @@ ipcRenderer.on('send:bankers', function(e, evt) {
           const el = document.createElement("option");
           el.textContent = opt;
           el.value = pub;
-          el.setAttribute('class', 'optionForSelection')
+          el.setAttribute('class', 'hidden')
           select.appendChild(el);
         }
       }
 
       const selectOptions = select.querySelectorAll('option');
       const newSelect = document.createElement('div');
-      newSelect.setAttribute('class', 'selectMultiple')
+      newSelect.setAttribute('class', 'selectMultiple bg-white w-60 relative')
       const active = document.createElement('div');
-      active.classList.add('active');
+      // active.classList.add('active');
+      // active.setAttribute('class', 'relative z-2 pt-8 pb-2 py-12 rounded-lg text-sm min-h-44 shadow-[0_4px_16px_0_rgba(255,165,0,0.12)] transition shadow-[0_4px_16px_0_rgba(255,165,0,0.12)] duration-300 ease-in hover:shadow-[0_4px_24px_-1px_rgba(255,165,0,0.16)]')
+      active.setAttribute('class', 'activeClass')
       const optionList = document.createElement('ul');
+      optionList.setAttribute('class', 'optionListClass')
+      // optionList.setAttribute('class', 'm-0 p-0 list-none text-base z-1 absolute top-full left-0 right-0 invisible opacity-0 rounded-lg translate-x-0 translate-y-20 origin-top-right shadow-[0_12px_20px_rgba(255,165,0,0.8)] transition-all duration-400 ease-in-out ')
       const placeholder = select.dataset.placeholder;
 
       const span = document.createElement('span');
+      span.setAttribute('class', 'spanClass')
+      // span.setAttribute('class', 'text-blue-200 block absolute left-12 cursor-pointer top-8 leading-7 transition-all duration-300 ease-in')
       span.innerText = placeholder;
       active.appendChild(span);
 
@@ -794,12 +801,15 @@ ipcRenderer.on('send:bankers', function(e, evt) {
           let text = option.innerText;
           if(option.selected){
               let tag = document.createElement('a');
+              tag.setAttribute('class', 'relative pt-0 pr-5 pb-5 pl-0')
               tag.dataset.value = option.value;
-              tag.innerHTML = "<em>"+text+"</em><i></i>";
+              tag.innerHTML = "<em class='emClass'>"+text+"</em><i class='iClass'></i>";
               active.appendChild(tag);
-              span.classList.add('hide');
+              span.classList.add('opacity-0 invicible -translate-x-4');
           }else{
               let item = document.createElement('li');
+              item.setAttribute('class', 'itemClass')
+              // item.setAttribute('class', 'text-indigo-950 bg-white px-12 py-16 cursor-pointer overflow-hidden relative litransition [&>*:first-child]:rounded-br-lg [&>*:first-child]:rounded-bl-none [&>*:last-child]:rounded-bl-lg [&>*:last-child]:rounded-br-none')
               item.dataset.value = option.value;
               item.innerHTML = text;
               optionList.appendChild(item);
@@ -807,6 +817,7 @@ ipcRenderer.on('send:bankers', function(e, evt) {
       });
       const arrow = document.createElement('div');
       arrow.classList.add('arrow');
+      // arrow.setAttribute('class', 'arrowClass')
       active.appendChild(arrow);
 
       newSelect.appendChild(active);
@@ -833,8 +844,9 @@ ipcRenderer.on('send:bankers', function(e, evt) {
               }
               li.classList.add('remove');
               let a = document.createElement('a');
+              a.setAttribute('class', 'relative pt-0 pr-5 pb-5 pl-0')
               a.dataset.value = li.dataset.value;
-              a.innerHTML = "<em>"+li.innerText+"</em><i></i>";
+              a.innerHTML = "<em class='emClass'>"+li.innerText+"</em><i class='iClass'></i>";
               a.classList.add('notShown');
               // a.style.display = "none";
               select.querySelector('div').appendChild(a); //might have to check later
@@ -927,6 +939,7 @@ ipcRenderer.on('send:bankers', function(e, evt) {
                   });
 
                   let li = document.createElement('li');
+                  // li.setAttribute('class', 'itemClass')
                   li.dataset.value = a.dataset.value;
                   li.innerText = a.querySelector('em').innerText;
                   li.classList.add('show');
@@ -935,7 +948,7 @@ ipcRenderer.on('send:bankers', function(e, evt) {
                       if(!selectEl.selectedOptions.length){
                           select.querySelector('span').classList.remove('hide');
                       }
-                      li.className = '';
+                      li.className = 'itemClass';
                   }, 350);
 
                   removeOption.onfinish = () => {
