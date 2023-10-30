@@ -481,6 +481,37 @@ async function bankerPubkeyRequest(evt) {
   }
 }
 
+async function importData(data) {
+	console.log("import data user: ", typeof(data.user))
+	console.log("import data user: ", typeof(data.bankers))
+	console.log("import data user: ", typeof(data.accounts))
+
+	if (data.user) {
+		const user = JSON.stringify(data.user, null, 2)
+		fs.writeFile(homedir + "/data/user.json"
+			, user, function writeJson(err) {
+			if (err) return console.log(err);
+			console.log('writing to user.json');
+		});
+	}
+	if (data.bankers) {
+		const bankers = JSON.stringify(data.bankers, null, 2)
+		fs.writeFile(homedir + "/data/banker.json"
+			, bankers, function writeJson(err) {
+			if (err) return console.log(err);
+			console.log('writing to banker.json');
+		});
+	}
+	if (data.accounts) {
+		const accounts = JSON.stringify(data.accounts, null, 2)
+		fs.writeFile(homedir + "/data/data.json"
+			, accounts, function writeJson(err) {
+			if (err) return console.log(err);
+			console.log('writing to data.json');
+		});
+	}
+}
+
 
 /**
   Function that will update the account's withdrawal signature array
@@ -574,7 +605,7 @@ ipcMain.on("banker:addorsig", (e, options) => {
   e.preventDefault()
   // console.log(typeof(options))
   const banker = JSON.parse(options)
-  console.log(banker)
+  console.log(banker.message)
   if (banker.message.includes("request-pubkey")) {
     //bankerPubkeyRequest(banker)
     /**
@@ -591,7 +622,10 @@ ipcMain.on("banker:addorsig", (e, options) => {
     console.log("response signature")
     bankerSignatureResponse(banker)
     //win.webContents.send('response:banker-signature', banker)
-  }else {
+  } else if (banker.message.includes("import:json-data")) {
+    console.log("import backup data")
+    importData(banker)
+  } else {
     console.log("signature")
   }
 })
@@ -662,6 +696,59 @@ ipcMain.on('signature:encode', (e, options) => {
       }
     })
   });
+})
+
+
+/**
+	Function to create a backup file
+**/
+ipcMain.on('export:get-data', () => {
+
+	console.log("export main")
+	const user = fs.readFileSync(homedir + "/data/user.json", "utf-8")
+	const bankers = fs.readFileSync(homedir + "/data/banker.json", "utf-8")
+	const accounts = fs.readFileSync(homedir + "/data/data.json", "utf-8")
+
+	const parsedUser = JSON.parse(user)
+  const parsedBankers = JSON.parse(bankers)
+  const parsedAccounts = JSON.parse(accounts)
+
+  let accountJson = {
+    "user": parsedUser,
+    "bankers": parsedBankers,
+    "accounts": parsedAccounts
+  }
+
+	let message = {
+		"header": "free_state_central_bank",
+		"message": "import:json-data",
+		"user": parsedUser,
+		"bankers": parsedBankers,
+		"accounts": parsedAccounts
+	}
+
+  //console.log("json message: ", message)
+
+	let backup = "This is your FSCB backup. \n"
+	const textBegin = "----- Begin fscb message ----- \n"
+	const textEnd = "\n ----- End fscb message ----- \n"
+
+	let backupMessage = backup + textBegin + JSON.stringify(message) + textEnd
+	console.log("backupMessage: ", backupMessage)
+
+	const path = "data"
+  const fileName = "backup.txt"
+	fs.writeFile(homedir + "/" + path +"/"+ fileName, backupMessage, function writeJson(err, bytes) {
+		if (err) {
+			console.log(err)
+		} else {
+			console.log("successfully write backup, bytes: ", bytes);
+			win.webContents.send('export:response', {})
+			return
+		}
+	})
+
+
 })
 
 

@@ -53,6 +53,10 @@ let bankerGeneratePrivkey = document.getElementById('banker-privkey-generation')
 let withdrawalFee = document.getElementById("withdraw-fee")
 let donateBtn = document.getElementById("donate-button")
 
+/**
+  Export screen
+**/
+let exportBtn = document.getElementById("export-btn")
 
 
 // console.log(getListClick)
@@ -1792,6 +1796,18 @@ function requestSignatureWindow(tx, account) {
 }
 
 
+/**
+  Function to export json data
+**/
+function exportJsonData() {
+  console.log("export users data")
+  ipcRenderer.send("export:get-data", {})
+}
+
+ipcRenderer.on('export:response', (e) => {
+  alertSuccess("Successfully created a backup file.")
+})
+
 
 // importText.addEventListener("change", loadText);
 formCreateAccount.addEventListener("submit", saveAndCreateText);
@@ -1806,4 +1822,5 @@ importTextButton.addEventListener('click', openImportTextTab)
 getbankerClick.addEventListener('click', getBanker);
 getListClick.addEventListener('click', getList);
 formWithdraw.addEventListener('submit', generateClaim);
-donateBtn.addEventListener('click', addDonationAddress)
+donateBtn.addEventListener('click', addDonationAddress);
+exportBtn.addEventListener('click', exportJsonData);
