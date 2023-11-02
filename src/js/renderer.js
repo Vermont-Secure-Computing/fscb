@@ -99,11 +99,24 @@ tabTogglers.forEach(function(toggler) {
             let accountDetails = document.getElementById('account-details')
             let accountActions = document.getElementById('account-actions')
             let accountWithdrawal = document.getElementById('account-withdrawal')
+            let withdrawalRef = document.getElementById('withdraw-reference')
+            // Account Withdrawal screen
+            let withdrawAddressInput = document.getElementById('withdraw-address')
+            let withdrawAmountInput = document.getElementById('withdraw-amount')
+            // Withdrawal reference screen
+            let listUnspentRef = document.getElementById('banker-verify-inputs-initial')
+            let listOutputRef = document.getElementById('banker-verify-outputs-initial')
 
             accountList.classList.remove("hidden")
             accountDetails.classList.add("hidden")
             accountActions.classList.add("hidden")
             accountWithdrawal.classList.add("hidden")
+            withdrawalRef.classList.add("hidden")
+
+            withdrawAddressInput.value = ""
+            withdrawAmountInput.value = ""
+            withdrawAddressInput.innerHTML = ""
+            withdrawAmountInput.innerHTML = ""
         }
         if (tabName === "#addbanker") {
             getBanker()
@@ -1711,7 +1724,9 @@ async function generateClaim(e) {
     })
 
     const generateButton = document.getElementById('generate-request-signature-message')
-    generateButton.addEventListener('click', function() {requestSignatureWindow(txRedeemTransaction, accountSigFilter)}, false)
+    generateButton.addEventListener('click', function() {
+      requestSignatureWindow(txRedeemTransaction, accountSigFilter)
+    }, false)
   }
 
 
@@ -1833,4 +1848,4 @@ getListClick.addEventListener('click', getList);
 formWithdraw.addEventListener('submit', generateClaim);
 donateBtn.addEventListener('click', addDonationAddress);
 exportBtn.addEventListener('click', exportJsonData);
-browseBtn.addEventListener('click', browseDirectory)
+//browseBtn.addEventListener('click', browseDirectory)
