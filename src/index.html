@@ -525,6 +525,10 @@
             Backup
             <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
             <div>
+              <p>Save the backup file to this directory: </p>
+              <input id="export-browse-btn" type="button" value="Browse..." />
+              <input type="file" id="select-dir" hidden webkitdirectory="" directory="" mozdirectory="">
+
               <button id="export-btn" class="inline-flex items-center px-12 py-3 text-sm font-medium text-center absolute right-5 mt-5 text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Export Data</button>
             </div>
           </div>

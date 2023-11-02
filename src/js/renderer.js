@@ -57,6 +57,8 @@ let donateBtn = document.getElementById("donate-button")
   Export screen
 **/
 let exportBtn = document.getElementById("export-btn")
+let browseBtn = document.getElementById("export-browse-btn")
+let inputFileBrowser = document.getElementById("select-dir")
 
 
 // console.log(getListClick)
@@ -1804,6 +1806,13 @@ function exportJsonData() {
   ipcRenderer.send("export:get-data", {})
 }
 
+function browseDirectory() {
+  console.log("click event for the file browser")
+  //inputFileBrowser.click()
+  let dir = browser.downloads.showDefaultFolder();
+  console.log("dir: ", dir)
+}
+
 ipcRenderer.on('export:response', (e) => {
   alertSuccess("Successfully created a backup file.")
 })
@@ -1824,3 +1833,4 @@ getListClick.addEventListener('click', getList);
 formWithdraw.addEventListener('submit', generateClaim);
 donateBtn.addEventListener('click', addDonationAddress);
 exportBtn.addEventListener('click', exportJsonData);
+browseBtn.addEventListener('click', browseDirectory)
