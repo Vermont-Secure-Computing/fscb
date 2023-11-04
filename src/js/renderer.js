@@ -277,7 +277,7 @@ ipcRenderer.on("list:file", function(e, evt){
             let address = row.insertCell(1);
             address.innerHTML = convertToJson[x].address
             let balance = row.insertCell(2);
-            balance.setAttribute('class', 'text-center')
+            balance.setAttribute('class', 'pl-3')
             balance.innerHTML = convertToJson[x].balance
             let veiwall = row.insertCell(3)
             veiwall.setAttribute('class', 'text-center')
@@ -1067,16 +1067,31 @@ ipcRenderer.on('request:banker-signature', (e, message) => {
     console.log("s: ", s.script)
     console.log("N: ", input.outpoint.index)
     console.log(input.outpoint.hash)
-
+    let inputs1 = document.createElement('input')
+    inputs1.setAttribute('readonly', true)
+    inputs1.setAttribute('class', 'md:flex px-3 bg-gray-300 text-black h-10 left-96 py-2 w-96');
+    inputs1.value = input.outpoint.hash
     let row = inputsTable.insertRow();
     let txid = row.insertCell(0);
-    txid.innerHTML = input.outpoint.hash
+    // txid.innerHTML = input.outpoint.hash
+    txid.appendChild(inputs1)
     txid.setAttribute('width', '45%')
+    let inputs2 = document.createElement('input')
+    inputs2.setAttribute('readonly', true)
+    inputs2.setAttribute('class', 'text-black text-center');
+    inputs2.value = input.outpoint.index
     let indexNo = row.insertCell(1);
+    indexNo.setAttribute('class', 'text-center text-black font-semibold')
     indexNo.innerHTML = input.outpoint.index
+    // indexNo.appendChild(inputs2)
     indexNo.setAttribute('width', '10%')
+    let inputs3 = document.createElement('input')
+    inputs3.setAttribute('readonly', true)
+    inputs3.setAttribute('class', 'md:flex bg-gray-300 pl-1 h-10 text-black px-3 py-2 w-full');
+    inputs3.value = s.script
     let script = row.insertCell(2);
-    script.innerHTML = s.script
+    // script.innerHTML = s.script
+    script.appendChild(inputs3)
     script.setAttribute('width', '45%')
   }
 
@@ -1431,7 +1446,7 @@ function finalizeNewKeys(evt){
     const div = document.createElement('div')
     div.setAttribute('class', 'bg-white p-3 rounded-md')
     const button = document.createElement('button')
-    button.setAttribute('class', 'py-2 px-3 rounded bg-orange-500')
+    button.setAttribute('class', 'inline-flex items-center px-10 py-3 text-base font-medium text-center text-white bg-orange-500 focus:ring-4 focus:ring-orange-500 dark:focus:bg-orange-500 hover:bg-orange absolute mt-10 right-6 rounded-full')
     button.setAttribute('id', "import-again-button")
     button.textContent = "Import Again"
     const p = document.createElement('p')
@@ -1652,15 +1667,31 @@ async function generateClaim(e) {
       console.log("N: ", input.outpoint.index)
       console.log(input.outpoint.hash)
 
+      let inputs1 = document.createElement('input')
+      inputs1.setAttribute('readonly', true)
+      inputs1.setAttribute('class', 'md:flex px-3 bg-gray-300 text-black h-10 left-96 py-2 w-96 ');
+      inputs1.value = input.outpoint.hash
       let row = inputsTable.insertRow();
       let txid = row.insertCell(0);
-      txid.innerHTML = input.outpoint.hash
+      // txid.innerHTML = input.outpoint.hash
+      txid.appendChild(inputs1)
       txid.setAttribute('width', '45%')
+      // let inputs2 = document.createElement('input')
+      // inputs2.setAttribute('readonly', true)
+      // inputs2.setAttribute('class', 'text-black pl-3 py-2 px-3 ');
+      // inputs2.value = input.outpoint.index
       let indexNo = row.insertCell(1);
+      indexNo.setAttribute('class', 'text-center text-black font-semibold')
       indexNo.innerHTML = input.outpoint.index
+      // indexNo.appendChild(inputs2)
       indexNo.setAttribute('width', '10%')
+      let inputs3 = document.createElement('input')
+      inputs3.setAttribute('readonly', true)
+      inputs3.setAttribute('class', 'md:flex bg-gray-300 pl-1 h-10 text-black px-3 py-2 w-96');
+      inputs3.value = s.script
       let script = row.insertCell(2);
-      script.innerHTML = s.script
+      // script.innerHTML = s.script
+      script.appendChild(inputs3)
       script.setAttribute('width', '45%')
     }
 
