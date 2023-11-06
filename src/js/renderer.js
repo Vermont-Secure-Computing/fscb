@@ -6,7 +6,7 @@
 
 //  Start Tab Pannels
 
-const importText =   document.getElementById('import-text');
+const importText = document.getElementById('import-text');
 // const bankersClick = document.getElementsByClassName('pubkeyAdd')[0];
 
 const formCreateAccount =   document.getElementById('create-new-form');
@@ -1098,13 +1098,26 @@ function parseTextArea(e) {
     const jsonString = textarea.value;
     const startIndex = jsonString.indexOf('{');
     const endIndex = jsonString.lastIndexOf('}');
+    console.log("startIndex: ", startIndex)
+    console.log("endIndex: ", endIndex)
+
     if (startIndex !== -1 && endIndex !== -1) {
         let jsonStr = jsonString.substring(startIndex, endIndex + 1);
         jsonStr = jsonStr.replace(/\s/g, " ")
         console.log("json str", jsonStr)
         ipcRenderer.send("banker:addorsig", jsonStr)
+    } else {
+      invalidJSONerror()
     }
 }
+
+function invalidJSONerror() {
+  alertError("Invalid FSCB JSON message. Please copy the message sent to your email.")
+}
+
+ipcRenderer.on('import-text:invalid', () => {
+  invalidJSONerror()
+})
 
 
 /**
@@ -1325,6 +1338,21 @@ function bankerSignTransaction(message, privkey) {
   closeButton.innerHTML = "Close"
   closeButton.addEventListener("click", function() {
     console.log("close sign response message")
+
+    importArea.classList.remove('hidden')
+    bankerMessageSignTx.classList.add('hidden')
+    importText.value = ""
+    bankerMessageSignTxBody.innerHTML = ""
+
+    // Clear verify withdrawal inputs
+    let inputsTable = document.getElementById('banker-verify-inputs')
+    let outputsTable = document.getElementById('banker-verify-outputs')
+    let userPrivKey = document.getElementById('banker-pivkey-for-signature')
+
+    inputsTable.innerHTML = ""
+    outputsTable.innerHTML = ""
+    userPrivKey.value = ""
+
     showImportListScreen()
   }, false);
 
@@ -1396,6 +1424,18 @@ ipcRenderer.on('withdrawal:ready-to-broadcast', (e, message) => {
   broadcastButton.addEventListener('click', () => {
     ipcRenderer.send('withdrawal:api', message.transaction_id)
   })
+
+  let closeButton = document.getElementById("owner-withdrawal-close-button")
+  closeButton.addEventListener('click', () => {
+    console.log("close button")
+
+    importArea.classList.remove('hidden')
+    ownerWithdrawalBroadcast.classList.add('hidden')
+    importText.value = ""
+    withdrawalTxId.innerHTML = ""
+
+    showImportListScreen()
+  })
 })
 
 ipcRenderer.on('withdrawal:broadcast-response', (e, res) => {
@@ -1410,6 +1450,7 @@ ipcRenderer.on('withdrawal:broadcast-response', (e, res) => {
   let closeButton = document.getElementById("owner-withdrawal-close-button")
   closeButton.addEventListener('click', () => {
     console.log("close button")
+    showImportListScreen()
   })
 
   if(res.message){

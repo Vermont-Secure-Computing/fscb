@@ -604,30 +604,35 @@ async function bankerSignatureResponse(message) {
 ipcMain.on("banker:addorsig", (e, options) => {
   e.preventDefault()
   // console.log(typeof(options))
-  const banker = JSON.parse(options)
-  console.log(banker.message)
-  if (banker.message.includes("request-pubkey")) {
-    //bankerPubkeyRequest(banker)
-    /**
-      Generate new keys for the account
-    **/
-    win.webContents.send('request:banker-pubkey', banker)
-  }else if (banker.message.includes("response-pubkey")) {
-    // console.log("response pubkey")
-    bankerPubkeyResponse(banker)
-  }else if (banker.message.includes("request-signature")) {
-    console.log("request signature")
-    win.webContents.send('request:banker-signature', banker)
-  } else if (banker.message.includes("response-signature")) {
-    console.log("response signature")
-    bankerSignatureResponse(banker)
-    //win.webContents.send('response:banker-signature', banker)
-  } else if (banker.message.includes("import:json-data")) {
-    console.log("import backup data")
-    importData(banker)
-  } else {
-    console.log("signature")
-  }
+	try {
+	  const banker = JSON.parse(options)
+	  console.log(banker)
+	  if (banker.message.includes("request-pubkey")) {
+	    //bankerPubkeyRequest(banker)
+	    /**
+	      Generate new keys for the account
+	    **/
+	    win.webContents.send('request:banker-pubkey', banker)
+	  }else if (banker.message.includes("response-pubkey")) {
+	    // console.log("response pubkey")
+	    bankerPubkeyResponse(banker)
+	  }else if (banker.message.includes("request-signature")) {
+	    console.log("request signature")
+	    win.webContents.send('request:banker-signature', banker)
+	  } else if (banker.message.includes("response-signature")) {
+	    console.log("response signature")
+	    bankerSignatureResponse(banker)
+	    //win.webContents.send('response:banker-signature', banker)
+	  } else if (banker.message.includes("import:json-data")) {
+	    console.log("import backup data")
+	    importData(banker)
+	  } else {
+	    console.log("signature")
+			win.webContents.send('import-text:invalid', {})
+	  }
+	} catch (e) {
+		win.webContents.send('import-text:invalid', {})
+	}
 })
 
 ipcMain.on('user:address', (e, options) => {
