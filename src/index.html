@@ -77,7 +77,7 @@
         <!-- Tab Contents -->
         <div class="bg-[#1a1a1a] col-span-9 h-auto" id="tab-contents" >
           <div id="importText" class="hidden p-4">
-            <div class="mx-auto" id="import-area">
+            <div class="mx-auto max-h-80" id="import-area">
               <form id="import-text-form">
                 <textarea name="" id="import-text" cols="30" rows="10" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Paste text here..."></textarea>
                 <button type="submit" class="inline-flex items-center px-12 py-3 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Import</button>
@@ -213,7 +213,7 @@
               <p class="text-xl text-white font-bold">Response to Withdrawal Signature request</p>
               <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
               <p class="text-l text-white my-1" id="sign-response-title"></p>
-              <div class="bg-white font-normal text-base p-8" id="banker-message-signtx-body">
+              <div class="bg-white font-normal text-base p-8 max-h-520 overflow-y-auto" id="banker-message-signtx-body">
               </div>
               <div id="banker-message-signtx-close-button"></div>
             </div>
@@ -264,7 +264,7 @@
                 </thead>
                 <tbody id="account-bankers-list">
                 </tbody>account-bankers-list
-                
+
               </table>
               <div  class="absolute h-96 mt-5 pl-56 right-6" id="account-buttons">
                 <!--Button are generated in renderer javascript-->
@@ -466,7 +466,7 @@
                           <option>15</option>
                         </select>
                       </div>
-                      
+
                     </div>
                     <button type="submit" class="inline-flex items-center px-10 py-2.5 text-sm font-medium text-center absolute w-32 right-10 mt-52 text-white bg-orange-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500 rounded-full">Submit</button>
                   </div>
