@@ -103,16 +103,15 @@ function bankerIdNumber() {
 // idNumber()
 
 
-
+/**
+	Function to create a new contract/account
+**/
 ipcMain.on("message:contractnew", (e, options) => {
   e.preventDefault()
-  console.log("rederer send", options)
   const getIdNumber = idNumber()
   pathMessage = 'message'
-  // console.log(options.bankersMerge)
   const mybankers = fs.readFileSync(homedir + "/data/banker.json", "utf-8")
   const bankersParse = JSON.parse(mybankers)
-  // console.log(typeof(bankersParse))
   let mergeBankers = []
   for (let i = 0; i < options.bankersMerge.length; i++ ) {
     for (let j in bankersParse) {
@@ -157,7 +156,8 @@ ipcMain.on("message:contractnew", (e, options) => {
       "signature_nedded": options.sigSendNumber,
       "address": options.pubkeySend,
       "redeem_script": options.redeemScriptSend,
-      "signatures": [],
+      //"signatures": [],
+			"withdrawals": [],
       "balance": "0.0",
       "currency": options.coinCurrencySend,
       "claimed": "false"
@@ -339,21 +339,25 @@ ipcMain.on('balance:api', (e, options) => {
               allaccount[i].balance = body.balance
               // const allparse = JSON.stringify(allaccount[i], null, 2)
               fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
-                jdata = JSON.parse(jdata);
-                //Step 3: append contract variable to list
-                jdata[i] = allaccount[i]
-                console.log(jdata);
-                const wData = JSON.stringify(jdata, null, 2)
-                fs.writeFile(homedir + "/" + path +"/"+ fileName, wData, (err) => {
-                  if (err) {
-                    return console.log(err)
-                  } else {
-                    const readMore = fs.readFileSync(homedir + "/data/data.json", "utf-8")
+								try {
+	                jdata = JSON.parse(jdata);
+	                //Step 3: append contract variable to list
+	                jdata[i] = allaccount[i]
+	                console.log(jdata);
+	                const wData = JSON.stringify(jdata, null, 2)
+	                fs.writeFile(homedir + "/" + path +"/"+ fileName, wData, (err) => {
+	                  if (err) {
+	                    return console.log(err)
+	                  } else {
+	                    const readMore = fs.readFileSync(homedir + "/data/data.json", "utf-8")
 
-                    win.webContents.send("list:file",  readMore)
+	                    win.webContents.send("list:file",  readMore)
 
-                  }
-                })
+	                  }
+	                })
+								} catch (e) {
+									console.log("parsing error: ", e)
+								}
               });
               // account = allaccount[i]
               // console.log(accounts)
@@ -380,7 +384,7 @@ ipcMain.on('balance:api', (e, options) => {
 })
 
 
-ipcMain.on('withdrawal:api', (e, txid) => {
+ipcMain.on('withdrawal:api', (e, txid, accountId, withdrawalId) => {
   console.log("ipc main withdrawal txid: ", txid)
   try {
     const request = https.request(`https://api.logbin.org/api/broadcast/r?transaction=${txid}`, (response) => {
@@ -392,7 +396,22 @@ ipcMain.on('withdrawal:api', (e, txid) => {
 
       response.on('end', async () => {
           const body = await JSON.parse(data);
+
           console.log("withdrawal response message: ", body)
+					if (body.message) {
+						const accounts = await JSON.parse(fs.readFileSync(homedir + "/data/data.json", "utf-8"))
+						for (const [key, value] of Object.entries(accounts)) {
+				      let account = value
+				      if (account.id == accountID) {
+								for (const [index, withdrawal] of account.withdrawals.entries()){
+									if (withdrawal.id == message.withdrawalId){
+										withdrawal.date_broadcasted = Date.now()
+										withdrawal.txid = body.message.result
+									}
+								}
+							}
+						}
+					}
           win.webContents.send('withdrawal:broadcast-response', body)
       });
    })
@@ -523,81 +542,86 @@ async function bankerSignatureResponse(message) {
     let accountID = message.id
     let bankerID = message.banker_id
     let next_banker
-    for (const [key, value] of Object.entries(accounts)) {
+
+		for (const [key, value] of Object.entries(accounts)) {
       let account = value
       if (account.id == accountID) {
-        for (const [index, signature] of account.signatures.entries()) {
-          if(signature.banker_id == bankerID) {
-            signature.transaction_id = message.transaction_id
-            signature.status = "SIGNED"
-            const date_signed = new Date()
-            signature.date_signed = date_signed
+				for (const [index, withdrawal] of account.withdrawals.entries()){
+					if (withdrawal.id == message.withdrawal_id){
+			    	for (const [index, signature] of withdrawal.signatures.entries()) {
+				      if(signature.banker_id == bankerID) {
+				        signature.transaction_id = message.transaction_id
+				        signature.status = "SIGNED"
+				        const date_signed = new Date()
+				        signature.date_signed = date_signed
 
-            const updatedAccounts = JSON.stringify(accounts, null, 2)
-            fs.writeFile(homedir + "/data/data.json"
-              , updatedAccounts, function writeJson(err) {
-              if (err)  {
-                console.log(err)
-              } else {
-                console.log("accounts updated")
-                // check number of signatures needed
-                if (account.signatures.length == account.signature_nedded) {
-                  console.log("ready to broadcast")
-                  win.webContents.send('withdrawal:ready-to-broadcast', message)
-                } else {
-                  console.log("request signature to next banker")
-                  for (const [index, banker] of account.bankers.entries()) {
-                    if(banker.banker_id == bankerID) {
-                      console.log("next banker: ", account.bankers[index + 1])
-                      let next_banker = account.bankers[index + 1]
+				        const updatedAccounts = JSON.stringify(accounts, null, 2)
+				        fs.writeFile(homedir + "/data/data.json"
+				          , updatedAccounts, function writeJson(err) {
+				          if (err)  {
+				            console.log(err)
+				          } else {
+				            console.log("accounts updated")
+				            // check number of signatures needed
+				            if (withdrawal.signatures.length == account.signature_nedded) {
+				              console.log("ready to broadcast")
+				              win.webContents.send('withdrawal:ready-to-broadcast', message)
+				            } else {
+				              console.log("request signature to next banker")
+				              for (const [index, banker] of account.bankers.entries()) {
+				                if(banker.banker_id == bankerID) {
+				                  console.log("next banker: ", account.bankers[index + 1])
+				                  let next_banker = account.bankers[index + 1]
 
-                      let newMessage = {
-                        "header": "free_state_central_bank",
-                        "message":"request-signature",
-                        "id": message.id,
-                        "contract_name": message.contract_name,
-                        "banker_id": next_banker.banker_id,
-                        "creator_name": message.creator_name,
-                        "creator_email": message.creator_email,
-                        "banker_name": next_banker.banker_name,
-                        "banker_email": next_banker.banker_email,
-                        "transaction_id_for_signature": message.transaction_id,
-                        "currency":message.currency
-                      }
-                      console.log("new message: ", newMessage)
+				                  let newMessage = {
+				                    "header": "free_state_central_bank",
+				                    "message":"request-signature",
+				                    "id": message.id,
+				                    "contract_name": message.contract_name,
+				                    "banker_id": next_banker.banker_id,
+				                    "creator_name": message.creator_name,
+				                    "creator_email": message.creator_email,
+				                    "banker_name": next_banker.banker_name,
+				                    "banker_email": next_banker.banker_email,
+				                    "transaction_id_for_signature": message.transaction_id,
+				                    "currency": message.currency,
+														"withdrawal_id": message.withdrawal_id,
+				                  }
+				                  console.log("new message: ", newMessage)
 
-                      // Create new signature object in the account signature array
-                      const newSignatory = {
-                        "banker_id": next_banker.banker_id,
-                        "date_requested": Date.now(),
-                        "date_signed": null,
-                        "status": "PENDING",
-                        "transaction_id": ""
-                      }
-                      account.signatures.push(newSignatory)
-                      const accountsNewSignatory = JSON.stringify(accounts, null, 2)
-                      fs.writeFile(homedir + "/data/data.json"
-                        , accountsNewSignatory, function writeJson(err) {
-                        if (err)  {
-                          console.log("updating signatures for next banker to sign error: ", err)
-                        } else {
-                          console.log("signature updated for next banker to sign: ")
-                          win.webContents.send('response:banker-signature', newMessage)
-                        }
-                      })
+				                  // Create new signature object in the account signature array
+				                  const newSignatory = {
+				                    "banker_id": next_banker.banker_id,
+				                    "date_requested": Date.now(),
+				                    "date_signed": null,
+				                    "status": "PENDING",
+				                    "transaction_id": ""
+				                  }
+				                  withdrawal.signatures.push(newSignatory)
 
-                      break
-                    } // end of if statement
-                  } // end of for loop
-                }
-              }
-            });
-          }
-        }
-      }
-    }
+				                  const accountsNewSignatory = JSON.stringify(accounts, null, 2)
+				                  fs.writeFile(homedir + "/data/data.json"
+				                    , accountsNewSignatory, function writeJson(err) {
+				                    if (err)  {
+				                      console.log("updating signatures for next banker to sign error: ", err)
+				                    } else {
+				                      console.log("signature updated for next banker to sign: ")
+				                      win.webContents.send('response:banker-signature', newMessage)
+				                    }
+				                  })
 
-
+				                  break
+				                } // end of if statement
+				              } // end of for loop
+				            }
+				          }
+				        });
+				      }
+			    	}
+					}
+				}
+			}
+		}
   }
 }
 
@@ -695,8 +719,8 @@ ipcMain.on('signature:encode', (e, options) => {
         console.log(err)
       } else {
         console.log("successfully updated");
-        // const accounts = fs.readFileSync(homedir + "/data/data.json", "utf-8")
-        // win.webContents.send("list:file", accounts)
+        const accounts = fs.readFileSync(homedir + "/data/data.json", "utf-8")
+        win.webContents.send("list:file", accounts)
         // win.webContents.send("send:newAccountSuccess", {})
       }
     })
