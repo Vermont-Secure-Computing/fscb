@@ -93,6 +93,7 @@ tabTogglers.forEach(function(toggler) {
         console.log('click button')
         importTextTab.classList.add('hidden')
         let tabName = this.getAttribute("href");
+        console.log('tab name: ', tabName)
         openTab = tabName;
         if (tabName === "#first") {
             ipcRenderer.send("balance:api", {"send": "get"})
@@ -135,6 +136,7 @@ tabTogglers.forEach(function(toggler) {
         for (let i = 0; i < tabContents.children.length-1; i++) {
           tabTogglers[i].parentElement.classList.remove("bg-gradient-to-l", "from-gray-500");
           tabContents.children[i].classList.remove("hidden");
+          console.log("tabContents.children[i].id: ", tabContents.children[i].id)
           if ("#" + tabContents.children[i].id === tabName) {
               continue;
           }
@@ -256,37 +258,13 @@ ipcRenderer.on("send:newAccountSuccess", function() {
 })
 
 ipcRenderer.on("list:file", function(e, evt){
-    //console.log(e)
     const convertToJson = JSON.parse(evt)
-    // console.log(convertToJson)
-    // let text = ""
-    // const container = document.getElementById('data-container')
-    // text+='<tr>'
-    // for(let x in convertToJson) {
-    //     if(convertToJson.hasOwnProperty(x)){
-    //         // console.log(convertToJson[x].email)
-    //         text+="<td>" + convertToJson[x].email + "</td>"
-    //     }
-    // }
-    // text+="</tr>"
-    // // console.log(text)
-    // // const stuff = convertToJson.map((item) => `<p>${item.firstname}<p>`)
-    // container.innerHTML = text
     const accountBody = document.getElementById('accounts-list-body')
-    // let accountTr = document.createElement('tr')
-    // accountTr.setAttribute('class', 'border-b dark:border-neutral-500')
-    // let accountTd = document.createElement('td')
-    // accountTd.setAttribute('class', 'whitespace-nowrap px-6 py-4')
-    // let accountTd1 = document.createElement('td')
-    // accountTd1.setAttribute('class', 'whitespace-nowrap px-6 py-4')
-    // let accountTd2 = document.createElement('td')
-    // accountTd2.setAttribute('class', 'whitespace-nowrap px-6 py-4')
-    // let respub;
+
     accountBody.innerHTML = ""
     for(let x in convertToJson) {
         if(convertToJson.hasOwnProperty(x)){
-            // console.log("convert to json", convertToJson[x])
-            // ipcRenderer.send("get:balance", {"pubkey": convertToJson[x].address})
+
             let row = accountBody.insertRow();
             let name = row.insertCell(0);
             name.setAttribute('class', 'pl-6')
@@ -302,40 +280,18 @@ ipcRenderer.on("list:file", function(e, evt){
             viewAccountDetailsButton.setAttribute('class', "px-5 py-0.5 font-small text-white bg-orange-500 focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500 rounded-full")
             viewAccountDetailsButton.innerHTML = "view"
             veiwall.appendChild(viewAccountDetailsButton)
-            //viewAccountDetailsButton.addEventListener('click', getAccountDetails)
+
             let details = convertToJson[x]
             viewAccountDetailsButton.addEventListener("click", function() {getAccountDetails(details);}, false);
-            // ipcRenderer.on('response:balance', function(e, arg) {
-            //     console.log(e)
-            //     if (e.error) {
-            //         balance.innerHTML = 0
-            //     } else {
-            //         balance.innerHTML = e
-            //     }
-            //     // ipcRenderer.removeAllListeners('get:balance');
-            //     // ipcRenderer.removeAllListeners('response:balance');
-            //     // ipcRenderer.removeAllListeners('list:file');
-            // })
 
-            // if(convertToJson.hasOwnProperty(x)){
-            //     console.log(convertToJson[x].contract_name)
-            //     // text+="<td>" + convertToJson[x].email + "</td>"
-            // }
-            // ipcRenderer.removeAllListeners('get:balance');
-            // ipcRenderer.removeAllListeners('response:balance');
-            // ipcRenderer.removeAllListeners('list:file');
         }
     }
-    // accountTr.appendChild(accountTd)
-    // accountTr.appendChild(accountTd1)
-    // accountTr.appendChild(accountTd2)
-    // accountBody.appendChild(accountTr)
-
 })
 
 
 /**
-  Account Actions
+  Account Actions Screen
+  List request for signatures status
 **/
 
 function addNewlines(str) {
@@ -353,7 +309,7 @@ function showTxId(txid) {
   alert(messageLineBreaks)
 }
 
-function listAccountActions(actions){
+function listAccountActions(actions, signatureNeeded){
   console.log("actions: ", actions)
   let accountDetails = document.getElementById('account-details')
   let accountWithdrawal = document.getElementById('account-withdrawal')
@@ -365,34 +321,65 @@ function listAccountActions(actions){
   let tableBody = document.getElementById('actions-list-body')
   tableBody.innerHTML = ''
 
-  for(let x in actions) {
-    if(actions.hasOwnProperty(x)){
-      let row = tableBody.insertRow();
-      let date = row.insertCell(0);
-      let dateReq
-      if (actions[x].date_signed) {
-        dateReq = new Date(actions[x].date_signed);
-      } else {
-        dateReq = new Date(actions[x].date_requested);
-      }
+  /**
+    Check if the withdrawal is ready for broadcasting
+  **/
 
-      dateFormat = dateReq.toDateString() + ", "+ dateReq.getHours() + ":" + dateReq.getMinutes();
+  console.log("actions: ", actions)
+  for (const [index, withdrawal] of actions.entries()){
+    if(withdrawal.hasOwnProperty('txid')){
+      let row = tableBody.insertRow();
+      let id = row.insertCell(0);
+      id.innerHTML = withdrawal.id
+      let date = row.insertCell(1);
+      let date_broadcasted = new Date(withdrawal.date_broadcasted)
+      dateFormat = date_broadcasted.toDateString()
       date.innerHTML = dateFormat
-      let banker = row.insertCell(1);
-      banker.innerHTML = actions[x].banker_name
-      let action = row.insertCell(2);
-      action.innerHTML = actions[x].action
-      let txid = row.insertCell(3);
-      if (actions[x].transaction_id) {
-        let viewBtn = "<button class='ml-4 disabled:opacity-75 bg-blue-500 active:bg-blue-700 text-white font-semibold hover:text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline' id='view-txid-btn'>View</button>"
-        txid.innerHTML = viewBtn
-        let viewTxidBtn = document.getElementById('view-txid-btn')
-        viewTxidBtn.addEventListener('click', () => showTxId(actions[x].transaction_id))
-      } else {
-        txid.innerHTML = ""
+      let banker = row.insertCell(2);
+      banker.innerHTML = "Owner"
+      let action = row.insertCell(3);
+      action.innerHTML = "Withdrawal broadcasted"
+      let txid = row.insertCell(4);
+      let viewBtn = "<button class='ml-4 disabled:opacity-75 bg-blue-500 active:bg-blue-700 text-white font-semibold hover:text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline' id='view-txid-btn'>View</button>"
+      txid.innerHTML = viewBtn
+      let viewTxidBtn = document.getElementById('view-txid-btn')
+      viewTxidBtn.addEventListener('click', () => showTxId(withdrawal.txid))
+      let status = row.insertCell(5);
+      status.innerHTML = "Success"
+    }
+    for(let x in withdrawal.signatures) {
+      console.log("withdrawal: ", withdrawal)
+      if(withdrawal.signatures.hasOwnProperty(x)){
+        let row = tableBody.insertRow();
+        let id = row.insertCell(0);
+        id.innerHTML = withdrawal.id
+        let date = row.insertCell(1);
+        let dateReq
+        if (actions[x].date_signed) {
+          dateReq = new Date(withdrawal.signatures[x].date_signed);
+        } else {
+          dateReq = new Date(withdrawal.signatures[x].date_requested);
+        }
+
+        //dateFormat = dateReq.toDateString() + ", "+ dateReq.getHours() + ":" + dateReq.getMinutes();
+        dateFormat = dateReq.toDateString()
+        date.innerHTML = dateFormat
+        let banker = row.insertCell(2);
+        banker.innerHTML = withdrawal.signatures[x].banker_name
+        let action = row.insertCell(3);
+        action.innerHTML = withdrawal.signatures[x].action
+        let txid = row.insertCell(4);
+        if (withdrawal.signatures[x].transaction_id) {
+          let viewBtn = "<button class='ml-4 disabled:opacity-75 bg-blue-500 active:bg-blue-700 text-white font-semibold hover:text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline' id='view-txid-btn'>View</button>"
+          txid.innerHTML = viewBtn
+          let viewTxidBtn = document.getElementById('view-txid-btn')
+          viewTxidBtn.addEventListener('click', () => showTxId(withdrawal.signatures[x].transaction_id))
+        } else {
+          txid.innerHTML = ""
+        }
+        let status = row.insertCell(5);
+        status.innerHTML = withdrawal.signatures[x].status
       }
-      let status = row.insertCell(4);
-      status.innerHTML = actions[x].status
     }
   }
 }
@@ -608,8 +595,9 @@ function getAccountDetails(account){
     let viewActionsButton = document.createElement('button')
     viewActionsButton.classList.add("inline-flex", "items-center", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-full", "focus:ring-4", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
     viewActionsButton.innerHTML = "Actions"
-    let actions = account.signatures
-    viewActionsButton.addEventListener("click", function() {listAccountActions(actions);}, false);
+    let actions = account.withdrawals
+    let signaturesNeeded = account.signature_nedded
+    viewActionsButton.addEventListener("click", function() {listAccountActions(actions, signaturesNeeded);}, false);
 
     let withdrawalButton = document.createElement('button')
     withdrawalButton.classList.add("inline-flex", "items-center", "m-2", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-full", "focus:ring-4", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
@@ -1119,41 +1107,6 @@ ipcRenderer.on('import-text:invalid', () => {
   invalidJSONerror()
 })
 
-
-/**
-BANKER
------Begin fscb message-----
-{"header": "free_state_central_bank",
-"message":"request-signature",
-"id": "183698202",
-"contract_name": "Stargazer",
-"banker_id": "8",
-"creator_name": "Robert Gludo",
-"creator_email": "robert@email.com",
-"banker_name": "gripter",
-"banker_email": "gripter@email.com",
-"transaction_id_for_signature":"0100000003658b21a68ca8f9fceb7c5051b53be3b46b88111f24648afebb6dd0bf144270780000000069522103417eb8968ac166dd9586f24fef4889fda053b251a886761cb9003d41fc3dd4ea2103577b26b2ced3512d76bc65efae1f32bee2b1fee422a146e5f59fa704d7c7f9de2102d25fb998eb19a2be9e33fdb62d0d779b9cf45f868fcf87988ad7682c0a1a611653ae00e1f5057ef7db4eb47c24191c2f650fdb4361ce932a2f7f9cac8f49a881a0ca5c96471d0000000069522103417eb8968ac166dd9586f24fef4889fda053b251a886761cb9003d41fc3dd4ea2103577b26b2ced3512d76bc65efae1f32bee2b1fee422a146e5f59fa704d7c7f9de2102d25fb998eb19a2be9e33fdb62d0d779b9cf45f868fcf87988ad7682c0a1a611653ae00e1f505627b5a06e8521614c0886d167bff911a5a137c5ce8ce538954b835ba0a5ce6c30000000069522103417eb8968ac166dd9586f24fef4889fda053b251a886761cb9003d41fc3dd4ea2103577b26b2ced3512d76bc65efae1f32bee2b1fee422a146e5f59fa704d7c7f9de2102d25fb998eb19a2be9e33fdb62d0d779b9cf45f868fcf87988ad7682c0a1a611653ae00c2eb0b01c041c817000000001976a914aac6a113dc48cd1a26dd55c68323bb4ec68f9b0f88ac00000000",
-"currency":"woodcoin"}
------End fscb message-----
-
-
------Begin fscb message-----
-{
-  "header": "free_state_central_bank",
-  "message": "response-signature-stargazer-robert@email.com-2797298723",
-  "id": "3607096450",
-  "contract_name": "more list contract",
-  "banker_id": "8",
-  "creator_name": "Robert Gludo",
-  "creator_email": "robert@email.com",
-  "banker_name": "gripter",
-  "banker_email": "gripter@email.com",
-  "currency": "woodcoin",
-  "transaction_id": "0100000003658b21a68ca8f9fceb7c5051b53be3b46b88111f24648afebb6dd0bf14427078000000006c004c69522103417eb8968ac166dd9586f24fef4889fda053b251a886761cb9003d41fc3dd4ea2103577b26b2ced3512d76bc65efae1f32bee2b1fee422a146e5f59fa704d7c7f9de2102d25fb998eb19a2be9e33fdb62d0d779b9cf45f868fcf87988ad7682c0a1a611653ae00e1f5057ef7db4eb47c24191c2f650fdb4361ce932a2f7f9cac8f49a881a0ca5c96471d000000006c004c69522103417eb8968ac166dd9586f24fef4889fda053b251a886761cb9003d41fc3dd4ea2103577b26b2ced3512d76bc65efae1f32bee2b1fee422a146e5f59fa704d7c7f9de2102d25fb998eb19a2be9e33fdb62d0d779b9cf45f868fcf87988ad7682c0a1a611653ae00e1f505627b5a06e8521614c0886d167bff911a5a137c5ce8ce538954b835ba0a5ce6c3000000006c004c69522103417eb8968ac166dd9586f24fef4889fda053b251a886761cb9003d41fc3dd4ea2103577b26b2ced3512d76bc65efae1f32bee2b1fee422a146e5f59fa704d7c7f9de2102d25fb998eb19a2be9e33fdb62d0d779b9cf45f868fcf87988ad7682c0a1a611653ae00c2eb0b01c041c817000000001976a914aac6a113dc48cd1a26dd55c68323bb4ec68f9b0f88ac00000000"
-}
------End fscb message-----
-**/
-
 /**
   Banker Function (Withdrawal - request for signature)
   Sign the txid from account owner
@@ -1422,7 +1375,7 @@ ipcRenderer.on('withdrawal:ready-to-broadcast', (e, message) => {
 
   let broadcastButton = document.getElementById("owner-withdrawal-broadcast-button")
   broadcastButton.addEventListener('click', () => {
-    ipcRenderer.send('withdrawal:api', message.transaction_id)
+    ipcRenderer.send('withdrawal:api', message.transaction_id, message.id, message.withdrawal_id)
   })
 
   let closeButton = document.getElementById("owner-withdrawal-close-button")
@@ -1454,12 +1407,17 @@ ipcRenderer.on('withdrawal:broadcast-response', (e, res) => {
   })
 
   if(res.message){
-    console.log(res.message.result)
+    console.log("res message: ", res.message.result)
     withdrawalSuccessResponseContainer.classList.remove('hidden')
     withdrawalTxIdResponse.innerHTML = res.message.result
 
     closeButton.classList.remove('hidden')
     broadcastButton.classList.add('hidden')
+
+    /**
+      Update the account details with the withdrawal transaction
+    */
+
   } else {
     console.log(res.error.error.message)
     withdrawalErrorResponseContainer.classList.remove('hidden')
@@ -1777,6 +1735,11 @@ async function generateClaim(changeAmount) {
   let accountSigFilter;
   let inputsTable = document.getElementById('banker-verify-inputs-initial')
   let outputsTable = document.getElementById('banker-verify-outputs-initial')
+
+  // Clear input and output table
+  inputsTable.innerHTML = ""
+  outputsTable.innerHTML = ""
+
   console.log("get unspent", getunspent)
   for(let i = 0; i < getunspent.length; i++) {
     if(getunspent[i].children[5].defaultChecked) {
@@ -1972,12 +1935,24 @@ async function generateClaim(changeAmount) {
 }
 
 function requestSignatureWindow(tx, account) {
+
+  // Clear withdraw address and amount input
+  let withdrawAddrInput = document.getElementById('withdraw-address')
+  let withdrawAmtInput = document.getElementById('withdraw-amount')
+  let withdrawFeeInput = document.getElementById('withdraw-fee')
+
+  withdrawAddrInput.value = ""
+  withdrawAmtInput.value = ""
+  withdrawAmtInput.value = 0
+
+  let withdrawalID = Date.now()
   let accountDetails = document.getElementById('account-details')
   let accountWithdrawal = document.getElementById('account-withdrawal')
   let accountActions = document.getElementById('account-actions')
   let withdrawalReference = document.getElementById('withdraw-reference')
   let sendSignature = document.getElementById('send-signature')
   let messageSignature = document.getElementById('request-sig-message')
+  messageSignature.innerHTML = ""
   accountDetails.classList.add('hidden')
   accountWithdrawal.classList.add('hidden')
   accountActions.classList.add('hidden')
@@ -2015,11 +1990,13 @@ function requestSignatureWindow(tx, account) {
   const p13 = document.createElement('p')
   p13.innerHTML = '"transaction_id_for_signature":' + '"' + tx + '",'
   const p14 = document.createElement('p')
-  p14.innerHTML = '"currency":' + '"' + accountParse[0].currency + '"}'
+  p14.innerHTML = '"currency":' + '"' + accountParse[0].currency + '",'
   const p15 = document.createElement('p')
   p15.innerHTML = '"contract_name":' + '"' + accountParse[0].contract_name + '",'
   const p16 = document.createElement('p')
-  p16.innerHTML = "-----End fscb message-----"
+  p16.innerHTML = '"withdrawal_id":' + '"' + withdrawalID + '"}'
+  const p17 = document.createElement('p')
+  p17.innerHTML = "-----End fscb message-----"
   messageSignature.appendChild(p1)
   messageSignature.appendChild(br)
   messageSignature.appendChild(br)
@@ -2038,6 +2015,7 @@ function requestSignatureWindow(tx, account) {
   messageSignature.appendChild(p13)
   messageSignature.appendChild(p14)
   messageSignature.appendChild(p16)
+  messageSignature.appendChild(p17)
   const data = {
     "banker_id": accountParse[0].bankers[0].banker_id,
     "banker_name": accountParse[0].bankers[0].banker_name,
@@ -2048,7 +2026,13 @@ function requestSignatureWindow(tx, account) {
     "action": "Request for signature"
   }
   console.log("action data: ", data)
-  accountParse[0].signatures.push(data)
+  const newWithdrawal = {
+    id: withdrawalID,
+    signatures: [
+      data
+    ]
+  }
+  accountParse[0].withdrawals.push(newWithdrawal)
   ipcRenderer.send('signature:encode', {"id": accountParse[0].contract_id, "contract": accountParse[0]})
   // console.log("new account parse", JSON.stringify(accountParse[0]))
 }
