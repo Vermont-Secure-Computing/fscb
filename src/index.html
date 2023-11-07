@@ -56,7 +56,9 @@
           <!-- Tabs -->
           <ul class='list-outside list-disc ml-12 mt-12 h-96'>
             <ul id="tabs">
-              <li class="list-disc marker:text-orange-500 -mt-0 px-4 text-white font-semibold text-xl py-2 rounded-t" id="account-list-tab"><a class="getlistClick" href="#first">Account List</a></li>
+              <li class="list-disc marker:text-orange-500 -mt-0 px-4 text-white font-semibold text-xl py-2 rounded-t" id="account-list-tab">
+                <a class="getlistClick" href="#first">Account List</a>
+              </li>
               <hr class="bg-gray-500 opacity-10 dark:opacity-50"/>
               <li class="list-disc marker:text-red-500 px-4 text-white font-semibold text-xl py-2 rounded-t"><a class="getbankerClick" href="#second">New Account</a></li>
               <hr class="bg-gray-500 opacity-10 dark:opacity-50"/>
@@ -275,6 +277,7 @@
               <table class="min-w-full text-left text-sm font-light text-white">
                 <thead class="border-b font-medium dark:border-neutral-500">
                   <tr>
+                    <th scope="col" class="px-6 py-4">ID</th>
                     <th scope="col" class="px-6 py-4">Date</th>
                     <th scope="col" class="px-6 py-4">Banker</th>
                     <th scope="col" class="px-6 py-4">Action</th>
@@ -392,7 +395,7 @@
             <div id="send-signature" class="hidden">
               <h1 class="text-white">Transaction Signature</h1>
               <br>
-              <div id="request-sig-message" class="bg-white text-gray-600 break-all p-8 text-base font-normal"></div>
+              <div id="request-sig-message" class="bg-white text-gray-600 break-all p-8 text-base font-normal max-h-520 overflow-y-auto"></div>
               <button
                 id="send-signature-close-btn"
                 class="inline-flex items-center px-5 py-2.5 text-base font-medium text-center absolute right-8 my-3 text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">
