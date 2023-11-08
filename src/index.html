@@ -150,7 +150,10 @@
                 <div class="mt-20 text-base font-bold"><p>WIF Private Key</p></div>
                 <input type="text" id="pivkey-wif" disabled class="col-span-3 bg-[#AAE8BD] border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
 
-                <input type="text" id="pubkey-compressed" hidden>
+                <div class="mt-8 text-base font-bold"><p>Public Key</p></div>
+                <input type="text" id="pubkey-compressed" disabled class="col-span-3 bg-[#AAE8BD] border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+
+                <!--input type="text" id="pubkey-compressed" hidden-->
 
                 <div class="mt-4">
                   <p>WARNING</p>
@@ -215,7 +218,7 @@
               <p class="text-xl text-white font-bold">Response to Withdrawal Signature request</p>
               <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
               <p class="text-l text-white my-1" id="sign-response-title"></p>
-              <div class="bg-white font-normal text-base p-8 max-h-520 overflow-y-auto" id="banker-message-signtx-body">
+              <div class="bg-white font-normal text-base p-8 max-h-420 overflow-y-auto" id="banker-message-signtx-body">
               </div>
               <div id="banker-message-signtx-close-button"></div>
             </div>
@@ -310,7 +313,7 @@
                  </div>
                </div>
                <!--Body of list unspent-->
-               <div class="grid mb-4 mt-4 font-normal text-xl" id="list-unspent"></div>
+               <div class="grid mb-4 mt-4 font-normal text-xl gap-2" id="list-unspent"></div>
                <form id="withdraw-submit" class="mt-28">
                   <div id="address-amount">
                      <div class="flex justify-end">
@@ -322,10 +325,16 @@
                      </div>
                      <div class="pl-2 grid grid-cols-4 gap-2 -mx-2 space-y-4 md:space-y-0 top-10 text-sm" id="address-keys">
 
-                       <input type="text" placeholder="Enter Address" id="withdraw-address" class="relative grid col-span-2 h-10 w-full text-base text-black font-normal placeholder-gray-600 border focus:shadow-outline">
+                       <input
+                        type="text"
+                        required
+                        placeholder="Enter Address"
+                        id="withdraw-address"
+                        class="relative grid col-span-2 h-10 w-full text-base text-black font-normal placeholder-gray-600 border focus:shadow-outline">
 
                        <input
                         type="number"
+                        required
                         step=0.001
                         min=0
                         placeholder="Enter Amount"
@@ -395,11 +404,7 @@
             <div id="send-signature" class="hidden">
               <h1 class="text-white">Transaction Signature</h1>
               <br>
-<<<<<<< HEAD
-              <div id="request-sig-message" class="bg-white text-gray-600 break-all p-8 text-base font-normal max-h-520 overflow-y-auto"></div>
-=======
-              <div id="request-sig-message" class="bg-white text-gray-600 break-all p-8 text-base top-10 font-normal"></div>
->>>>>>> november07
+              <div id="request-sig-message" class="bg-white text-gray-600 break-all p-8 text-base font-normal max-h-420 overflow-y-auto"></div>
               <button
                 id="send-signature-close-btn"
                 class="inline-flex items-center px-5 py-2.5 text-base font-medium text-center absolute right-8 my-3 text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">
@@ -539,13 +544,13 @@
               <p class="text-black px-5 mt-2 text-base font-normal text-left">The Free State Central Bank (FSCB) is open source software and comes with no warranty or guarantee of any kind.</p>
               <p class="text-black px-5 mt-2 text-base font-normal text-left">The purpose of FSCB is to help organize cryptocurrency trusts, which store funds using multisignatures enabling a higher security envronment for long term wealth management.  FSCB was created by a team of software consutants working with the Vermont Secure Computing Consultancy.</p>
               <p class="text-black px-5 mt-2 text-base font-normal text-left">In a normal banking model, an account holder entrusts bank employees with custody of their funds. In the FSCB model, the account holder entrusts "bankers" from his own social networks to take partial custody, to hold the private keys that control the funds in the account.</p>
-              <p class="text-black px-5 mt-2 text-base font-normal text-left">The account holder can also choose the redundancy level of the trust, via how many keys will be necessary to save and move the funds. Because of this redundancy, if one or more keys are lost, the funds will not be lost.</p>
+              <p class="text-black px-5 mt-2 text-base font-normal text-left">The account holder can also choose the redundancy level of the trust, via how many keys will be necessary to save and move the funds. Because of this redundancy, if one or more keys are lost, the funds will not necessarily be lost.</p>
               <p class="text-black px-5 mt-2 text-base font-normal text-left">There is no futher counterparty risk associated with such an account, no company or individual other than those selected by the account holder has any control of the keys.</p>
               <p class="text-black px-5 mt-2 text-base font-normal text-left">FSCB software will never store any private keys, remember to back up all keys and information associated with your funds!  Any methods can be used by selected bankers to store private keys.</p>
               <p class="text-black px-5 mt-2 text-base font-normal text-left">FSCB software creators have no control of your funds nor responsibility of any funds.</p>
               <p class="text-black px-5 mt-2 text-base font-normal text-left">FSCB is serverless, there are no centralized records of any kind maintained regarding the use of this software.</p>
               <p class="text-black px-5 mt-1 text-lg font-bold text-left">Use at your own risk!</p>
-             
+
             </div>
             <table id="data-container"></table>
           </div>
@@ -556,12 +561,16 @@
           <div id="sixth" class="hidden p-4 text-white text-xl font-bold">
             Backup
             <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
-            <div>
-              <!--p>Save the backup file to this directory: </p>
-              <input id="export-browse-btn" type="button" value="Browse..." />
-              <input type="file" id="select-dir" hidden webkitdirectory="" directory="" mozdirectory=""-->
 
+            <div id="backup-btn-container">
               <button id="export-btn" class="inline-flex items-center px-12 py-3 text-sm font-medium text-center absolute right-5 mt-5 text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Export Data</button>
+            </div>
+            <div id="backup-message-container" class="hidden">
+              <p class="mt-8 text-base text-normal">This is your FSCB backup. Please copy the line below and save it.</p>
+              <div class="mt-2 bg-white font-normal text-base p-8 max-h-420 overflow-y-auto" id="backup-message">
+              </div>
+
+              <button id="close-backup-btn" class="inline-flex items-center px-12 py-3 text-sm font-medium text-center absolute right-5 mt-5 text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Close</button>
             </div>
           </div>
         </div>
@@ -569,13 +578,13 @@
       <div id="user-profile" class="hidden h-screen bg-[#1a1a1a]">
         <form id="user-profile-form" class="relative text-white left-44 p-1 pl-48">
           <div class="mt-16 pl-7">
-            <img src="./images/FSP LOGO 7 2.png" alt="fscb">
+            <img src="./images/fscb_logo_round.png" alt="fscb">
           </div>
            <div class="font-semibold mt-8">
-            <span>Please do fill up the form</span>
+            <!--span>Please do fill up the form</span-->
            </div>
           <input input type="text" id="user-name" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block relative w-96 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Username">
-          <input input type="text" id="user-email" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block relative w-96 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Users E-mail">
+          <input input type="email" id="user-email" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block relative w-96 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Users E-mail">
           <button type="submit" class="items-center relative px-40 py-3 text-md font-medium text-center text-white bg-orange-500 focus:ring-4 focus:ring-orange-500 dark:focus:bg-orange-500 hover:bg-orange mt-5 ml-2 rounded-full">Submit</button>
         </form>
       </div>
