@@ -34,7 +34,7 @@ let secondTab = document.getElementById('second')
 let addBankerTab = document.getElementById('addbanker')
 let thirdTab = document.getElementById('third')
 let fourthTab = document.getElementById('fourth')
-let fifthTab = document.getElementById('fifth')
+let fifthTab = document.getElementById('sixth')
 
 /**
   Import Text screen
@@ -90,10 +90,10 @@ getUserData()
 tabTogglers.forEach(function(toggler) {
     toggler.addEventListener("click", function(e) {
         e.preventDefault();
-        console.log('click button')
+
         importTextTab.classList.add('hidden')
         let tabName = this.getAttribute("href");
-        console.log('tab name: ', tabName)
+
         openTab = tabName;
         if (tabName === "#first") {
             ipcRenderer.send("balance:api", {"send": "get"})
@@ -135,12 +135,11 @@ tabTogglers.forEach(function(toggler) {
 
         for (let i = 0; i < tabContents.children.length-1; i++) {
           tabTogglers[i].parentElement.classList.remove("bg-gradient-to-l", "from-gray-500");
-          tabContents.children[i].classList.remove("hidden");
-          console.log("tabContents.children[i].id: ", tabContents.children[i].id)
-          if ("#" + tabContents.children[i].id === tabName) {
+          tabContents.children[i+1].classList.remove("hidden");
+          if ("#" + tabContents.children[i+1].id === tabName) {
               continue;
           }
-          tabContents.children[i].classList.add("hidden");
+          tabContents.children[i+1].classList.add("hidden");
 
         }
         e.target.parentElement.classList.add("bg-gradient-to-l", "from-gray-500");
@@ -159,12 +158,15 @@ function showImportListScreen() {
   thirdTab.classList.add('hidden')
   fourthTab.classList.add('hidden')
   fifthTab.classList.add('hidden')
-
+  console.log("show import list screen")
   let tabContents = document.querySelector("#tab-contents");
   for (let i = 0; i < tabContents.children.length-1; i++) {
-    tabTogglers[i].parentElement.classList.remove("bg-gradient-to-l", "from-gray-500");
+    if (tabTogglers[i].parentElement) {
+      tabTogglers[i].parentElement.classList.remove("bg-gradient-to-l", "from-gray-500");
+    }
   }
   let accountListTab = document.getElementById('account-list-tab')
+  console.log("accountListTab: ", accountListTab)
   accountListTab.classList.add("bg-gradient-to-l", "from-gray-500");
 }
 
@@ -310,7 +312,6 @@ function showTxId(txid) {
 }
 
 function listAccountActions(actions, signatureNeeded){
-  console.log("actions: ", actions)
   let accountDetails = document.getElementById('account-details')
   let accountWithdrawal = document.getElementById('account-withdrawal')
   let accountActions = document.getElementById('account-actions')
@@ -324,8 +325,6 @@ function listAccountActions(actions, signatureNeeded){
   /**
     Check if the withdrawal is ready for broadcasting
   **/
-
-  console.log("actions: ", actions)
   for (const [index, withdrawal] of actions.entries()){
     if(withdrawal.hasOwnProperty('txid')){
       let row = tableBody.insertRow();
@@ -348,7 +347,6 @@ function listAccountActions(actions, signatureNeeded){
       status.innerHTML = "Success"
     }
     for(let x in withdrawal.signatures) {
-      console.log("withdrawal: ", withdrawal)
       if(withdrawal.signatures.hasOwnProperty(x)){
         let row = tableBody.insertRow();
         let id = row.insertCell(0);
@@ -410,12 +408,10 @@ function outputsAddress(e) {
   Owner view - Account withdrawal
 **/
 function accountWithdrawalFunc(address){
-  console.log("withdrawal: ", address.address)
   CHANGE_ADDRESS = address.address
   ipcRenderer.send("unspent:api", address.address)
   const script = coinjs.script()
   const addressScript = script.decodeRedeemScript(address.redeemscript)
-  console.log("redeem script res ", addressScript)
 
   let accountDetails = document.getElementById('account-details')
   let accountWithdrawal = document.getElementById('account-withdrawal')
@@ -436,11 +432,11 @@ function accountWithdrawalFunc(address){
   ipcRenderer.on('unspent:address', (e, evt) => {
     // const listParse = JSON.parse(evt)
     const listP = evt;
-    console.log("unspent address: ", evt, listP.length)
+    //console.log("unspent address: ", evt, listP.length)
     if (unspentAmountTotal == 0) {
       for (let i = 0; i < listP.length; i++) {
         console.log(listP[i].txid)
-        unspentAmountTotal += listP[i].amount / 100000000
+        unspentAmountTotal += Number(listP[i].amount / 100000000)
         // let row = tableBody.insertRow()
         // let transactionId = row.insertCell(0)
         // transactionId.innerHTML = listP[i].txid.substring(0,30)+"..."
@@ -457,7 +453,7 @@ function accountWithdrawalFunc(address){
         div.setAttribute('id', 'inner-unspent')
         div.setAttribute('class', 'grid md:grid-cols-4 gap-3')
         let input1 = document.createElement('input')
-        input1.setAttribute('class', 'col-span-2 txid-withdraw text-black')
+        input1.setAttribute('class', 'col-span-2 txid-withdraw text-black text-base text-normal p-1')
         input1.setAttribute('id', 'txid-withdraw')
         input1.value = listP[i].txid
         let input2 = document.createElement('input')
@@ -466,12 +462,12 @@ function accountWithdrawalFunc(address){
         input2.setAttribute('id', 'vout-withdraw')
         input2.value = listP[i].vout
         let input3 = document.createElement('input')
-        input3.setAttribute('class', 'text-black')
+        input3.setAttribute('class', 'text-black text-base text-normal')
         input3.setAttribute('class', 'hidden')
         input3.setAttribute('id', 'script-withdraw')
         input3.value = addressScript.redeemscript
         let input4 = document.createElement('input')
-        input4.setAttribute('class', 'col-span-1 text-black')
+        input4.setAttribute('class', 'col-span-1 text-black text-base text-normal p-1')
         input4.setAttribute('id', 'amount-withdraw')
         input4.value = listP[i].amount / 100000000
         let input5 = document.createElement('input')
@@ -483,10 +479,19 @@ function accountWithdrawalFunc(address){
         check.addEventListener('change', (e, evt) => {
           console.log("e testing ", e)
           console.log("evt testing ", evt)
+          let withdrawAmt = getTotalWithdrawalAmt()
+
           if(e.target.defaultChecked) {
             check.removeAttribute('checked', '')
+            console.log("subtract this amount: ", input4.value)
+
+            unspentAmountTotal -= parseFloat(input4.value)
+            withdrawalFee.value = (unspentAmountTotal - withdrawAmt).toFixed(8)
           } else {
             check.setAttribute('checked', '')
+            console.log("add this amount: ", input4.value)
+            unspentAmountTotal += parseFloat(input4.value)
+            withdrawalFee.value = (unspentAmountTotal - withdrawAmt).toFixed(8)
           }
         })
         div.appendChild(input1)
@@ -503,6 +508,17 @@ function accountWithdrawalFunc(address){
   })
 }
 
+function getTotalWithdrawalAmt() {
+  const getuserinput = document.querySelectorAll('#address-keys')
+  let totalOutput = 0
+
+  for (let i = 0; i < getuserinput.length; i++) {
+    let amount = getuserinput[i].children[1].value
+    totalOutput += Number(amount)
+  }
+  return totalOutput
+}
+
 function amountOnInput(amount) {
   if (!isNaN(amount)) {
     const getuserinput = document.querySelectorAll('#address-keys')
@@ -513,7 +529,7 @@ function amountOnInput(amount) {
       totalOutput += Number(amount)
     }
     TOTAL_AMOUNT_TO_WITHDRAW = totalOutput
-    withdrawalFee.value = unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW
+    withdrawalFee.value = (unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW).toFixed(8)
   }
 }
 
@@ -528,13 +544,13 @@ function amountOnchange(amount) {
 
   //TOTAL_AMOUNT_TO_WITHDRAW += Number(amount)
   TOTAL_AMOUNT_TO_WITHDRAW = totalOutput
-  withdrawalFee.value = unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW
+  withdrawalFee.value = (unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW).toFixed(8)
 }
 
 function amountOnchangeSubtract(amount) {
 
   TOTAL_AMOUNT_TO_WITHDRAW -= Number(amount)
-  withdrawalFee.value = unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW
+  withdrawalFee.value = (unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW).toFixed(8)
   console.log("amount to subtract: ", amount)
   console.log("withdrawal fee: ", unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW)
 }
@@ -599,9 +615,19 @@ function getAccountDetails(account){
     let signaturesNeeded = account.signature_nedded
     viewActionsButton.addEventListener("click", function() {listAccountActions(actions, signaturesNeeded);}, false);
 
+    /**
+      Disable withdrawal button when account balance is zero(0)
+    **/
     let withdrawalButton = document.createElement('button')
-    withdrawalButton.classList.add("inline-flex", "items-center", "m-2", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-full", "focus:ring-4", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
     withdrawalButton.innerHTML = "Withdrawal"
+    if (account.balance > 0) {
+      withdrawalButton.classList.add("inline-flex", "items-center", "m-2", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-full", "focus:ring-4", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
+      withdrawalButton.disabled = false;
+    } else {
+      withdrawalButton.classList.add("inline-flex", "items-center", "m-2", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-full", "cursor-not-allowed")
+      withdrawalButton.disabled = true;
+    }
+
     let address = {
         "address": account.address,
         "redeemscript": account.redeem_script
@@ -642,10 +668,12 @@ function addOrDelete(id) {
     let input1 = document.createElement('input')
     input1.setAttribute('class', 'text-base text-black font-normal h-10 col-span-2 mt-2')
     input1.setAttribute('placeholder', 'Enter Address')
+    input1.setAttribute('required', '')
     let input2 = document.createElement('input')
     // input2.addEventListener('onchange', ()=> {console.log("amount: ", input2.value)})
     input2.setAttribute('class', 'text-base text-black font-normal h-10 col-span-1 mt-2 user-input-amount')
     input2.setAttribute('placeholder', 'Enter Amount')
+    input2.setAttribute('required', '')
 
     /**
       Add event listener to the amount input
@@ -705,8 +733,7 @@ function addBanker(e) {
       Add banker form validation
     **/
     if (bankerName == "" || bankerEmail == "") {
-      console.log("User name and email is required.")
-      alertError("User name and email is required.")
+      alertError("Banker User name and email is required.")
       return
     }
     if (bankerEmail) {
@@ -1447,13 +1474,32 @@ async function createUserProfile(e) {
     e.preventDefault()
     const userName = document.getElementById('user-name').value
     const userEmail = document.getElementById('user-email').value
-    coinjs.compressed = true
-    const userAddress = await coinjs.newKeys()
-    console.log(userAddress)
+
+    /**
+      Validation
+    **/
+    if (userName == '' || userEmail == '') {
+      alertError("Name and email is required.")
+      return
+    } else if (userName.length > 50) {
+      alertError("Name should not be more than 50 characters")
+      return
+    } else if (!isEmailValid) {
+      alertError("Invalid email address")
+      return
+    }
+
+
+    /**
+      Disabled key creation
+    **/
+    //coinjs.compressed = true
+    //const userAddress = await coinjs.newKeys()
+    //console.log(userAddress)
     ipcRenderer.send("user:address", {
         userName,
         userEmail,
-        userAddress
+        //userAddress
     })
     ipcRenderer.on('create:profile', (e) => {
         const userProfile = document.getElementById('user-profile')
@@ -1677,8 +1723,32 @@ function checkTxFee(e) {
   let withdrawFeeInput = document.getElementById("withdraw-fee")
   let userInputtedFee = withdrawFeeInput.value
 
-  let change = unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW
+  if (unspentAmountTotal == 0) {
+    alertError("No unspent selected.")
+    return
+  }
+
+  /****/
+  // for (let i = 0; i < getuserinput.length; i++) {
+  //   let address = getuserinput[i].children[0].value
+  //   let amount = getuserinput[i].children[1].value
+  //
+  //   userinputindex = i
+  //   userinputsum += Number(amount)
+  //   console.log(address, amount)
+  //
+  //   let isValidAddress = coinjs.addressDecode(address)
+  //   if (isValidAddress == false) {
+  //     alertError("Address is not valid")
+  //     return
+  //   } else {
+  //     tx.addoutput(address, amount)
+  //   }
+  // }
+
+  let change = (unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW).toFixed(8)
   console.log("change: ", change)
+  console.log("userInputtedFee: ", userInputtedFee)
 
   if (unspentAmountTotal < TOTAL_AMOUNT_TO_WITHDRAW) {
     alertError("Insufficient balance. Please adjust the withdrawal amount.")
@@ -1707,6 +1777,7 @@ function checkTxFee(e) {
 }
 
 async function generateClaim(changeAmount) {
+  console.log("generate claim")
   //e.preventDefault()
   // const txid = document.getElementById('txid-withdraw').value
   // const vout = document.getElementById('vout-withdraw').value
@@ -1754,6 +1825,7 @@ async function generateClaim(changeAmount) {
     //   console.log(out)
     // }
   }
+
   console.log(getuserinput)
   for (let i = 0; i < getuserinput.length; i++) {
     let address = getuserinput[i].children[0].value
@@ -1798,7 +1870,7 @@ async function generateClaim(changeAmount) {
   }
   /**End of automatically adding change address**/
 
-  if (userunspentindex === getunspent.length -1 && userinputindex === getuserinput.length -1) {
+  if (userunspentindex <= getunspent.length -1 && userinputindex <= getuserinput.length -1) {
     let accountDetails = document.getElementById('account-details')
     let accountWithdrawal = document.getElementById('account-withdrawal')
     let accountActions = document.getElementById('account-actions')
@@ -1925,6 +1997,11 @@ async function generateClaim(changeAmount) {
     generateButton.addEventListener('click', function() {
       requestSignatureWindow(txRedeemTransaction, accountSigFilter)
     }, false)
+  } else {
+    console.log("userunspentindex: ", userunspentindex)
+    console.log("getunspent.length -1: ", getunspent.length -1)
+    console.log("userinputindex: ", userinputindex)
+    console.log("getuserinput.length -1: ", getuserinput.length -1)
   }
 
 
@@ -2066,8 +2143,55 @@ function browseDirectory() {
   console.log("dir: ", dir)
 }
 
-ipcRenderer.on('export:response', (e) => {
-  alertSuccess("Successfully created a backup file.")
+/**
+  Display data to backup in a textarea and let
+  the copy and save it
+**/
+ipcRenderer.on('export:response', (e, message) => {
+  //alertSuccess("Successfully created a backup file.")
+  let backupBtnContainer = document.getElementById('backup-btn-container')
+  let backupMessageContainer = document.getElementById('backup-message-container')
+  let backupMessageBody = document.getElementById('backup-message')
+  let closeBtn = document.getElementById('close-backup-btn')
+
+  backupBtnContainer.classList.add('hidden')
+  backupMessageContainer.classList.remove('hidden')
+
+  const div = document.createElement('div')
+  div.setAttribute('class', 'bg-white p-3 rounded-md text-black')
+  const p1 = document.createElement('p')
+  const p2 = document.createElement('pre')
+  const p3 = document.createElement('p')
+
+  backupMessageBody.innerHTML = ''
+
+  p1.innerHTML = "-----Begin fscb message-----";
+  p2.innerHTML = JSON.stringify(message, undefined, 2);
+  p3.innerHTML = "-----End fscb message-----";
+
+  p1.classList.add('my-1')
+  p2.classList.add('whitespace-pre-wrap', 'break-all')
+  div.appendChild(p1)
+  div.appendChild(p2)
+  div.appendChild(p3)
+
+  backupMessageBody.appendChild(div)
+
+  closeBtn.addEventListener("click", function() {
+
+    console.log("close back up screen")
+    backupBtnContainer.classList.remove('hidden')
+    backupMessageContainer.classList.add('hidden')
+
+    showImportListScreen()
+  }, false);
+})
+
+
+ipcRenderer.on('response:import-json', (e) => {
+  alertSuccess("Successfully imported FSCB data.")
+  const textarea = document.getElementById('import-text');
+  textarea.innerHTML = ""
 })
 
 
