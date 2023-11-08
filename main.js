@@ -501,9 +501,6 @@ async function bankerPubkeyRequest(evt) {
 }
 
 async function importData(data) {
-	console.log("import data user: ", typeof(data.user))
-	console.log("import data user: ", typeof(data.bankers))
-	console.log("import data user: ", typeof(data.accounts))
 
 	if (data.user) {
 		const user = JSON.stringify(data.user, null, 2)
@@ -529,6 +526,9 @@ async function importData(data) {
 			console.log('writing to data.json');
 		});
 	}
+
+	/****/
+	win.webContents.send('response:import-json', {})
 }
 
 
@@ -664,10 +664,10 @@ ipcMain.on('user:address', (e, options) => {
   let data = {
     "user_name": options.userName,
     "user_email": options.userEmail,
-    "address": options.userAddress.address,
-    "pubkey": options.userAddress.pubkey, // pubkey compressed 66 chars
-    "privkey": options.userAddress.wif, // privkey 52 chars base58
-    "wif": options.userAddress.privkey // privkey hex 64 chars
+    // "address": options.userAddress.address,
+    // "pubkey": options.userAddress.pubkey, // pubkey compressed 66 chars
+    // "privkey": options.userAddress.wif, // privkey 52 chars base58
+    // "wif": options.userAddress.privkey // privkey hex 64 chars
   }
   try {
     // const fileName = "user.json"
@@ -758,25 +758,29 @@ ipcMain.on('export:get-data', () => {
 
   //console.log("json message: ", message)
 
-	let backup = "This is your FSCB backup. \n"
-	const textBegin = "----- Begin fscb message ----- \n"
-	const textEnd = "\n ----- End fscb message ----- \n"
+	// let backup = "This is your FSCB backup. \n"
+	// const textBegin = "----- Begin fscb message ----- \n"
+	// const textEnd = "\n ----- End fscb message ----- \n"
+	//
+	// let backupMessage = backup + textBegin + JSON.stringify(message) + textEnd
+	// console.log("backupMessage: ", backupMessage)
 
-	let backupMessage = backup + textBegin + JSON.stringify(message) + textEnd
-	console.log("backupMessage: ", backupMessage)
+	/**
+		Disabled. New backup flow, display data in a textarea and let the user copy and save it
+	**/
+	// const path = "data"
+  // const fileName = "backup.txt"
+	// fs.writeFile(homedir + "/" + path +"/"+ fileName, backupMessage, function writeJson(err, bytes) {
+	// 	if (err) {
+	// 		console.log(err)
+	// 	} else {
+	// 		console.log("successfully write backup, bytes: ", bytes);
+	// 		win.webContents.send('export:response', {})
+	// 		return
+	// 	}
+	// })
 
-	const path = "data"
-  const fileName = "backup.txt"
-	fs.writeFile(homedir + "/" + path +"/"+ fileName, backupMessage, function writeJson(err, bytes) {
-		if (err) {
-			console.log(err)
-		} else {
-			console.log("successfully write backup, bytes: ", bytes);
-			win.webContents.send('export:response', {})
-			return
-		}
-	})
-
+	win.webContents.send('export:response', message)
 
 })
 
