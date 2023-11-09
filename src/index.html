@@ -97,9 +97,9 @@
               <p class="text-xl text-white font-bold">Request for Withdrawal Signature</p>
               <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
               <p class="text-l text-white my-1" id="sign-request-title"></p>
-              <div id="owner-message-sign-request-body">
-                <div id="owner-message-sign-request-close-button"></div>
+              <div id="owner-message-sign-request-body" class="max-h-[420px] overflow-y-auto">
               </div>
+              <div id="owner-message-sign-request-close-button"></div>
             </div>
             <!--End of Owners view - Message to send - Signature request-->
 
@@ -111,7 +111,7 @@
               <div id="owner-withdrawal-txid-body">
                 <div class="text-white my-1">
                   <p>TxID</p>
-                  <div id="owner-withdrawal-txid-for-broadcast" class="break-all p2 bg-white p-8 text-black font-normal text-base mt-8"></div>
+                  <div id="owner-withdrawal-txid-for-broadcast" class="break-all p2 bg-white p-8 text-black font-normal text-base mt-8 max-h-[360px]"></div>
                 </div>
 
                 <!-- Successful withdrawal broadcast -->
@@ -218,7 +218,7 @@
               <p class="text-xl text-white font-bold">Response to Withdrawal Signature request</p>
               <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
               <p class="text-l text-white my-1" id="sign-response-title"></p>
-              <div class="bg-white font-normal text-base p-8 max-h-420 overflow-y-auto" id="banker-message-signtx-body">
+              <div class="bg-white font-normal text-base p-8 max-h-[420px] overflow-y-auto" id="banker-message-signtx-body">
               </div>
               <div id="banker-message-signtx-close-button"></div>
             </div>
@@ -264,7 +264,7 @@
                     <th scope="col" class="px-6 py-2 mt-2">Name</th>
                     <th scope="col" class="px-6 py-2 mt-2">E-mail</th>
                     <th scope="col" class="px-6 py-2 mt-2">Public key</th>
-                    <th scope="col" class="px-6 py-2 mt-2">Signature</th>
+                    <!--th scope="col" class="px-6 py-2 mt-2">Signature</th-->
                   </tr>
                 </thead>
                 <tbody id="account-bankers-list">
@@ -277,20 +277,22 @@
             </div>
             <div id="account-actions" class="hidden">
               <h1>Account actions</h1>
-              <table class="min-w-full text-left text-sm font-light text-white">
-                <thead class="border-b font-medium dark:border-neutral-500">
-                  <tr>
-                    <th scope="col" class="px-6 py-4">ID</th>
-                    <th scope="col" class="px-6 py-4">Date</th>
-                    <th scope="col" class="px-6 py-4">Banker</th>
-                    <th scope="col" class="px-6 py-4">Action</th>
-                    <th scope="col" class="px-6 py-4">TxID</th>
-                    <th scope="col" class="px-6 py-4">Status</th>
-                  </tr>
-                </thead>
-                <tbody id="actions-list-body">
-                </tbody>
-              </table>
+              <div class=" max-h-[420px] overflow-y-auto">
+                <table class="min-w-full text-left text-sm font-light text-white">
+                  <thead class="border-b font-medium dark:border-neutral-500">
+                    <tr>
+                      <th scope="col" class="px-6 py-4">ID</th>
+                      <th scope="col" class="px-6 py-4">Date</th>
+                      <th scope="col" class="px-6 py-4">Banker</th>
+                      <th scope="col" class="px-6 py-4">Action</th>
+                      <th scope="col" class="px-6 py-4">TxID</th>
+                      <th scope="col" class="px-6 py-4">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="actions-list-body">
+                  </tbody>
+                </table>
+              </div>
               <button
                 id="account-actions-back-btn"
                 class="inline-flex items-center px-10 py-2.5 text-base font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">
@@ -404,7 +406,7 @@
             <div id="send-signature" class="hidden">
               <h1 class="text-white">Transaction Signature</h1>
               <br>
-              <div id="request-sig-message" class="bg-white text-gray-600 break-all p-8 text-base font-normal max-h-420 overflow-y-auto"></div>
+              <div id="request-sig-message" class="bg-white text-gray-600 break-all p-8 text-base font-normal max-h-[420px] overflow-y-auto"></div>
               <button
                 id="send-signature-close-btn"
                 class="inline-flex items-center px-5 py-2.5 text-base font-medium text-center absolute right-8 my-3 text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">
@@ -567,7 +569,7 @@
             </div>
             <div id="backup-message-container" class="hidden">
               <p class="mt-8 text-base text-normal">This is your FSCB backup. Please copy the line below and save it.</p>
-              <div class="mt-2 bg-white font-normal text-base p-8 max-h-420 overflow-y-auto" id="backup-message">
+              <div class="mt-2 bg-white font-normal text-base p-8 max-h-[420px] overflow-y-auto" id="backup-message">
               </div>
 
               <button id="close-backup-btn" class="inline-flex items-center px-12 py-3 text-sm font-medium text-center absolute right-5 mt-5 text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Close</button>
