@@ -384,8 +384,12 @@ ipcMain.on('balance:api', (e, options) => {
 })
 
 
-ipcMain.on('withdrawal:api', (e, txid, accountId, withdrawalId) => {
-  console.log("ipc main withdrawal txid: ", txid)
+ipcMain.on('withdrawal:api', (e, message) => {
+  console.log("ipc main withdrawal txid: ", message)
+	const txid = message.transaction_id
+	const accountId = message.id
+	const withdrawalId = message.withdrawal_id
+
   try {
     const request = https.request(`https://api.logbin.org/api/broadcast/r?transaction=${txid}`, (response) => {
       console.log("withdrawal response")
@@ -395,18 +399,34 @@ ipcMain.on('withdrawal:api', (e, txid, accountId, withdrawalId) => {
       });
 
       response.on('end', async () => {
+				console.log("response end: ", data)
           const body = await JSON.parse(data);
 
           console.log("withdrawal response message: ", body)
 					if (body.message) {
+						console.log("body.message: ", body.message)
 						const accounts = await JSON.parse(fs.readFileSync(homedir + "/data/data.json", "utf-8"))
 						for (const [key, value] of Object.entries(accounts)) {
 				      let account = value
-				      if (account.id == accountID) {
+							console.log("account.id vs accountId: ", account.id, accountId)
+				      if (account.id == accountId) {
+								console.log("inside account: ")
 								for (const [index, withdrawal] of account.withdrawals.entries()){
-									if (withdrawal.id == message.withdrawalId){
+									console.log("withdrawal.id vs withdrawalId: ", withdrawal.id, withdrawalId)
+									if (withdrawal.id == withdrawalId){
+										console.log("inside withdrawal id")
 										withdrawal.date_broadcasted = Date.now()
 										withdrawal.txid = body.message.result
+										console.log(withdrawal)
+										const updatedAccounts = JSON.stringify(accounts, null, 2)
+										fs.writeFile(homedir + "/data/data.json"
+											, updatedAccounts, function writeJson(err) {
+											if (err)  {
+												console.log("updating withdrawal after successful broadcasting error: ", err)
+											} else {
+												console.log("withdrawal broadcasted. record updated")
+											}
+										})
 									}
 								}
 							}
@@ -592,10 +612,12 @@ async function bankerSignatureResponse(message) {
 				                  // Create new signature object in the account signature array
 				                  const newSignatory = {
 				                    "banker_id": next_banker.banker_id,
+														"banker_name": next_banker.banker_name,
 				                    "date_requested": Date.now(),
 				                    "date_signed": null,
 				                    "status": "PENDING",
-				                    "transaction_id": ""
+				                    "transaction_id": "",
+														"action": "Request for signature"
 				                  }
 				                  withdrawal.signatures.push(newSignatory)
 

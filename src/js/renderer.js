@@ -326,26 +326,8 @@ function listAccountActions(actions, signatureNeeded){
     Check if the withdrawal is ready for broadcasting
   **/
   for (const [index, withdrawal] of actions.entries()){
-    if(withdrawal.hasOwnProperty('txid')){
-      let row = tableBody.insertRow();
-      let id = row.insertCell(0);
-      id.innerHTML = withdrawal.id
-      let date = row.insertCell(1);
-      let date_broadcasted = new Date(withdrawal.date_broadcasted)
-      dateFormat = date_broadcasted.toDateString()
-      date.innerHTML = dateFormat
-      let banker = row.insertCell(2);
-      banker.innerHTML = "Owner"
-      let action = row.insertCell(3);
-      action.innerHTML = "Withdrawal broadcasted"
-      let txid = row.insertCell(4);
-      let viewBtn = "<button class='ml-4 disabled:opacity-75 bg-blue-500 active:bg-blue-700 text-white font-semibold hover:text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline' id='view-txid-btn'>View</button>"
-      txid.innerHTML = viewBtn
-      let viewTxidBtn = document.getElementById('view-txid-btn')
-      viewTxidBtn.addEventListener('click', () => showTxId(withdrawal.txid))
-      let status = row.insertCell(5);
-      status.innerHTML = "Success"
-    }
+    console.log('withdrawal: ', withdrawal)
+    console.log("has prop: ", withdrawal.hasOwnProperty('txid'))
     for(let x in withdrawal.signatures) {
       if(withdrawal.signatures.hasOwnProperty(x)){
         let row = tableBody.insertRow();
@@ -353,7 +335,7 @@ function listAccountActions(actions, signatureNeeded){
         id.innerHTML = withdrawal.id
         let date = row.insertCell(1);
         let dateReq
-        if (actions[x].date_signed) {
+        if (withdrawal.signatures[x].date_signed) {
           dateReq = new Date(withdrawal.signatures[x].date_signed);
         } else {
           dateReq = new Date(withdrawal.signatures[x].date_requested);
@@ -378,6 +360,28 @@ function listAccountActions(actions, signatureNeeded){
         let status = row.insertCell(5);
         status.innerHTML = withdrawal.signatures[x].status
       }
+    }
+
+    if(withdrawal.hasOwnProperty('txid')){
+
+      let row = tableBody.insertRow();
+      let id = row.insertCell(0);
+      id.innerHTML = withdrawal.id
+      let date = row.insertCell(1);
+      let date_broadcasted = new Date(withdrawal.date_broadcasted)
+      dateFormat = date_broadcasted.toDateString()
+      date.innerHTML = dateFormat
+      let banker = row.insertCell(2);
+      banker.innerHTML = "Owner"
+      let action = row.insertCell(3);
+      action.innerHTML = "Withdrawal broadcasted"
+      let txid = row.insertCell(4);
+      let viewBtn = "<button class='ml-4 disabled:opacity-75 bg-blue-500 active:bg-blue-700 text-white font-semibold hover:text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline' id='view-txid-btn'>View</button>"
+      txid.innerHTML = viewBtn
+      let viewTxidBtn = document.getElementById('view-txid-btn')
+      viewTxidBtn.addEventListener('click', () => showTxId(withdrawal.txid))
+      let status = row.insertCell(5);
+      status.innerHTML = "Success"
     }
   }
 }
@@ -599,8 +603,8 @@ function getAccountDetails(account){
         email.innerHTML = bankers[x].banker_email
         let publicKey = row.insertCell(2);
         publicKey.innerHTML = pubkey
-        let signature = row.insertCell(3);
-        signature.innerHTML = bankers[x].signature ? bankers[x].signature : 'no signature yet'
+        // let signature = row.insertCell(3);
+        // signature.innerHTML = bankers[x].pubkey ? bankers[x].pubkey : 'no signature yet'
       }
     }
 
@@ -1387,8 +1391,15 @@ ipcRenderer.on('response:banker-signature', (e, message) => {
     // bankerForm.classList.remove('hidden')
     // bankersList.classList.remove('hidden')
     // bankerMessage.classList.add('hidden')
+    importArea.classList.remove('hidden')
+    ownerMessageSignRequest.classList.add('hidden')
+    importText.value = ""
+
+    showImportListScreen()
     console.log("close sign request message")
   }, false);
+
+  buttonDiv.appendChild(closeButton)
 })
 
 ipcRenderer.on('withdrawal:ready-to-broadcast', (e, message) => {
@@ -1402,7 +1413,7 @@ ipcRenderer.on('withdrawal:ready-to-broadcast', (e, message) => {
 
   let broadcastButton = document.getElementById("owner-withdrawal-broadcast-button")
   broadcastButton.addEventListener('click', () => {
-    ipcRenderer.send('withdrawal:api', message.transaction_id, message.id, message.withdrawal_id)
+    ipcRenderer.send('withdrawal:api', message)
   })
 
   let closeButton = document.getElementById("owner-withdrawal-close-button")
