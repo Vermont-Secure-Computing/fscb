@@ -326,64 +326,166 @@ ipcMain.on('balance:api', (e, options) => {
     accounts = fs.readFileSync(homedir + "/data/data.json", "utf-8")
     const allaccount = JSON.parse(accounts)
     for(let i in allaccount) {
-      // console.log(i)
       // console.log(Object.keys(allaccount).length)
-      const request = https.request(`https://twigchain.com/ext/getAddress/${allaccount[i].address}`, (response) => {
-      let data = '';
-      response.on('data', (chunk) => {
-          data = data + chunk.toString();
-      });
+      if (allaccount[i].currency === 'woodcoin') {
+        const request = https.request(`https://twigchain.com/ext/getAddress/${allaccount[i].address}`, (response) => {
+        let data = '';
+        response.on('data', (chunk) => {
+            data = data + chunk.toString();
+            console.log("all account ", chunk.toString())
+        });
 
-      response.on('end', async () => {
-          const body = await JSON.parse(data);
-          // console.log(body);
-          // allaccount[i].balance = body
-          if (body.address) {
-            if (allaccount[i].address === body.address) {
+        response.on('end', async () => {
+            const body = await JSON.parse(data);
+            // console.log(body);
+            // allaccount[i].balance = body
+            if (body.address) {
+              if (allaccount[i].address === body.address) {
 
-              allaccount[i].balance = body.balance
-              // const allparse = JSON.stringify(allaccount[i], null, 2)
-              fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
-								try {
-	                jdata = JSON.parse(jdata);
-	                //Step 3: append contract variable to list
-	                jdata[i] = allaccount[i]
-	                console.log(jdata);
-	                const wData = JSON.stringify(jdata, null, 2)
-	                fs.writeFile(homedir + "/" + path +"/"+ fileName, wData, (err) => {
-	                  if (err) {
-	                    return console.log(err)
-	                  } else {
-	                    const readMore = fs.readFileSync(homedir + "/data/data.json", "utf-8")
+                allaccount[i].balance = body.balance
+                // const allparse = JSON.stringify(allaccount[i], null, 2)
+                fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
+                  try {
+                    jdata = JSON.parse(jdata);
+                    //Step 3: append contract variable to list
+                    jdata[i] = allaccount[i]
+                    console.log(jdata);
+                    const wData = JSON.stringify(jdata, null, 2)
+                    fs.writeFile(homedir + "/" + path +"/"+ fileName, wData, (err) => {
+                      if (err) {
+                        return console.log(err)
+                      } else {
+                        const readMore = fs.readFileSync(homedir + "/data/data.json", "utf-8")
 
-	                    win.webContents.send("list:file",  readMore)
+                        win.webContents.send("list:file",  readMore)
 
-	                  }
-	                })
-								} catch (e) {
-									console.log("parsing error: ", e)
-								}
-              });
-              // account = allaccount[i]
-              // console.log(accounts)
-              // const updateJson = JSON.stringify(allaccount[i], null, 2)
-              // console.log(updateJson)
-              // fs.writeFile(jsonFile, updateJson, function writeJson() {
-              //   if (err) {
-              //     return console.log(err)
-              //   }
-              // })
+                      }
+                    })
+                  } catch (e) {
+                    console.log("parsing error: ", e)
+                  }
+                });
+                // account = allaccount[i]
+                // console.log(accounts)
+                // const updateJson = JSON.stringify(allaccount[i], null, 2)
+                // console.log(updateJson)
+                // fs.writeFile(jsonFile, updateJson, function writeJson() {
+                //   if (err) {
+                //     return console.log(err)
+                //   }
+                // })
+              }
             }
-          }
-      });
-      })
+          });
+        })
 
-      request.on('error', (error) => {
+        request.on('error', (error) => {
+            console.log('An error', error);
+            // win.webContents.send('response:balance', toString(0))
+        });
+        request.end()
+      } else if (allaccount[i].currency === 'bitcoin') {
+          console.log("currency ", allaccount[i].currency)
+          console.log("currency address ", allaccount[i].address)
+          const request = https.request(`https://api.blockchair.com/bitcoin/dashboards/address/${allaccount[i].address}?key=B___VYwLG4HbTTSe7C2ZZ12wleYgwrUe`, (response) => {
+            let data = '';
+            response.on('data', (chunk) => {
+              data = data + chunk.toString();
+              // console.log("all account 2 ", chunk.toString())
+            });
+            response.on('end', async () => {
+              const body = await JSON.parse(data);
+              const bodydata = Object.keys(body.data)
+              const removeBracket = bodydata[0]
+              if (body.data) {
+                if (allaccount[i].address === removeBracket) {
+                  // console.log("bitcoin satoshi ", body.data[allaccount[i].address].address.balance / Math.pow(10,8))
+                  allaccount[i].balance = body.data[allaccount[i].address].address.balance / Math.pow(10,8)
+                  fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
+                    try {
+                      jdata = JSON.parse(jdata);
+                      //Step 3: append contract variable to list
+                      jdata[i] = allaccount[i]
+                      console.log(jdata);
+                      const wData = JSON.stringify(jdata, null, 2)
+                      fs.writeFile(homedir + "/" + path +"/"+ fileName, wData, (err) => {
+                        if (err) {
+                          return console.log(err)
+                        } else {
+                          const readMore = fs.readFileSync(homedir + "/data/data.json", "utf-8")
+  
+                          win.webContents.send("list:file",  readMore)
+  
+                        }
+                      })
+                    } catch (e) {
+                      console.log("parsing error: ", e)
+                    }
+                  });
+                }
+              }
+            })
+
+          })
+          request.on('error', (error) => {
+            console.log('An error', error);
+            // win.webContents.send('response:balance', toString(0))
+
+          });
+          request.end()
+      } else if (allaccount[i].currency === 'litecoin') {
+        console.log("currency ", allaccount[i].currency)
+        console.log("currency address ", allaccount[i].address)
+        const request = https.request(`https://api.blockchair.com/litecoin/dashboards/address/${allaccount[i].address}?key=B___VYwLG4HbTTSe7C2ZZ12wleYgwrUe`, (response) => {
+          let data = '';
+          response.on('data', (chunk) => {
+            data = data + chunk.toString();
+            // console.log("all account 2 ", chunk.toString())
+          });
+          response.on('end', async () => {
+            const body = await JSON.parse(data);
+            const bodydata = Object.keys(body.data)
+            const removeBracket = bodydata[0]
+            if (body.data) {
+              if (allaccount[i].address === removeBracket) {
+                // console.log("bitcoin satoshi ", body.data[allaccount[i].address].address.balance / Math.pow(10,8))
+                allaccount[i].balance = body.data[allaccount[i].address].address.balance / Math.pow(10,8)
+                fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
+                  try {
+                    jdata = JSON.parse(jdata);
+                    //Step 3: append contract variable to list
+                    jdata[i] = allaccount[i]
+                    console.log(jdata);
+                    const wData = JSON.stringify(jdata, null, 2)
+                    fs.writeFile(homedir + "/" + path +"/"+ fileName, wData, (err) => {
+                      if (err) {
+                        return console.log(err)
+                      } else {
+                        const readMore = fs.readFileSync(homedir + "/data/data.json", "utf-8")
+
+                        win.webContents.send("list:file",  readMore)
+
+                      }
+                    })
+                  } catch (e) {
+                    console.log("parsing error: ", e)
+                  }
+                });
+              }
+            }
+          })
+
+        })
+        request.on('error', (error) => {
           console.log('An error', error);
           // win.webContents.send('response:balance', toString(0))
 
-      });
-      request.end()
+        });
+        request.end()
+    } else {
+        console.log("Chain not found")
+        return
+      }
     }
   }
 })
