@@ -277,17 +277,24 @@ ipcRenderer.on("send:newAccountSuccess", function() {
 ipcRenderer.on("list:file", function(e, evt){
     const convertToJson = JSON.parse(evt)
     const accountBody = document.getElementById('accounts-list-body')
+    let coinInitial;
 
     accountBody.innerHTML = ""
     for(let x in convertToJson) {
         if(convertToJson.hasOwnProperty(x)){
-
+            if (convertToJson[x].currency === 'woodcoin') {
+              coinInitial = 'LOG'
+            } else if (convertToJson[x].currency === 'bitcoin') {
+              coinInitial = 'BTC'
+            } else {
+              coinInitial = 'LTC'
+            }
             let row = accountBody.insertRow();
             let name = row.insertCell(0);
             name.setAttribute('class', 'pl-6')
             name.innerHTML = convertToJson[x].contract_name
             let address = row.insertCell(1);
-            address.innerHTML = convertToJson[x].address
+            address.innerHTML = coinInitial + ':' + convertToJson[x].address
             let balance = row.insertCell(2);
             balance.setAttribute('class', 'pl-4')
             balance.innerHTML = convertToJson[x].balance
