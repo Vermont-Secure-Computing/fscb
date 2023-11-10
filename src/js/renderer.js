@@ -1,7 +1,7 @@
 // var keys = ["02a580990522b85a9d842669f0950a615c061ec6916f32b8b3461efe58985c0cb4", "02bb3d790f459a017c11002a80671e8fc6213675b8845044996f51690011d7bdb0", "03d2fb8b133858b2a5b70e884451f2eaa23064e3dc9f77e417b317bed014f30dfc"]
 // var sigsNeeded = 2
-//  var multisig =  coinjs.pubkeys2MultisigAddress(keys, sigsNeeded);
-//  console.log(multisig)
+ // var multisig =  coinjs.pubkeys2MultisigAddress(keys, sigsNeeded);
+ // console.log(multisig)
 
 
 //  Start Tab Pannels
@@ -66,7 +66,7 @@ let inputFileBrowser = document.getElementById("select-dir")
 // const accountList = document.getElementById('accounts-list');
 
 const sigNumber = document.getElementById('releaseCoins');
-const currency = document.getElementById('coin-currency')
+const currency = document.getElementById('account-coin-currency')
 let tabsContainer = document.getElementById('tabs');
 let tabTogglers = tabsContainer.querySelectorAll("aside #tabs a");
 let bankersArray
@@ -198,6 +198,10 @@ function slicePubkey(pubkey) {
   }
 }
 
+
+/**
+  New account creation
+**/
 async function saveAndCreateText(e) {
     e.preventDefault();
     // console.log(contractName.value, " ", creatorName.value, " ", creatorEmail.value)
@@ -727,9 +731,10 @@ function addBanker(e) {
     const emailInput = document.getElementById('banker-email-add')
 
     // Get value of selected currency
-    var selectElement = document.querySelector('#coin-currency');
-    var bankerCurrency = selectElement.value;
+    var selectElement = document.getElementById('banker-coin-currency');
+    var bankerCurrency = selectElement.options[selectElement.selectedIndex].text;
 
+    console.log("bankerCurrency: ", bankerCurrency)
     const bankerName = nameInput.value
     const bankerEmail = emailInput.value
 
@@ -1540,10 +1545,23 @@ function isWifKeyValid(hex) {
 ipcRenderer.on('request:banker-pubkey', async(e, message) => {
     importArea.classList.add('hidden')
     bankerGeneratePrivkey.classList.remove('hidden')
-
-    coinjs.compressed = true
-    const userAddress = await coinjs.newKeys()
-    console.log(userAddress)
+    let userAddress
+    if (message.currency === "woodcoin") {
+      coinjs.compressed = true
+      userAddress = await coinjs.newKeys()
+      console.log(userAddress)
+    } else if (message.currency === "bitcoin") {
+      bitcoinjs.compressed = true
+      userAddress = await bitcoinjs.newKeys()
+      console.log(userAddress)
+    } else if (message.currency === "litecoin") {
+      console.log("currency litecoin")
+      litecoinjs.compressed = true
+      userAddress = await litecoinjs.newKeys()
+      console.log(userAddress)
+    } else {
+      return
+    }
 
     let privkeyHexInput = document.getElementById('pivkey-hex')
     let privkeyWifInput = document.getElementById('pivkey-wif')

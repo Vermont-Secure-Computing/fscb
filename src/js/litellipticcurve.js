@@ -2,7 +2,7 @@
 * Basic Javascript Elliptic Curve implementation
 * Ported loosely from BouncyCastle's Java EC code
 * Only Fp curves implemented for now
-* 
+*
 * Copyright Tom Wu, bitaddress.org  BSD License.
 * http://www-cs-students.stanford.edu/~tjw/jsbn/LICENSE
 */
@@ -63,7 +63,7 @@
 	/**
 	* return a sqrt root - the routine verifies that the calculation
 	* returns the right value - if none exists it returns null.
-	* 
+	*
 	* Copyright (c) 2000 - 2011 The Legion Of The Bouncy Castle (http://www.bouncycastle.org)
 	* Ported to JavaScript by bitaddress.org
 	*/
@@ -73,7 +73,7 @@
 		// p mod 4 == 3
 		if (this.q.testBit(1)) {
 			// z = g^(u+1) + p, p = 4u + 3
-			var z = new ec.FieldElementFp(this.q, this.x.modPow(this.q.shiftRight(2).add(BigInteger.ONE), this.q));
+			var z = new litec.FieldElementFp(this.q, this.x.modPow(this.q.shiftRight(2).add(BigInteger.ONE), this.q));
 			return z.square().equals(this) ? z : null;
 		}
 
@@ -352,7 +352,7 @@
 		var len = 32; // integerToBytes will zero pad if integer is less than 32 bytes. 32 bytes length is required by the Bitcoin protocol.
 		var enc = litec.integerToBytes(x, len);
 
-		// when compressed prepend byte depending if y point is even or odd 
+		// when compressed prepend byte depending if y point is even or odd
 		if (compressed) {
 			if (y.isEven()) {
 				enc.unshift(0x02);
@@ -515,7 +515,7 @@
 		this.q = q;
 		this.a = this.fromBigInteger(a);
 		this.b = this.fromBigInteger(b);
-		this.infinity = new ec.PointFp(this, null, null);
+		this.infinity = new litec.PointFp(this, null, null);
 		this.reducer = new Barrett(this.q);
 	}
 
