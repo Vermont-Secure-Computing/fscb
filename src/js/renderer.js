@@ -67,6 +67,9 @@ let inputFileBrowser = document.getElementById("select-dir")
 
 const sigNumber = document.getElementById('releaseCoins');
 const currency = document.getElementById('account-coin-currency')
+currency.addEventListener('change', setAccountCurrency)
+let ACCOUNT_CURRENCY = "woodcoin"
+
 let tabsContainer = document.getElementById('tabs');
 let tabTogglers = tabsContainer.querySelectorAll("aside #tabs a");
 let bankersArray
@@ -147,6 +150,14 @@ tabTogglers.forEach(function(toggler) {
 });
 
 
+
+
+function setAccountCurrency() {
+  const coinCurrencySend = currency.options[currency.selectedIndex].text;
+  ACCOUNT_CURRENCY = coinCurrencySend
+  ipcRenderer.send("newaccount:banker:filter", {});
+}
+
 /**
   Navigate to Import List screen
 **/
@@ -215,7 +226,7 @@ async function saveAndCreateText(e) {
     const sigSendNumber = sigNumber.options[sigNumber.selectedIndex].text;
     const coinCurrencySend = currency.options[currency.selectedIndex].text;
     const innerMultiKey = document.querySelectorAll('.activeClass a')
-    console.log(innerMultiKey)
+    console.log("innerMultiKey", innerMultiKey)
 
     /**
       New account data validation
@@ -909,8 +920,9 @@ ipcRenderer.on('send:bankers', function(e, evt) {
       // Get the selected value for contract currency
       // And filter bankers array with the value
       select.options.length = 0
+      console.log("account currency: ", currency)
       for(const key in bankersArray) {
-        if(bankersArray[key].pubkey){
+        if(bankersArray[key].pubkey && bankersArray[key].currency === ACCOUNT_CURRENCY){
           const opt = bankersArray[key].banker_email;
           const pub = bankersArray[key].pubkey;
           const el = document.createElement("option");
