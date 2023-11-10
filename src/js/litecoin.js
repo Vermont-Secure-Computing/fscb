@@ -100,7 +100,7 @@
 	}
 
 	/* provide a public key and return address */
-	bitbit.pubkey2address = function(h, byte){
+	litecoinjs.pubkey2address = function(h, byte){
 		var r = ripemd160(Crypto.SHA256(Crypto.util.hexToBytes(h), {asBytes: true}));
 		r.unshift(byte || litecoinjs.pub);
 		var hash = Crypto.SHA256(Crypto.SHA256(r, {asBytes: true}), {asBytes: true});
