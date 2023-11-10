@@ -30,8 +30,12 @@
 		<script type="text/javascript" src="../src/js/qcode-decoder.min.js"></script>
 		<script type="text/javascript" src="../src/js/jsbn.js"></script>
 		<script type="text/javascript" src="../src/js/ellipticcurve.js"></script>
+    <script type="text/javascript" src="../src/js/bitellipticcurve.js"></script>
+    <script type="text/javascript" src="../src/js/litellipticcurve.js"></script>
 
-		<script type="text/javascript" src="../src/js/coin.js"></script>
+    <script type="text/javascript" src="../src/js/coin.js"></script>
+    <script type="text/javascript" src="../src/js/bitcoin.js"></script>
+		<script type="text/javascript" src="../src/js/litecoin.js"></script>
     <script type="text/javascript" src="../src/js/renderer.js" defer></script>
   </head>
   <body>
@@ -419,10 +423,10 @@
             <hr class="my-3 mt-4 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
             <form id="create-new-form">
               <div class="relative mb-4 flex flex-wrap items-stretch">
-                <select class="text-black font-normal text-sm relative h-10 col-span-2 block w-full p-2 mt-1" name="currency" id="coin-currency">
+                <select class="text-black font-normal text-sm relative h-10 col-span-2 block w-full p-2 mt-1" name="currency" id="account-coin-currency">
                   <option value="woodcoin" selected>woodcoin</option>
-                  <!-- <option value="bitcoin">bitcoin</option>
-                  <option value="litecoin">litecoin</option> -->
+                  <option value="bitcoin">bitcoin</option>
+                  <option value="litecoin">litecoin</option>
                 </select>
               </div>
               <div class="relative mb-4 flex flex-wrap items-stretch">
@@ -492,10 +496,10 @@
             Add Banker
             <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
             <form class="mt-2" id="add-banker-form">
-              <select class="text-black font-normal text-sm relative h-10 col-span-2 block w-full p-2 mt-4" name="currency" id="coin-currency">
-                <option value="woodcoin" selected>woodcoin</option>
-                <!-- <option value="bitcoin">bitcoin</option>
-                <option value="litecoin">litecoin</option> -->
+              <select class="text-black font-normal text-sm relative h-10 col-span-2 block w-full p-2 mt-4" name="currency" id="banker-coin-currency">
+                <option value="woodcoin">woodcoin</option>
+                <option value="bitcoin">bitcoin</option>
+                <option value="litecoin">litecoin</option>
               </select>
               <input type="text" id="banker-name-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Bankers Name">
               <input type="email" id="banker-email-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email-add absoulte mt-2" placeholder="Bankers Email">
