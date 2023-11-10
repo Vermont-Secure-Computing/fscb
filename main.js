@@ -144,7 +144,7 @@ ipcMain.on("message:contractnew", (e, options) => {
   //   })
 
   // }
-
+	console.log("mergeBankers: ", mergeBankers)
   let data = {
       "id": Math.floor(1000000000 + Math.random() * 9000000000),
       "contract_id": getIdNumber,
@@ -265,6 +265,11 @@ ipcMain.on('message:addBanker', (e, options) => {
   } catch (e) {
     console.log(e)
   }
+})
+
+
+ipcMain.on('newaccount:banker:filter', (e) => {
+	readBankersFile()
 })
 
 function readBankersFile() {
