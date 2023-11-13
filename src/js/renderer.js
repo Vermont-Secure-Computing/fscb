@@ -220,9 +220,6 @@ async function saveAndCreateText(e) {
     const creatorSendName = USER.user_name;
     const creatorSendEmail = USER.user_email;
 
-    coinjs.compressed = true
-    const creatorAddressDetail = await coinjs.newKeys()
-    // console.log("New Key ", creatorAddressDetail)
     const sigSendNumber = sigNumber.options[sigNumber.selectedIndex].text;
     const coinCurrencySend = currency.options[currency.selectedIndex].text;
     const innerMultiKey = document.querySelectorAll('.activeClass a')
@@ -248,9 +245,26 @@ async function saveAndCreateText(e) {
     // })
         bankersMerge.push(innerMultiKey[i].dataset.value)
     }
-    console.log("banker merge ", bankersMerge)
+
+    let coin_js
+
+    if (coinCurrencySend === "woodcoin") {
+      coin_js = coinjs
+    } else if (coinCurrencySend === "bitcoin") {
+      coin_js = bitcoinjs
+    } else if (coinCurrencySend === "litecoin") {
+      coin_js = litecoinjs
+    } else {
+      console.log("invalid currency")
+    }
+
+
+    coin_js.compressed = true
+    const creatorAddressDetail = await coin_js.newKeys()
+
+    console.log("creatorAddressDetail ", creatorAddressDetail)
     const keys = bankersMerge;
-    const multisig =  coinjs.pubkeys2MultisigAddress(keys, sigSendNumber);
+    const multisig =  coin_js.pubkeys2MultisigAddress(keys, sigSendNumber);
     console.log("multisig ", multisig)
     const pubkeySend = multisig.address;
     const redeemScriptSend = multisig.redeemScript;
@@ -441,7 +455,20 @@ function outputsAddress(e) {
 function accountWithdrawalFunc(address){
   CHANGE_ADDRESS = address.address
   ipcRenderer.send("unspent:api", {"address": address.address, "currency": address.currency})
-  const script = coinjs.script()
+
+  let coin_js
+  if (address.currency === "woodcoin") {
+    coin_js = coinjs
+  } else if (address.currency === "bitcoin") {
+    coin_js = bitcoinjs
+  } else if (address.currency === "litecoin") {
+    coin_js = litecoinjs
+  } else {
+    console.log("invalid currency")
+  }
+
+
+  const script = coin_js.script()
   const addressScript = script.decodeRedeemScript(address.redeemscript)
 
   let accountDetails = document.getElementById('account-details')
@@ -455,7 +482,7 @@ function accountWithdrawalFunc(address){
   userInputAmountTotal = 0
   TOTAL_AMOUNT_TO_WITHDRAW = 0
 
-  let tx = coinjs.transaction();
+  let tx = coin_js.transaction();
   accountDetails.classList.add("hidden")
   accountWithdrawal.classList.remove("hidden")
   accountActions.classList.add("hidden")
@@ -1195,7 +1222,18 @@ ipcRenderer.on('request:banker-signature', (e, message) => {
   let inputsTable = document.getElementById('banker-verify-inputs')
   let outputsTable = document.getElementById('banker-verify-outputs')
 
-  const tx = coinjs.transaction()
+  let coin_js
+  if (message.currency === "woodcoin") {
+    coin_js = coinjs
+  } else if (message.currency === "bitcoin") {
+    coin_js = bitcoinjs
+  } else if (message.currency === "litecoin") {
+    coin_js = litecoinjs
+  } else {
+    console.log("invalid currency")
+  }
+
+  const tx = coin_js.transaction()
   const deserializeTx = tx.deserialize(message.transaction_id_for_signature)
   console.log("deserialize tx: ", deserializeTx)
 
@@ -1265,13 +1303,13 @@ ipcRenderer.on('request:banker-signature', (e, message) => {
 
       var addr = '';
       if(output.script.chunks.length==5){
-        addr = coinjs.scripthash2address(Crypto.util.bytesToHex(output.script.chunks[2]));
+        addr = coin_js.scripthash2address(Crypto.util.bytesToHex(output.script.chunks[2]));
       } else if((output.script.chunks.length==2) && output.script.chunks[0]==0){
-        addr = coinjs.bech32_encode(coinjs.bech32.hrp, [coinjs.bech32.version].concat(coinjs.bech32_convert(output.script.chunks[1], 8, 5, true)));
+        addr = coin_js.bech32_encode(coin_js.bech32.hrp, [coin_js.bech32.version].concat(coin_js.bech32_convert(output.script.chunks[1], 8, 5, true)));
       } else {
-        var pub = coinjs.pub;
-        coinjs.pub = coinjs.multisig;
-        addr = coinjs.scripthash2address(Crypto.util.bytesToHex(output.script.chunks[1]));
+        var pub = coin_js.pub;
+        coin_js.pub = coin_js.multisig;
+        addr = coin_js.scripthash2address(Crypto.util.bytesToHex(output.script.chunks[1]));
         coinjs.pub = pub;
       }
 
@@ -1589,23 +1627,19 @@ function isWifKeyValid(hex) {
 ipcRenderer.on('request:banker-pubkey', async(e, message) => {
     importArea.classList.add('hidden')
     bankerGeneratePrivkey.classList.remove('hidden')
-    let userAddress
+    let coin_js
     if (message.currency === "woodcoin") {
-      coinjs.compressed = true
-      userAddress = await coinjs.newKeys()
-      console.log(userAddress)
+      coin_js = coinjs
     } else if (message.currency === "bitcoin") {
-      bitcoinjs.compressed = true
-      userAddress = await bitcoinjs.newKeys()
-      console.log(userAddress)
+      coin_js = bitcoinjs
     } else if (message.currency === "litecoin") {
-      console.log("currency litecoin")
-      litecoinjs.compressed = true
-      userAddress = await litecoinjs.newKeys()
-      console.log(userAddress)
+      coin_js = litecoinjs
     } else {
       return
     }
+
+    coin_js.compressed = true
+    let userAddress = await coin_js.newKeys()
 
     let privkeyHexInput = document.getElementById('pivkey-hex')
     let privkeyWifInput = document.getElementById('pivkey-wif')
@@ -1630,20 +1664,7 @@ ipcRenderer.on('request:banker-pubkey', async(e, message) => {
         return
       }
 
-      let newKeys
-      if (message.currency === "woodcoin") {
-        coinjs.compressed = true
-        newKeys = await coinjs.newKeysFromHex(updatedHex)
-      } else if (message.currency === "bitcoin") {
-        bitcoinjs.compressed = true
-        newKeys = await bitcoinjs.newKeysFromHex(updatedHex)
-      } else if (message.currency === "litecoin") {
-        console.log("currency litecoin")
-        litecoinjs.compressed = true
-        newKeys = await litecoinjs.newKeysFromHex(updatedHex)
-      } else {
-        return
-      }
+      let newKeys = await coin_js.newKeysFromHex(updatedHex)
 
       privkeyHexInput.value = newKeys.privkey
       privkeyWifInput.value = newKeys.wif
