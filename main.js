@@ -555,27 +555,80 @@ ipcMain.on('withdrawal:api', (e, message) => {
 
 ipcMain.on('unspent:api', (e, address) => {
   console.log("ipc main address: ", address)
-  try {
-    const request = https.request(`https://api.logbin.org/api?address=${address}`, (response) => {
-      console.log("im here")
-      let data = '';
-      response.on('data', (chunk) => {
-          data = data + chunk.toString();
+  if (address.currency === 'woodcoin') {
+    try {
+      const request = https.request(`https://api.logbin.org/api?address=${address.address}`, (response) => {
+        console.log("im here")
+        let data = '';
+        response.on('data', (chunk) => {
+            data = data + chunk.toString();
+        });
+  
+        response.on('end', async () => {
+            const body = await JSON.parse(data);
+            console.log("unspent body: ", body.message.address)
+            win.webContents.send('unspent:address', {"utxo":body.message.address, "currency":address.currency})
+        });
+     })
+  
+      request.on('error', (error) => {
+          console.log('An error', error);
       });
-
-      response.on('end', async () => {
-          const body = await JSON.parse(data);
-          console.log("unspent body: ", body.message.address)
-          win.webContents.send('unspent:address', body.message.address)
+      request.end()
+    } catch(e) {
+      console.log("error : ", e)
+    }
+  } else if (address.currency === 'bitcoin') {
+    try {
+      const request = https.request(`https://api.blockchair.com/bitcoin/dashboards/address/${address.address}?key=B___VYwLG4HbTTSe7C2ZZ12wleYgwrUe`, (response) => {
+        console.log("im here")
+        let data = '';
+        response.on('data', (chunk) => {
+            data = data + chunk.toString();
+        });
+  
+        response.on('end', async () => {
+            const body = await JSON.parse(data);
+            // console.log("body response", body)
+            console.log("unspent body: ", body.data[address.address].utxo)
+            win.webContents.send('unspent:address', {"utxo":body.data[address.address].utxo, "currency":address.currency})
+        });
+     })
+  
+      request.on('error', (error) => {
+          console.log('An error', error);
       });
-   })
-
-    request.on('error', (error) => {
-        console.log('An error', error);
-    });
-    request.end()
-  } catch(e) {
-    console.log("error : ", e)
+      request.end()
+    } catch(e) {
+      console.log("error : ", e)
+    }
+  } else if (address.currency === 'litecoin') {
+    try {
+      const request = https.request(`https://api.blockchair.com/litecoin/dashboards/address/${address.address}?key=B___VYwLG4HbTTSe7C2ZZ12wleYgwrUe`, (response) => {
+        console.log("im here")
+        let data = '';
+        response.on('data', (chunk) => {
+            data = data + chunk.toString();
+        });
+  
+        response.on('end', async () => {
+            const body = await JSON.parse(data);
+            // console.log("body response", body)
+            console.log("unspent body: ", body.data[address.address].utxo)
+            win.webContents.send('unspent:address', {"utxo":body.data[address.address].utxo, "currency":address.currency})
+        });
+     })
+  
+      request.on('error', (error) => {
+          console.log('An error', error);
+      });
+      request.end()
+    } catch(e) {
+      console.log("error : ", e)
+    }
+  } else {
+      console.log("Chain not found")
+      return
   }
 })
 
