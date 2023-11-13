@@ -497,60 +497,144 @@ ipcMain.on('withdrawal:api', (e, message) => {
 	const accountId = message.id
 	const withdrawalId = message.withdrawal_id
 
-  try {
-    const request = https.request(`https://api.logbin.org/api/broadcast/r?transaction=${txid}`, (response) => {
-      console.log("withdrawal response")
-      let data = '';
-      response.on('data', (chunk) => {
-          data = data + chunk.toString();
-      });
+	if (message.currency === "woodcoin") {
+		try {
+	    const request = https.request(`https://api.logbin.org/api/broadcast/r?transaction=${txid}`, (response) => {
+	      console.log("withdrawal response")
+	      let data = '';
+	      response.on('data', (chunk) => {
+	          data = data + chunk.toString();
+	      });
 
-      response.on('end', async () => {
-				console.log("response end: ", data)
-          const body = await JSON.parse(data);
+	      response.on('end', async () => {
+					console.log("response end: ", data)
+	          const body = await JSON.parse(data);
 
-          console.log("withdrawal response message: ", body)
-					if (body.message) {
-						console.log("body.message: ", body.message)
-						const accounts = await JSON.parse(fs.readFileSync(homedir + "/data/data.json", "utf-8"))
-						for (const [key, value] of Object.entries(accounts)) {
-				      let account = value
-							console.log("account.id vs accountId: ", account.id, accountId)
-				      if (account.id == accountId) {
-								console.log("inside account: ")
-								for (const [index, withdrawal] of account.withdrawals.entries()){
-									console.log("withdrawal.id vs withdrawalId: ", withdrawal.id, withdrawalId)
-									if (withdrawal.id == withdrawalId){
-										console.log("inside withdrawal id")
-										withdrawal.date_broadcasted = Date.now()
-										withdrawal.txid = body.message.result
-										console.log(withdrawal)
-										const updatedAccounts = JSON.stringify(accounts, null, 2)
-										fs.writeFile(homedir + "/data/data.json"
-											, updatedAccounts, function writeJson(err) {
-											if (err)  {
-												console.log("updating withdrawal after successful broadcasting error: ", err)
-											} else {
-												console.log("withdrawal broadcasted. record updated")
-											}
-										})
+	          console.log("withdrawal response message: ", body)
+						if (body.message) {
+							console.log("body.message: ", body.message)
+							const accounts = await JSON.parse(fs.readFileSync(homedir + "/data/data.json", "utf-8"))
+							for (const [key, value] of Object.entries(accounts)) {
+					      let account = value
+								console.log("account.id vs accountId: ", account.id, accountId)
+					      if (account.id == accountId) {
+									console.log("inside account: ")
+									for (const [index, withdrawal] of account.withdrawals.entries()){
+										console.log("withdrawal.id vs withdrawalId: ", withdrawal.id, withdrawalId)
+										if (withdrawal.id == withdrawalId){
+											console.log("inside withdrawal id")
+											withdrawal.date_broadcasted = Date.now()
+											withdrawal.txid = body.message.result
+											console.log(withdrawal)
+											const updatedAccounts = JSON.stringify(accounts, null, 2)
+											fs.writeFile(homedir + "/data/data.json"
+												, updatedAccounts, function writeJson(err) {
+												if (err)  {
+													console.log("updating withdrawal after successful broadcasting error: ", err)
+												} else {
+													console.log("withdrawal broadcasted. record updated")
+												}
+											})
+										}
 									}
 								}
 							}
 						}
-					}
-          win.webContents.send('withdrawal:broadcast-response', body)
-      });
-   })
+	          win.webContents.send('withdrawal:broadcast-response', body)
+	      });
+	   })
 
-    request.on('error', (error) => {
-        console.log('An error', error);
-        win.webContents.send('withdrawal:broadcast-response', body)
-    });
-    request.end()
-  } catch(e) {
-    console.log("error : ", e)
-  }
+	    request.on('error', (error) => {
+	        console.log('An error', error);
+	        win.webContents.send('withdrawal:broadcast-response', body)
+	    });
+	    request.end()
+	  } catch(e) {
+	    console.log("error : ", e)
+	  }
+	} else if (message.currency === "bitcoin" || message.currency === "litecoin") {
+		let chain = message.currency === "bitcoin" ? "bitcoin" : "litecoin";
+		try {
+			var postData = JSON.stringify({
+    		'data' : txid
+			});
+		  const request = https.request(`https://api.blockchair.com/{chain}/push/transaction`, (response) => {
+		      console.log("withdrawal response")
+		      let data = '';
+		      response.on('data', (chunk) => {
+		          data = data + chunk.toString();
+		      });
+
+		      response.on('end', async () => {
+						console.log("response end: ", data)
+		          const resp = await JSON.parse(data);
+							let body
+
+							if (resp.data) {
+								body = {
+									message: {
+										result: resp.data.transaction_hash
+									}
+								}
+							} else {
+								body = {
+									error : {
+										error: {
+											message: resp.context.error
+										}
+									}
+								}
+							}
+
+		          console.log("withdrawal response message: ", body)
+							if (body.message) {
+								console.log("body.message: ", body.message)
+								const accounts = await JSON.parse(fs.readFileSync(homedir + "/data/data.json", "utf-8"))
+								for (const [key, value] of Object.entries(accounts)) {
+						      let account = value
+									console.log("account.id vs accountId: ", account.id, accountId)
+						      if (account.id == accountId) {
+										console.log("inside account: ")
+										for (const [index, withdrawal] of account.withdrawals.entries()){
+											console.log("withdrawal.id vs withdrawalId: ", withdrawal.id, withdrawalId)
+											if (withdrawal.id == withdrawalId){
+												console.log("inside withdrawal id")
+												withdrawal.date_broadcasted = Date.now()
+												withdrawal.txid = body.data.transaction_hash
+												console.log(withdrawal)
+												const updatedAccounts = JSON.stringify(accounts, null, 2)
+												fs.writeFile(homedir + "/data/data.json"
+													, updatedAccounts, function writeJson(err) {
+													if (err)  {
+														console.log("updating withdrawal after successful broadcasting error: ", err)
+													} else {
+														console.log("withdrawal broadcasted. record updated")
+													}
+												})
+											}
+										}
+									}
+								}
+							}
+		          win.webContents.send('withdrawal:broadcast-response', body)
+		      });
+		  })
+		  req.write(postData);
+	    request.on('error', (error) => {
+	        console.log('An error', error);
+	        win.webContents.send('withdrawal:broadcast-response', body)
+	    });
+	    request.end()
+	  } catch(e) {
+	    console.log("error : ", e)
+	  }
+	} else {
+		console.log("invalid currency")
+		return
+	}
+
+
+
 })
 
 ipcMain.on('unspent:api', (e, address) => {
