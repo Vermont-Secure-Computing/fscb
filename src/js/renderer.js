@@ -435,7 +435,7 @@ function outputsAddress(e) {
 **/
 function accountWithdrawalFunc(address){
   CHANGE_ADDRESS = address.address
-  ipcRenderer.send("unspent:api", address.address)
+  ipcRenderer.send("unspent:api", {"address": address.address, "currency": address.currency})
   const script = coinjs.script()
   const addressScript = script.decodeRedeemScript(address.redeemscript)
 
@@ -457,12 +457,25 @@ function accountWithdrawalFunc(address){
 
   ipcRenderer.on('unspent:address', (e, evt) => {
     // const listParse = JSON.parse(evt)
-    const listP = evt;
+    console.log(evt)
+    const listP = evt.utxo;
     //console.log("unspent address: ", evt, listP.length)
     if (unspentAmountTotal == 0) {
       for (let i = 0; i < listP.length; i++) {
-        console.log(listP[i].txid)
-        unspentAmountTotal += Number(listP[i].amount / 100000000)
+        // console.log(listP[i].txid)
+        let listPAmount;
+        let listPTXID;
+        let listPvout
+        if (evt.currency === 'woodcoin') {
+          listPAmount = listP[i].amount
+          listPTXID = listP[i].txid
+          listPvout = listP[i].vout
+        } else {
+          listPAmount = listP[i].value
+          listPTXID = listP[i].transaction_hash
+          listPvout = listP[i].index
+        }
+        unspentAmountTotal += Number(listPAmount / 100000000)
         // let row = tableBody.insertRow()
         // let transactionId = row.insertCell(0)
         // transactionId.innerHTML = listP[i].txid.substring(0,30)+"..."
@@ -481,12 +494,12 @@ function accountWithdrawalFunc(address){
         let input1 = document.createElement('input')
         input1.setAttribute('class', 'col-span-2 txid-withdraw text-black text-base text-normal p-1')
         input1.setAttribute('id', 'txid-withdraw')
-        input1.value = listP[i].txid
+        input1.value = listPTXID
         let input2 = document.createElement('input')
         input2.setAttribute('class', 'text-black')
         input2.setAttribute('class', 'hidden')
         input2.setAttribute('id', 'vout-withdraw')
-        input2.value = listP[i].vout
+        input2.value = listPvout
         let input3 = document.createElement('input')
         input3.setAttribute('class', 'text-black text-base text-normal')
         input3.setAttribute('class', 'hidden')
@@ -495,7 +508,7 @@ function accountWithdrawalFunc(address){
         let input4 = document.createElement('input')
         input4.setAttribute('class', 'col-span-1 text-black text-base text-normal p-1')
         input4.setAttribute('id', 'amount-withdraw')
-        input4.value = listP[i].amount / 100000000
+        input4.value = listPAmount / 100000000
         let input5 = document.createElement('input')
         input5.setAttribute('class', 'hidden')
         input5.value = address.redeemscript
@@ -656,7 +669,8 @@ function getAccountDetails(account){
 
     let address = {
         "address": account.address,
-        "redeemscript": account.redeem_script
+        "redeemscript": account.redeem_script,
+        "currency": account.currency
     }
     withdrawalButton.addEventListener("click", function() {accountWithdrawalFunc(address);}, false);
 
