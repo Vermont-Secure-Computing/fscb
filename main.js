@@ -413,9 +413,9 @@ ipcMain.on('balance:api', (e, options) => {
                           return console.log(err)
                         } else {
                           const readMore = fs.readFileSync(homedir + "/data/data.json", "utf-8")
-  
+
                           win.webContents.send("list:file",  readMore)
-  
+
                         }
                       })
                     } catch (e) {
@@ -563,14 +563,14 @@ ipcMain.on('unspent:api', (e, address) => {
         response.on('data', (chunk) => {
             data = data + chunk.toString();
         });
-  
+
         response.on('end', async () => {
             const body = await JSON.parse(data);
             console.log("unspent body: ", body.message.address)
             win.webContents.send('unspent:address', {"utxo":body.message.address, "currency":address.currency})
         });
      })
-  
+
       request.on('error', (error) => {
           console.log('An error', error);
       });
@@ -586,7 +586,7 @@ ipcMain.on('unspent:api', (e, address) => {
         response.on('data', (chunk) => {
             data = data + chunk.toString();
         });
-  
+
         response.on('end', async () => {
             const body = await JSON.parse(data);
             // console.log("body response", body)
@@ -594,7 +594,7 @@ ipcMain.on('unspent:api', (e, address) => {
             win.webContents.send('unspent:address', {"utxo":body.data[address.address].utxo, "currency":address.currency})
         });
      })
-  
+
       request.on('error', (error) => {
           console.log('An error', error);
       });
@@ -610,7 +610,7 @@ ipcMain.on('unspent:api', (e, address) => {
         response.on('data', (chunk) => {
             data = data + chunk.toString();
         });
-  
+
         response.on('end', async () => {
             const body = await JSON.parse(data);
             // console.log("body response", body)
@@ -618,7 +618,7 @@ ipcMain.on('unspent:api', (e, address) => {
             win.webContents.send('unspent:address', {"utxo":body.data[address.address].utxo, "currency":address.currency})
         });
      })
-  
+
       request.on('error', (error) => {
           console.log('An error', error);
       });
