@@ -348,9 +348,10 @@ function listAccountActions(actions, signatureNeeded){
     Check if the withdrawal is ready for broadcasting
   **/
   for (const [index, withdrawal] of actions.entries()){
-    console.log('withdrawal: ', withdrawal)
-    console.log("has prop: ", withdrawal.hasOwnProperty('txid'))
+    // console.log('withdrawal: ', withdrawal)
+    // console.log("has prop: ", withdrawal.hasOwnProperty('txid'))
     for(let x in withdrawal.signatures) {
+      console.log("x: ", x)
       if(withdrawal.signatures.hasOwnProperty(x)){
         let row = tableBody.insertRow();
         let id = row.insertCell(0);
@@ -372,10 +373,14 @@ function listAccountActions(actions, signatureNeeded){
         action.innerHTML = withdrawal.signatures[x].action
         let txid = row.insertCell(4);
         if (withdrawal.signatures[x].transaction_id) {
-          let viewBtn = "<button class='ml-4 disabled:opacity-75 bg-blue-500 active:bg-blue-700 text-white font-semibold hover:text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline' id='view-txid-btn'>View</button>"
+          let id = 'view-txid-btn-' + String(withdrawal.id) + String(withdrawal.signatures[x].banker_id)
+          let viewBtn = "<button class='ml-4 disabled:opacity-75 bg-blue-500 active:bg-blue-700 text-white font-semibold hover:text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline' id='"+id+"'>View</button>"
           txid.innerHTML = viewBtn
-          let viewTxidBtn = document.getElementById('view-txid-btn')
-          viewTxidBtn.addEventListener('click', () => showTxId(withdrawal.signatures[x].transaction_id))
+          let viewTxidBtn = document.getElementById(id)
+          viewTxidBtn.addEventListener('click', () => {
+            console.log("view ", withdrawal.signatures[x].transaction_id)
+            showTxId(withdrawal.signatures[x].transaction_id)
+          })
         } else {
           txid.innerHTML = ""
         }
@@ -600,6 +605,7 @@ withdrawAmountInput.addEventListener('change', () => {amountOnchange(withdrawAmo
 
 function getAccountDetails(account){
   console.log("get account details: ", account)
+  ACCOUNT_CURRENCY = account.currency
   if (account.hasOwnProperty('id')) {
     let accountList = document.getElementById('accounts-list')
     let accountDetails = document.getElementById('account-details')
@@ -1310,9 +1316,18 @@ function bankerSignTransaction(message, privkey) {
   console.log("sign tx: ", message.transaction_id_for_signature)
   console.log("user privkey: ", privkey)
 
-  const tx = coinjs.transaction()
+
+  let tx
+  if (message.currency === "woodcoin") {
+    tx = coinjs.transaction()
+  } else if (message.currency === "bitcoin") {
+    tx = bitcoinjs.transaction()
+  }  else if (message.currency === "litecoin") {
+    tx = litecoinjs.transaction()
+  }
+
   const scriptToSign = tx.deserialize(message.transaction_id_for_signature)
-  const signedTX = scriptToSign.sign(privkey, 1)
+  signedTX = scriptToSign.sign(privkey, 1)
 
   console.log("signed: ", signedTX)
 
@@ -1540,15 +1555,11 @@ async function createUserProfile(e) {
 
 
     /**
-      Disabled key creation
+      Disabled key creation on create User
     **/
-    //coinjs.compressed = true
-    //const userAddress = await coinjs.newKeys()
-    //console.log(userAddress)
     ipcRenderer.send("user:address", {
         userName,
         userEmail,
-        //userAddress
     })
     ipcRenderer.on('create:profile', (e) => {
         const userProfile = document.getElementById('user-profile')
@@ -1619,8 +1630,20 @@ ipcRenderer.on('request:banker-pubkey', async(e, message) => {
         return
       }
 
-      coinjs.compressed = true
-      const newKeys = await coinjs.newKeysFromHex(updatedHex)
+      let newKeys
+      if (message.currency === "woodcoin") {
+        coinjs.compressed = true
+        newKeys = await coinjs.newKeysFromHex(updatedHex)
+      } else if (message.currency === "bitcoin") {
+        bitcoinjs.compressed = true
+        newKeys = await bitcoinjs.newKeysFromHex(updatedHex)
+      } else if (message.currency === "litecoin") {
+        console.log("currency litecoin")
+        litecoinjs.compressed = true
+        newKeys = await litecoinjs.newKeysFromHex(updatedHex)
+      } else {
+        return
+      }
 
       privkeyHexInput.value = newKeys.privkey
       privkeyWifInput.value = newKeys.wif
@@ -1840,6 +1863,7 @@ function checkTxFee(e) {
 
 async function generateClaim(changeAmount) {
   console.log("generate claim")
+  console.log("account currency: ", ACCOUNT_CURRENCY)
   //e.preventDefault()
   // const txid = document.getElementById('txid-withdraw').value
   // const vout = document.getElementById('vout-withdraw').value
@@ -1856,7 +1880,20 @@ async function generateClaim(changeAmount) {
   // const out = await tx.serialize()
   // console.log("tx serialize", out)
   // console.log("decode tx serialize", tx.deserialize(out))
-  let tx = coinjs.transaction()
+  let coin_js
+  if (ACCOUNT_CURRENCY === "woodcoin") {
+    coin_js = coinjs
+  } else if (ACCOUNT_CURRENCY === "bitcoin") {
+    coin_js = bitcoinjs
+  } else if (ACCOUNT_CURRENCY === "litecoin") {
+    coin_js = litecoinjs
+  } else {
+    console.log("invalid currency")
+    return
+  }
+
+  let tx = coin_js.transaction()
+
   const getunspent = document.querySelectorAll('#inner-unspent')
   const getuserinput = document.querySelectorAll('#address-keys')
   //const changeAddressinput = document.getElementById('change-address')
@@ -1897,7 +1934,7 @@ async function generateClaim(changeAmount) {
     userinputsum += Number(amount)
     console.log(address, amount)
 
-    let isValidAddress = coinjs.addressDecode(address)
+    let isValidAddress = coin_js.addressDecode(address)
     if (isValidAddress == false) {
       alertError("Address is not valid")
       return
@@ -2025,14 +2062,14 @@ async function generateClaim(changeAmount) {
 
         var addr = '';
         if(output.script.chunks.length==5){
-          addr = coinjs.scripthash2address(Crypto.util.bytesToHex(output.script.chunks[2]));
+          addr = coin_js.scripthash2address(Crypto.util.bytesToHex(output.script.chunks[2]));
         } else if((output.script.chunks.length==2) && output.script.chunks[0]==0){
-          addr = coinjs.bech32_encode(coinjs.bech32.hrp, [coinjs.bech32.version].concat(coinjs.bech32_convert(output.script.chunks[1], 8, 5, true)));
+          addr = coin_js.bech32_encode(coin_js.bech32.hrp, [coin_js.bech32.version].concat(coin_js.bech32_convert(output.script.chunks[1], 8, 5, true)));
         } else {
-          var pub = coinjs.pub;
-          coinjs.pub = coinjs.multisig;
-          addr = coinjs.scripthash2address(Crypto.util.bytesToHex(output.script.chunks[1]));
-          coinjs.pub = pub;
+          var pub = coin_js.pub;
+          coin_js.pub = coin_js.multisig;
+          addr = coin_js.scripthash2address(Crypto.util.bytesToHex(output.script.chunks[1]));
+          coin_js.pub = pub;
         }
 
         console.log("address: ", addr)
