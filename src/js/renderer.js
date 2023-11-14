@@ -507,10 +507,10 @@ function accountWithdrawalFunc(address){
           listPvout = listP[i].vout
         } else {
           listPAmount = listP[i].value
-          listPTXID = listP[i].transaction_hash
+          listPTXID = listP[i].hash
           listPvout = listP[i].index
         }
-        unspentAmountTotal += Number(listPAmount / 100000000)
+        unspentAmountTotal += Number(listPAmount)
         // let row = tableBody.insertRow()
         // let transactionId = row.insertCell(0)
         // transactionId.innerHTML = listP[i].txid.substring(0,30)+"..."
@@ -543,7 +543,7 @@ function accountWithdrawalFunc(address){
         let input4 = document.createElement('input')
         input4.setAttribute('class', 'col-span-1 text-black text-base text-normal p-1')
         input4.setAttribute('id', 'amount-withdraw')
-        input4.value = listPAmount / 100000000
+        input4.value = listPAmount
         let input5 = document.createElement('input')
         input5.setAttribute('class', 'hidden')
         input5.value = address.redeemscript
@@ -602,6 +602,7 @@ function amountOnInput(amount) {
       let amount = getuserinput[i].children[1].value
       totalOutput += Number(amount)
     }
+    console.log("total output: ", totalOutput)
     TOTAL_AMOUNT_TO_WITHDRAW = totalOutput
     withdrawalFee.value = (unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW).toFixed(8)
   }

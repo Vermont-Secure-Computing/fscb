@@ -410,7 +410,7 @@ ipcMain.on('balance:api', (e, options) => {
               if (body.data) {
                 // if (allaccount[i].address === removeBracket) {
                   // console.log("bitcoin satoshi ", body.data[allaccount[i].address].address.balance / Math.pow(10,8))
-                  allaccount[i].balance = body.data.confirmed / Math.pow(10,8)
+                  allaccount[i].balance = body.data.confirmed // Math.pow(10,8)
                   fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
                     try {
                       jdata = JSON.parse(jdata);
@@ -469,7 +469,7 @@ ipcMain.on('balance:api', (e, options) => {
               if (body.data) {
                 // if (allaccount[i].address === removeBracket) {
                   // console.log("bitcoin satoshi ", body.data[allaccount[i].address].address.balance / Math.pow(10,8))
-                  allaccount[i].balance = body.data.confirmed / Math.pow(10,8)
+                  allaccount[i].balance = body.data.confirmed  // Math.pow(10,8)
                   fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
                     try {
                       jdata = JSON.parse(jdata);
@@ -573,12 +573,23 @@ ipcMain.on('withdrawal:api', (e, message) => {
 	    console.log("error : ", e)
 	  }
 	} else if (message.currency === "bitcoin" || message.currency === "litecoin") {
-		let chain = message.currency === "bitcoin" ? "bitcoin" : "litecoin";
+		let chain = message.currency === "bitcoin" ? "BTC" : "LTC";
 		try {
 			var postData = JSON.stringify({
-    		'data' : txid
+    		'tx_hex' : txid
 			});
-		  const request = https.request(`https://api.blockchair.com/{chain}/push/transaction`, (response) => {
+
+			const options = {
+				hostname: 'chain.so',
+				path: `/api/v3/broadcast_transaction/${chain}`,
+				port: 443,
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'API-KEY': 'fuLTNLsgF24ePCVdXIkxujWo1ZGuLu4J'
+				}
+			}
+		  const request = https.request(options, (response) => {
 		      console.log("withdrawal response")
 		      let data = '';
 		      response.on('data', (chunk) => {
@@ -593,14 +604,14 @@ ipcMain.on('withdrawal:api', (e, message) => {
 							if (resp.data) {
 								body = {
 									message: {
-										result: resp.data.transaction_hash
+										result: resp.data.hash
 									}
 								}
 							} else {
 								body = {
 									error : {
 										error: {
-											message: resp.context.error
+											message: resp.error
 										}
 									}
 								}
@@ -686,7 +697,7 @@ ipcMain.on('unspent:api', (e, address) => {
     try {
       const options = {
         hostname: 'chain.so',
-        path: `/api/v3/unspent_outputs/BTC/${allaccount[i].address}/1`,
+        path: `/api/v3/unspent_outputs/BTC/${address.address}/1`,
         port: 443,
         method: 'GET',
         headers: {
@@ -703,8 +714,8 @@ ipcMain.on('unspent:api', (e, address) => {
         response.on('end', async () => {
             const body = await JSON.parse(data);
             // console.log("body response", body)
-            console.log("unspent body: ", body.data[address.address].utxo)
-            win.webContents.send('unspent:address', {"utxo":body.data[address.address].utxo, "currency":address.currency})
+            console.log("unspent body: ", body.data.outputs)
+            win.webContents.send('unspent:address', {"utxo":body.data.outputs, "currency":address.currency})
         });
      })
 
@@ -719,7 +730,7 @@ ipcMain.on('unspent:api', (e, address) => {
     try {
       const options = {
         hostname: 'chain.so',
-        path: `/api/v3/unspent_outputs/LTC/${allaccount[i].address}/1`,
+        path: `/api/v3/unspent_outputs/LTC/${address.address}/1`,
         port: 443,
         method: 'GET',
         headers: {
@@ -735,9 +746,9 @@ ipcMain.on('unspent:api', (e, address) => {
 
         response.on('end', async () => {
             const body = await JSON.parse(data);
-            // console.log("body response", body)
-            console.log("unspent body: ", body.data[address.address].utxo)
-            win.webContents.send('unspent:address', {"utxo":body.data[address.address].utxo, "currency":address.currency})
+            console.log("body response", body)
+            console.log("ltc unspent body: ", body.data.outputs)
+            win.webContents.send('unspent:address', {"utxo":body.data.outputs, "currency":address.currency})
         });
      })
 
