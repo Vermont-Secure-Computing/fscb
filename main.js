@@ -631,7 +631,7 @@ ipcMain.on('withdrawal:api', (e, message) => {
 											if (withdrawal.id == withdrawalId){
 												console.log("inside withdrawal id")
 												withdrawal.date_broadcasted = Date.now()
-												withdrawal.txid = body.data.transaction_hash
+												withdrawal.txid = body.data.hash
 												console.log(withdrawal)
 												const updatedAccounts = JSON.stringify(accounts, null, 2)
 												fs.writeFile(homedir + "/data/data.json"
@@ -650,7 +650,7 @@ ipcMain.on('withdrawal:api', (e, message) => {
 		          win.webContents.send('withdrawal:broadcast-response', body)
 		      });
 		  })
-		  req.write(postData);
+		  request.write(postData);
 	    request.on('error', (error) => {
 	        console.log('An error', error);
 	        win.webContents.send('withdrawal:broadcast-response', body)
