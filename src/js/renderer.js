@@ -86,6 +86,9 @@ let userInputAmountTotal = 0
 let TOTAL_AMOUNT_TO_WITHDRAW = 0
 let CHANGE_ADDRESS
 let CHANGE_AMOUNT
+let DONATION_LOG = 'WhAiyvrEhG6Ty9AkTb1hnUwbT3PubdWkAg'
+let DONATION_BTC = 'WhAiyvrEhG6Ty9AkTb1hnUwbT3PubdWkAg'
+let DONATION_LTC = 'WhAiyvrEhG6Ty9AkTb1hnUwbT3PubdWkAg'
 let DONATION_ADDRESS = 'WhAiyvrEhG6Ty9AkTb1hnUwbT3PubdWkAg'
 let WITHDRAWAL_FEE = 0.01
 
@@ -705,7 +708,10 @@ function getAccountDetails(account){
         "redeemscript": account.redeem_script,
         "currency": account.currency
     }
-    withdrawalButton.addEventListener("click", function() {accountWithdrawalFunc(address);}, false);
+    withdrawalButton.addEventListener("click", function() {
+      setDonationAddress(account.currency)
+      accountWithdrawalFunc(address);
+    }, false);
 
 
     buttonContainer.appendChild(viewActionsButton)
@@ -720,6 +726,19 @@ function getAccountDetails(account){
 //     const accountTr = document.createElement('tr')
 
 // })
+
+
+function setDonationAddress(currency) {
+  if (currency === "woodcoin") {
+    DONATION_ADDRESS = DONATION_LOG
+  } else if (currency === "bitcoin") {
+    DONATION_ADDRESS = DONATION_BTC
+  } else if (currency === "litecoin") {
+    DONATION_ADDRESS = DONATION_LTC
+  } else {
+    console.log("invalid currency")
+  }
+}
 
 function addDonationAddress() {
   const addressInput = document.getElementById('withdraw-address')
