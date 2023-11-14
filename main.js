@@ -387,7 +387,16 @@ ipcMain.on('balance:api', (e, options) => {
       } else if (allaccount[i].currency === 'bitcoin') {
           console.log("currency ", allaccount[i].currency)
           console.log("currency address ", allaccount[i].address)
-          const request = https.request(`https://api.blockchair.com/bitcoin/dashboards/address/${allaccount[i].address}?key=B___VYwLG4HbTTSe7C2ZZ12wleYgwrUe`, (response) => {
+          const options = {
+            hostname: 'chain.so',
+            path: `/api/v3/balance/BTC/${allaccount[i].address}`,
+            port: 443,
+            method: 'GET',
+            headers: {
+              'API-KEY': 'fuLTNLsgF24ePCVdXIkxujWo1ZGuLu4J'
+            }
+          }
+          const request = https.request(options, (response) => {
             let data = '';
             response.on('data', (chunk) => {
               data = data + chunk.toString();
@@ -395,12 +404,13 @@ ipcMain.on('balance:api', (e, options) => {
             });
             response.on('end', async () => {
               const body = await JSON.parse(data);
-              const bodydata = Object.keys(body.data)
-              const removeBracket = bodydata[0]
+              // const bodydata = Object.keys(body.data)
+              // const removeBracket = bodydata[0]
+              console.log("chain so response balance: ", body)
               if (body.data) {
-                if (allaccount[i].address === removeBracket) {
+                // if (allaccount[i].address === removeBracket) {
                   // console.log("bitcoin satoshi ", body.data[allaccount[i].address].address.balance / Math.pow(10,8))
-                  allaccount[i].balance = body.data[allaccount[i].address].address.balance / Math.pow(10,8)
+                  allaccount[i].balance = body.data.confirmed / Math.pow(10,8)
                   fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
                     try {
                       jdata = JSON.parse(jdata);
@@ -422,7 +432,7 @@ ipcMain.on('balance:api', (e, options) => {
                       console.log("parsing error: ", e)
                     }
                   });
-                }
+                // }
               }
             })
 
@@ -435,53 +445,63 @@ ipcMain.on('balance:api', (e, options) => {
           request.end()
       } else if (allaccount[i].currency === 'litecoin') {
         console.log("currency ", allaccount[i].currency)
-        console.log("currency address ", allaccount[i].address)
-        const request = https.request(`https://api.blockchair.com/litecoin/dashboards/address/${allaccount[i].address}?key=B___VYwLG4HbTTSe7C2ZZ12wleYgwrUe`, (response) => {
-          let data = '';
-          response.on('data', (chunk) => {
-            data = data + chunk.toString();
-            // console.log("all account 2 ", chunk.toString())
-          });
-          response.on('end', async () => {
-            const body = await JSON.parse(data);
-            const bodydata = Object.keys(body.data)
-            const removeBracket = bodydata[0]
-            if (body.data) {
-              if (allaccount[i].address === removeBracket) {
-                // console.log("bitcoin satoshi ", body.data[allaccount[i].address].address.balance / Math.pow(10,8))
-                allaccount[i].balance = body.data[allaccount[i].address].address.balance / Math.pow(10,8)
-                fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
-                  try {
-                    jdata = JSON.parse(jdata);
-                    //Step 3: append contract variable to list
-                    jdata[i] = allaccount[i]
-                    console.log(jdata);
-                    const wData = JSON.stringify(jdata, null, 2)
-                    fs.writeFile(homedir + "/" + path +"/"+ fileName, wData, (err) => {
-                      if (err) {
-                        return console.log(err)
-                      } else {
-                        const readMore = fs.readFileSync(homedir + "/data/data.json", "utf-8")
-
-                        win.webContents.send("list:file",  readMore)
-
-                      }
-                    })
-                  } catch (e) {
-                    console.log("parsing error: ", e)
-                  }
-                });
-              }
+          console.log("currency address ", allaccount[i].address)
+          const options = {
+            hostname: 'chain.so',
+            path: `/api/v3/balance/LTC/${allaccount[i].address}`,
+            port: 443,
+            method: 'GET',
+            headers: {
+              'API-KEY': 'fuLTNLsgF24ePCVdXIkxujWo1ZGuLu4J'
             }
+          }
+          const request = https.request(options, (response) => {
+            let data = '';
+            response.on('data', (chunk) => {
+              data = data + chunk.toString();
+              // console.log("all account 2 ", chunk.toString())
+            });
+            response.on('end', async () => {
+              const body = await JSON.parse(data);
+              // const bodydata = Object.keys(body.data)
+              // const removeBracket = bodydata[0]
+              console.log("chain so response balance: ", body)
+              if (body.data) {
+                // if (allaccount[i].address === removeBracket) {
+                  // console.log("bitcoin satoshi ", body.data[allaccount[i].address].address.balance / Math.pow(10,8))
+                  allaccount[i].balance = body.data.confirmed / Math.pow(10,8)
+                  fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
+                    try {
+                      jdata = JSON.parse(jdata);
+                      //Step 3: append contract variable to list
+                      jdata[i] = allaccount[i]
+                      console.log(jdata);
+                      const wData = JSON.stringify(jdata, null, 2)
+                      fs.writeFile(homedir + "/" + path +"/"+ fileName, wData, (err) => {
+                        if (err) {
+                          return console.log(err)
+                        } else {
+                          const readMore = fs.readFileSync(homedir + "/data/data.json", "utf-8")
+
+                          win.webContents.send("list:file",  readMore)
+
+                        }
+                      })
+                    } catch (e) {
+                      console.log("parsing error: ", e)
+                    }
+                  });
+                // }
+              }
+            })
+
           })
+          request.on('error', (error) => {
+            console.log('An error', error);
+            // win.webContents.send('response:balance', toString(0))
 
-        })
-        request.on('error', (error) => {
-          console.log('An error', error);
-          // win.webContents.send('response:balance', toString(0))
-
-        });
-        request.end()
+          });
+          request.end()
     } else {
         console.log("Chain not found")
         return
@@ -664,7 +684,16 @@ ipcMain.on('unspent:api', (e, address) => {
     }
   } else if (address.currency === 'bitcoin') {
     try {
-      const request = https.request(`https://api.blockchair.com/bitcoin/dashboards/address/${address.address}?key=B___VYwLG4HbTTSe7C2ZZ12wleYgwrUe`, (response) => {
+      const options = {
+        hostname: 'chain.so',
+        path: `/api/v3/unspent_outputs/BTC/${allaccount[i].address}/1`,
+        port: 443,
+        method: 'GET',
+        headers: {
+          'API-KEY': 'fuLTNLsgF24ePCVdXIkxujWo1ZGuLu4J'
+        }
+      }
+      const request = https.request(options , (response) => {
         console.log("im here")
         let data = '';
         response.on('data', (chunk) => {
@@ -688,7 +717,16 @@ ipcMain.on('unspent:api', (e, address) => {
     }
   } else if (address.currency === 'litecoin') {
     try {
-      const request = https.request(`https://api.blockchair.com/litecoin/dashboards/address/${address.address}?key=B___VYwLG4HbTTSe7C2ZZ12wleYgwrUe`, (response) => {
+      const options = {
+        hostname: 'chain.so',
+        path: `/api/v3/unspent_outputs/LTC/${allaccount[i].address}/1`,
+        port: 443,
+        method: 'GET',
+        headers: {
+          'API-KEY': 'fuLTNLsgF24ePCVdXIkxujWo1ZGuLu4J'
+        }
+      }
+      const request = https.request(options, (response) => {
         console.log("im here")
         let data = '';
         response.on('data', (chunk) => {
