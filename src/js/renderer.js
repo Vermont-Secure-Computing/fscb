@@ -16,7 +16,7 @@ const userProfileForm = document.getElementById('user-profile-form')
 const formAddBanker = document.getElementById('add-banker-form');
 const formWithdraw = document.getElementById('withdraw-submit')
 const contractName = document.getElementById("contract-name");
-const creatorName = document.getElementById("creator-name");
+//const creatorName = document.getElementById("creator-name");
 const creatorEmail = document.getElementById("creator-email");
 const creatorAddress = document.getElementById("creator-address");
 const minusButton = document.getElementById('address-amount');
@@ -646,20 +646,22 @@ function getAccountDetails(account){
 
     //accountDetails.innerHTML = ""
     let accountName = document.getElementById('account-name')
-    let creatorName = document.getElementById('creator-name')
+    //let creatorName = document.getElementById('creator-name')
     let accountEmail = document.getElementById('account-email')
     let accountBalance = document.getElementById('account-balance')
     let accountAddress = document.getElementById('account-address')
     let accountRedeemScript = document.getElementById('account-redeem-script')
     let accountCurrency = document.getElementById('account-currency')
+    let accountSignatures = document.getElementById('account-signatures')
 
     accountName.innerHTML = account.contract_name
-    creatorName.innerHTML = account.creator_name
+    //creatorName.innerHTML = account.creator_name
     accountEmail.innerHTML = account.creator_email
     accountBalance.innerHTML = account.balance
     accountAddress.innerHTML = account.address
     accountRedeemScript.innerHTML = account.redeem_script
     accountCurrency.innerHTML = account.currency
+    accountSignatures.innerHTML = account.signature_nedded
 
 
     let tableBody = document.getElementById('account-bankers-list')
@@ -1758,7 +1760,7 @@ function finalizeNewKeys(evt){
 //
 ipcRenderer.on('addBanker:pubkey', (e, evt) => {
   importText.value = ''
-  alertSuccess("Successfully added banker's publick key.")
+  alertSuccess("Successfully added banker's public key.")
 
 })
 
