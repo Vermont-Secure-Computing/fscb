@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #1a1a1a;
+        }
+
+        .loader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .logo-container {
+            margin-bottom: 26px;
+            opacity: 1;
+            transform-origin: center;
+            animation: zoomOutAndFade 2s;
+        }
+
+        @keyframes zoomOutAndFade {
+            0%, 25%, 75%{
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(5.0);
+                opacity: 0;
+            }
+        }
+
+        .loader img {
+            width: auto;
+            max-width: 100%;
+            height: 50vh;
+            object-fit: contain;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loader">
+        <div class="logo-container">
+            <img src="./images/fscb_01.png" alt="Logo">
+        </div>
+    </div>
+</body>
+
+</html>

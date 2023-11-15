@@ -17,22 +17,45 @@ contextMenu({
 });
 
 const createWindow = () => {
-  win = new BrowserWindow({
+  // Create splash window
+  var splash = new BrowserWindow({ 
     width: isDev ? 1500 : 800,
-    height: 600,
-    resizable: isDev,
-    webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: true,
-      devTools: true,
-      preload: path.join(__dirname, 'preload.js')
-    }
-  })
+    height: 728,
+    resizable: isDev, 
+    transparent: false, 
+    frame: false, 
+    alwaysOnTop: true,
+  });
 
-  // Show devtools automatically if in development
-  if (isDev) {
-    win.webContents.openDevTools();
-  }
+  
+  splash.loadFile('src/splash.html');
+  
+  splash.center();
+  
+
+  setTimeout(function () {
+    
+    splash.close();
+    
+
+    // Create main window
+    win = new BrowserWindow({
+      width: isDev ? 1500 : 800,
+      height: 728,
+      resizable: isDev,
+      webPreferences: {
+        nodeIntegration: true,
+        contextIsolation: true,
+        devTools: true,
+        preload: path.join(__dirname, 'preload.js')
+      }
+    });
+
+    // Show devtools automatically if in development
+    if (isDev) {
+      win.webContents.openDevTools();
+    }
+
 
   win.removeMenu()
   const existAccount = fs.existsSync(homedir + '/data/data.json')
@@ -43,19 +66,25 @@ const createWindow = () => {
 
 
   win.loadFile('src/index.html').then(() => {
-
+    
     if (existAccount) {
-      const accounts = fs.readFileSync(homedir +  "/data/data.json", "utf-8")
-      console.log("accounts: ", accounts)
-      win.webContents.send("list:file", accounts)
+      const accounts = fs.readFileSync(homedir +  "/data/data.json", "utf-8");
+      console.log("accounts: ", accounts);
+      win.webContents.send("list:file", accounts);
     }
 
     if (!existsUser) {
-      win.webContents.send("user:profile", {"user": false})
+      win.webContents.send("user:profile", {"user": false});
     }
-  })
+  });
 
-}
+  
+  win.center();
+  
+  win.show();
+
+}, 2000);
+};
 
 
 app.whenReady().then(() => {
