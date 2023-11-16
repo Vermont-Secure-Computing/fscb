@@ -287,6 +287,7 @@ async function saveAndCreateText(e) {
 }
 
 ipcRenderer.on("send:newAccountSuccess", function() {
+  contractName.value = ""
   alertSuccess("Account successfully created.")
   showImportListScreen()
 })
@@ -502,7 +503,7 @@ function accountWithdrawalFunc(address){
         let listPTXID;
         let listPvout
         if (evt.currency === 'woodcoin') {
-          listPAmount = listP[i].amount
+          listPAmount = listP[i].amount / 100000000
           listPTXID = listP[i].txid
           listPvout = listP[i].vout
         } else {
@@ -1457,13 +1458,111 @@ function bankerSignTransaction(message, privkey) {
 };
 
 
-ipcRenderer.on('response:banker-signature', (e, message) => {
-  console.log("response:banker-signature: ", message)
+/**
+  After importing banker signature response,
+  show the select next banker screen
+**/
+ipcRenderer.on('response:banker-signature', (e, data) => {
+
+  const account = data.account
+  const message = data.message
+
+  console.log("message: ", message)
+  console.log("message.withdrawal_id: ", message.withdrawal_id)
+  // Loop thru the account withdrawal array And
+  // get the list of bankers that already signed
+  const bankers = account.bankers
+  let acctWithdrawal
+  let signedBankers = []
+
+  for (const [index, withdrawal] of account.withdrawals.entries()) {
+    console.log("withdrawal.id: ", typeof(withdrawal.id))
+    if (withdrawal.id === Number(message.withdrawal_id)) {
+      console.log("withdrawal: ", withdrawal)
+      let sx = withdrawal.signatures
+      for (const [index, signature] of sx.entries()) {
+        console.log("signature: ", signature)
+        if (signature.status === "SIGNED") {
+          signedBankers.push(signature)
+        }
+      }
+    }
+  }
+  console.log("signedBankers: ", typeof(signedBankers))
+  console.log("signedBankers: ", signedBankers)
+  const bankersArray = bankers.filter((elem) => !signedBankers.find((banker) => elem.banker_id === banker.banker_id));
+
+  let selectNextBankerScreen = document.getElementById('request-sig-next-banker-select')
+  selectNextBankerScreen.classList.remove('hidden')
+  importArea.classList.add('hidden')
+
+  //
+  // Start of Signed Banker's table
+  //
+  const bankersBody = document.getElementById('signed-bankers-list-body')
+
+  bankersBody.innerHTML = ""
+  for(let x in signedBankers) {
+      if(signedBankers.hasOwnProperty(x)){
+          let signedTx = slicePubkey(signedBankers[x].transaction_id)
+          let row = bankersBody.insertRow();
+          let name = row.insertCell(0);
+          name.innerHTML = signedBankers[x].banker_name
+          let dateSigned = row.insertCell(1);
+          let ds = signedBankers[x].date_signed
+          dateFormat = ds.toDateString()
+          dateSigned.innerHTML = dateFormat
+          let signature = row.insertCell(2);
+          signature.innerHTML = signedTx
+      }
+  }
+  //
+  // End of Banker's table
+  //
+
+
+  let selectBankers = document.getElementById("next-banker-to-sign-container")
+  var select =  document.getElementById("select-next-bankers-to-sign");
+  select.innerHTML = ''
+  select.dataset.placeholder = 'Choose Bankers'
+
+  const el = document.createElement("option");
+  el.textContent = "Select a banker";
+  el.value = "";
+  select.appendChild(el);
+  bankersArray.forEach((banker, i) => {
+    const opt = banker.banker_email;
+    const pub = banker.pubkey;
+    const el = document.createElement("option");
+    el.textContent = opt;
+    el.value = JSON.stringify(banker);
+    select.appendChild(el);
+  });
+
+  let generateBtn = document.getElementById('generate-next-sign-message')
+  generateBtn.addEventListener('click', () => {
+    const banker = select.options[select.selectedIndex].value;
+    console.log("banker: ", banker)
+
+    if (banker) {
+      let parsedBanker = JSON.parse(banker)
+      ipcRenderer.send("owner:save-next-banker", {account, message, parsedBanker})
+    } else {
+      alertError("Please select a banker.")
+    }
+  })
+
+
+})
+
+ipcRenderer.on('owner:show-banker-signature-message', (e, message) => {
+  console.log("owner:show-banker-signature-message: ", message)
 
   alertSuccess("Banker signature successfully updated.")
 
   ownerMessageSignRequest.classList.remove('hidden')
-  importArea.classList.add('hidden')
+  let selectNextBankerScreen = document.getElementById('request-sig-next-banker-select')
+  selectNextBankerScreen.classList.add('hidden')
 
   let ownerMessageSignRequestBody = document.getElementById('owner-message-sign-request-body')
   let signResponseTitle = document.getElementById('sign-request-title')
@@ -1721,7 +1820,7 @@ function finalizeNewKeys(evt){
     const button = document.createElement('button')
     button.setAttribute('class', 'inline-flex items-center px-10 py-3 text-sm font-medium text-center text-white bg-orange-500 focus:ring-4 focus:ring-orange-500 dark:focus:bg-orange-500 hover:bg-orange absolute mt-5 right-10 rounded-full')
     button.setAttribute('id', "import-again-button")
-    button.textContent = "Import Again"
+    button.textContent = "Clear"
     const p = document.createElement('p')
     const br = document.createElement('br')
     const p1 = document.createElement('p')
@@ -2137,7 +2236,11 @@ async function generateClaim(changeAmount) {
 
     const generateButton = document.getElementById('generate-request-signature-message')
     generateButton.addEventListener('click', function() {
-      requestSignatureWindow(txRedeemTransaction, accountSigFilter)
+      /**
+        Show select banker screen before the request signature message
+      **/
+      selectBankerToSign(txRedeemTransaction, accountSigFilter)
+      //requestSignatureWindow(txRedeemTransaction, accountSigFilter)
     }, false)
   } else {
     console.log("userunspentindex: ", userunspentindex)
@@ -2153,7 +2256,61 @@ async function generateClaim(changeAmount) {
 
 }
 
-function requestSignatureWindow(tx, account) {
+
+function selectBankerToSign(tx, account, withdrawalID=null) {
+
+  let accountDetails = document.getElementById('account-details')
+  let accountWithdrawal = document.getElementById('account-withdrawal')
+  let accountActions = document.getElementById('account-actions')
+  let withdrawalReference = document.getElementById('withdraw-reference')
+  let reqBankersSelect = document.getElementById('request-sig-banker-select')
+  let messageSignature = document.getElementById('request-sig-message')
+  messageSignature.innerHTML = ""
+  accountDetails.classList.add('hidden')
+  accountWithdrawal.classList.add('hidden')
+  accountActions.classList.add('hidden')
+  withdrawalReference.classList.add('hidden')
+  reqBankersSelect.classList.remove('hidden')
+
+  const accountParse = JSON.parse(account)
+
+  let selectBankers = document.getElementById("next-banker-to-sign")
+  var select =  document.getElementById("select-bankers-to-sign");
+  select.innerHTML = ''
+  select.dataset.placeholder = 'Choose Bankers'
+
+  let bankersArray = accountParse[0].bankers
+
+  const el = document.createElement("option");
+  el.textContent = "Select a banker";
+  el.value = "";
+  select.appendChild(el);
+  bankersArray.forEach((banker, i) => {
+    const opt = banker.banker_email;
+    const pub = banker.pubkey;
+    const el = document.createElement("option");
+    el.textContent = opt;
+    el.value = JSON.stringify(banker);
+    select.appendChild(el);
+  });
+
+  let generateBtn = document.getElementById('generate-sign-message')
+  generateBtn.addEventListener('click', () => {
+    let selectBanker = document.getElementById('select-bankers-to-sign')
+    const banker = select.options[select.selectedIndex].value;
+    console.log("banker: ", banker)
+
+    if (banker) {
+      let parsedBanker = JSON.parse(banker)
+      requestSignatureWindow(tx, account, parsedBanker)
+    } else {
+      alertError("Please select a banker.")
+    }
+  })
+
+}
+
+function requestSignatureWindow(tx, account, banker) {
 
   // Clear withdraw address and amount input
   let withdrawAddrInput = document.getElementById('withdraw-address')
@@ -2165,17 +2322,19 @@ function requestSignatureWindow(tx, account) {
   withdrawAmtInput.value = 0
 
   let withdrawalID = Date.now()
-  let accountDetails = document.getElementById('account-details')
-  let accountWithdrawal = document.getElementById('account-withdrawal')
-  let accountActions = document.getElementById('account-actions')
-  let withdrawalReference = document.getElementById('withdraw-reference')
+  // let accountDetails = document.getElementById('account-details')
+  // let accountWithdrawal = document.getElementById('account-withdrawal')
+  // let accountActions = document.getElementById('account-actions')
+  // let withdrawalReference = document.getElementById('withdraw-reference')
   let sendSignature = document.getElementById('send-signature')
   let messageSignature = document.getElementById('request-sig-message')
+  let selectBankerScreen = document.getElementById('request-sig-banker-select')
   messageSignature.innerHTML = ""
-  accountDetails.classList.add('hidden')
-  accountWithdrawal.classList.add('hidden')
-  accountActions.classList.add('hidden')
-  withdrawalReference.classList.add('hidden')
+  // accountDetails.classList.add('hidden')
+  // accountWithdrawal.classList.add('hidden')
+  // accountActions.classList.add('hidden')
+  // withdrawalReference.classList.add('hidden')
+  selectBankerScreen.classList.add('hidden')
   sendSignature.classList.remove('hidden')
   console.log("tx: ", tx)
   console.log("account: ", typeof(account))
@@ -2183,7 +2342,8 @@ function requestSignatureWindow(tx, account) {
   console.log("account parse: ", accountParse)
   const br = document.createElement('br')
   const p1 = document.createElement('p')
-  p1.innerHTML = "Please copy the line below and send it to" + " " + accountParse[0].bankers[0].banker_email
+  //p1.innerHTML = "Please copy the line below and send it to" + " " + accountParse[0].bankers[0].banker_email
+  p1.innerHTML = "Please copy the line below and send it to" + " " + banker.banker_email
   const p2 = document.createElement('p')
   p2.innerHTML = accountParse[0].creator_name + " is requesting for your banker signature at this " + accountParse[0].contract_name
   const p3 = document.createElement('p')
@@ -2197,15 +2357,15 @@ function requestSignatureWindow(tx, account) {
   const p7 = document.createElement('p')
   p7.innerHTML = '"id":' + '"' + accountParse[0].id + '",'
   const p8 = document.createElement('p')
-  p8.innerHTML = '"banker_id":' + accountParse[0].bankers[0].banker_id + ','
+  p8.innerHTML = '"banker_id":' + banker.banker_id + ','
   const p9 = document.createElement('p')
   p9.innerHTML = '"creator_name":' + '"' + accountParse[0].creator_name + '",'
   const p10 = document.createElement('p')
   p10.innerHTML = '"creator_email":' + '"' + accountParse[0].creator_email + '",'
   const p11 = document.createElement('p')
-  p11.innerHTML = '"banker_name":' + '"' + accountParse[0].bankers[0].banker_name + '",'
+  p11.innerHTML = '"banker_name":' + '"' + banker.banker_name + '",'
   const p12 = document.createElement('p')
-  p12.innerHTML = '"banker_email":' + '"' + accountParse[0].bankers[0].banker_email + '",'
+  p12.innerHTML = '"banker_email":' + '"' + banker.banker_email + '",'
   const p13 = document.createElement('p')
   p13.innerHTML = '"transaction_id_for_signature":' + '"' + tx + '",'
   const p14 = document.createElement('p')
