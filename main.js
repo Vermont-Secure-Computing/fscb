@@ -18,25 +18,25 @@ contextMenu({
 
 const createWindow = () => {
   // Create splash window
-  var splash = new BrowserWindow({ 
+  var splash = new BrowserWindow({
     width: isDev ? 1500 : 800,
     height: 728,
-    resizable: isDev, 
-    transparent: false, 
-    frame: false, 
+    resizable: isDev,
+    transparent: false,
+    frame: false,
     alwaysOnTop: true,
   });
 
-  
+
   splash.loadFile('src/splash.html');
-  
+
   splash.center();
-  
+
 
   setTimeout(function () {
-    
+
     splash.close();
-    
+
 
     // Create main window
     win = new BrowserWindow({
@@ -66,7 +66,7 @@ const createWindow = () => {
 
 
   win.loadFile('src/index.html').then(() => {
-    
+
     if (existAccount) {
       const accounts = fs.readFileSync(homedir +  "/data/data.json", "utf-8");
       console.log("accounts: ", accounts);
@@ -78,9 +78,9 @@ const createWindow = () => {
     }
   });
 
-  
+
   win.center();
-  
+
   win.show();
 
 }, 2000);
@@ -710,7 +710,8 @@ ipcMain.on('unspent:api', (e, address) => {
 
         response.on('end', async () => {
             const body = await JSON.parse(data);
-            console.log("unspent body: ", body.message.address)
+						console.log("unspent body woodcoin: ", body)
+            console.log("unspent body woodcoin: ", body.message.address)
             win.webContents.send('unspent:address', {"utxo":body.message.address, "currency":address.currency})
         });
      })
@@ -905,58 +906,19 @@ async function bankerSignatureResponse(message) {
 				          } else {
 				            console.log("accounts updated")
 				            // check number of signatures needed
-				            if (withdrawal.signatures.length == account.signature_nedded) {
+										const signatures = withdrawal.signatures.filter(val => val.transaction_id != "");
+										console.log("signatures: ", signatures);
+				            if (signatures.length == account.signature_nedded) {
 				              console.log("ready to broadcast")
 				              win.webContents.send('withdrawal:ready-to-broadcast', message)
 				            } else {
 				              console.log("request signature to next banker")
-				              for (const [index, banker] of account.bankers.entries()) {
-				                if(banker.banker_id == bankerID) {
-				                  console.log("next banker: ", account.bankers[index + 1])
-				                  let next_banker = account.bankers[index + 1]
+											let data = {
+												"account": account,
+												"message": message
+											}
+											win.webContents.send('response:banker-signature', data)
 
-				                  let newMessage = {
-				                    "header": "free_state_central_bank",
-				                    "message":"request-signature",
-				                    "id": message.id,
-				                    "contract_name": message.contract_name,
-				                    "banker_id": next_banker.banker_id,
-				                    "creator_name": message.creator_name,
-				                    "creator_email": message.creator_email,
-				                    "banker_name": next_banker.banker_name,
-				                    "banker_email": next_banker.banker_email,
-				                    "transaction_id_for_signature": message.transaction_id,
-				                    "currency": message.currency,
-														"withdrawal_id": message.withdrawal_id,
-				                  }
-				                  console.log("new message: ", newMessage)
-
-				                  // Create new signature object in the account signature array
-				                  const newSignatory = {
-				                    "banker_id": next_banker.banker_id,
-														"banker_name": next_banker.banker_name,
-				                    "date_requested": Date.now(),
-				                    "date_signed": null,
-				                    "status": "PENDING",
-				                    "transaction_id": "",
-														"action": "Request for signature"
-				                  }
-				                  withdrawal.signatures.push(newSignatory)
-
-				                  const accountsNewSignatory = JSON.stringify(accounts, null, 2)
-				                  fs.writeFile(homedir + "/data/data.json"
-				                    , accountsNewSignatory, function writeJson(err) {
-				                    if (err)  {
-				                      console.log("updating signatures for next banker to sign error: ", err)
-				                    } else {
-				                      console.log("signature updated for next banker to sign: ")
-				                      win.webContents.send('response:banker-signature', newMessage)
-				                    }
-				                  })
-
-				                  break
-				                } // end of if statement
-				              } // end of for loop
 				            }
 				          }
 				        });
@@ -968,6 +930,68 @@ async function bankerSignatureResponse(message) {
 		}
   }
 }
+
+ipcMain.on("owner:save-next-banker", async(e, data) => {
+	let account = data.account
+	let message = data.message
+	let next_banker = data.parsedBanker
+
+	console.log("data: ", data)
+
+	if (fs.existsSync(homedir + "/data/data.json")) {
+    const accounts = await JSON.parse(fs.readFileSync(homedir + "/data/data.json", "utf-8"))
+
+		for (const [key, value] of Object.entries(accounts)) {
+      let account = value
+      if (account.id == account.id) {
+				for (const [index, withdrawal] of account.withdrawals.entries()){
+					if (withdrawal.id == message.withdrawal_id){
+
+					  let newMessage = {
+					    "header": "free_state_central_bank",
+					    "message":"request-signature",
+					    "id": message.id,
+					    "contract_name": message.contract_name,
+					    "banker_id": next_banker.banker_id,
+					    "creator_name": message.creator_name,
+					    "creator_email": message.creator_email,
+					    "banker_name": next_banker.banker_name,
+					    "banker_email": next_banker.banker_email,
+					    "transaction_id_for_signature": message.transaction_id,
+					    "currency": message.currency,
+							"withdrawal_id": message.withdrawal_id,
+					  }
+					  console.log("new message: ", newMessage)
+
+					  // Create new signature object in the account signature array
+					  const newSignatory = {
+					    "banker_id": next_banker.banker_id,
+							"banker_name": next_banker.banker_name,
+					    "date_requested": Date.now(),
+					    "date_signed": null,
+					    "status": "PENDING",
+					    "transaction_id": "",
+							"action": "Request for signature"
+					  }
+					  withdrawal.signatures.push(newSignatory)
+
+					  const accountsNewSignatory = JSON.stringify(accounts, null, 2)
+					  fs.writeFile(homedir + "/data/data.json"
+					    , accountsNewSignatory, function writeJson(err) {
+					    if (err)  {
+					      console.log("updating signatures for next banker to sign error: ", err)
+					    } else {
+					      console.log("signature updated for next banker to sign: ")
+					      win.webContents.send('owner:show-banker-signature-message', newMessage)
+					    }
+					  })
+
+					}
+				}
+			}
+		}
+	}
+})
 
 ipcMain.on("banker:addorsig", (e, options) => {
   e.preventDefault()
