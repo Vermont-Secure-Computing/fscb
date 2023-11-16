@@ -84,6 +84,8 @@
         <div class="bg-[#1a1a1a] col-span-9 h-auto" id="tab-contents" >
           <div id="importText" class="hidden p-4">
             <div class="mx-auto max-h-80" id="import-area">
+              <p class="text-xl text-white font-bold">Welcome to FSCB</p>
+              <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
               <form id="import-text-form">
                 <textarea name="" id="import-text" cols="30" rows="10" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Paste text here..."></textarea>
                 <button type="submit" class="inline-flex items-center px-12 py-3 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Import</button>
@@ -227,6 +229,40 @@
               <div id="banker-message-signtx-close-button"></div>
             </div>
             <!--End of Bankers view - Message to send - Sign tx Response-->
+
+            <!--Owners view - Next banker for signature -->
+            <div id="request-sig-next-banker-select" class="hidden">
+              <p class="text-xl text-white font-bold">Select banker</p>
+              <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
+              <div id="bankers-has-signed">
+                <div class="mt-8">
+                  <p class="text-base text-white">Bankers with signature</p>
+                </div>
+                <table id="signed-bankers-list" class="relative w-full pl-96 flex-col border-collapse border border-slate-400 text-center text-sm font-light text-black bg-white mt-4">
+                  <thead class="border-b font-medium dark:border-neutral-950">
+                    <tr>
+                      <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-100"/>
+                      <th scope="col" class="px-6 py-2">Name</th>
+                      <th scope="col" class="px-6 py-2">Date Signed</th>
+                      <th scope="col" class="px-6 py-2">Signature</th>
+                    </tr>
+                  </thead>
+                  <tbody class="text-black bg-white" id="signed-bankers-list-body">
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="col-span-12 mt-4 text-gray-500 text-xs font-semibold py-1 m-1 relative w-full" id="next-banker-to-sign-container">
+                <select
+                  class="text-black font-normal text-sm relative h-10 col-span-2 block w-full p-2 mt-1"
+                  name="bankers-to-sign"
+                  id="select-next-bankers-to-sign"
+                >
+                </select>
+              </div>
+              <button id="generate-next-sign-message" class="inline-flex items-center px-12 py-3 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Generate</button>
+            </div>
+            <!-- End of Owners view - Next banker for signature-->
 
           </div>
           <div id="first" class="p-9 text-white font-bold text-xl leading-relaxed">
@@ -407,6 +443,20 @@
                 class="inline-flex items-center px-5 py-2.5 text-base font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">
                 Generate
               </button>
+            </div>
+            <div id="request-sig-banker-select" class="hidden">
+              <p class="text-xl text-white font-bold">Select banker</p>
+              <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
+
+              <div class="col-span-12 mt-4 text-gray-500 text-xs font-semibold py-1 m-1 relative w-full" id="next-banker-to-sign">
+                <select
+                  class="text-black font-normal text-sm relative h-10 col-span-2 block w-full p-2 mt-1"
+                  name="bankers-to-sign"
+                  id="select-bankers-to-sign"
+                >
+                </select>
+              </div>
+              <button id="generate-sign-message" class="inline-flex items-center px-12 py-3 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Generate</button>
             </div>
             <div id="send-signature" class="hidden">
               <h1 class="text-white">Transaction Signature</h1>
