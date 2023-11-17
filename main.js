@@ -942,9 +942,9 @@ ipcMain.on("owner:save-next-banker", async(e, data) => {
     const accounts = await JSON.parse(fs.readFileSync(homedir + "/data/data.json", "utf-8"))
 
 		for (const [key, value] of Object.entries(accounts)) {
-      let account = value
-      if (account.id == account.id) {
-				for (const [index, withdrawal] of account.withdrawals.entries()){
+      let acct = value
+      if (acct.id == account.id) {
+				for (const [index, withdrawal] of acct.withdrawals.entries()){
 					if (withdrawal.id == message.withdrawal_id){
 
 					  let newMessage = {
