@@ -154,6 +154,19 @@ tabTogglers.forEach(function(toggler) {
 
 
 
+/**
+  Refresh button in account list screen
+**/
+let refreshBtn = document.getElementById("refresh-account-list")
+refreshBtn.addEventListener("click", () => {
+  ipcRenderer.send("balance:api", {"send": "get"})
+})
+/**
+  End of Refresh button in account list screen
+**/
+
+
+
 
 function setAccountCurrency() {
   const coinCurrencySend = currency.options[currency.selectedIndex].text;
@@ -2508,7 +2521,7 @@ getbankerClick.addEventListener('click', getBanker)
 getListClick.addEventListener('click', getList)
 importTextButton.addEventListener('click', openImportTextTab)
 getbankerClick.addEventListener('click', getBanker);
-getListClick.addEventListener('click', getList);
+//getListClick.addEventListener('click', getList);
 formWithdraw.addEventListener('submit', checkTxFee);
 donateBtn.addEventListener('click', addDonationAddress);
 exportBtn.addEventListener('click', exportJsonData);
