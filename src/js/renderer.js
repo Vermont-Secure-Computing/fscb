@@ -305,6 +305,12 @@ ipcRenderer.on("send:newAccountSuccess", function() {
   showImportListScreen()
 })
 
+ipcRenderer.on("new-account-error:existing", function() {
+  contractName.value = ""
+  alertError("Account creation failed. Generated address and redeem script are already used.")
+  showImportListScreen()
+})
+
 ipcRenderer.on("list:file", function(e, evt){
     const convertToJson = JSON.parse(evt)
     const accountBody = document.getElementById('accounts-list-body')
