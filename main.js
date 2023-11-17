@@ -133,10 +133,40 @@ function bankerIdNumber() {
 
 
 /**
+	Check if address and redeem script is already used by an existing account
+**/
+async function isAccountAddressExisting(address, redeemScript) {
+  const accounts = await JSON.parse(fs.readFileSync(homedir + "/data/data.json", "utf-8"))
+
+  let checker = false
+  for (const [key, value] of Object.entries(accounts)) {
+    let acct = value
+    if (acct.address === address && acct.redeem_script) {
+      checker = true
+      break;
+    }
+  }
+
+  console.log("checker: ", checker)
+	return checker
+}
+
+
+/**
 	Function to create a new contract/account
 **/
-ipcMain.on("message:contractnew", (e, options) => {
+ipcMain.on("message:contractnew", async(e, options) => {
   e.preventDefault()
+
+	// Check if address or redeem script already used by an existing account
+	const isAddressExisting = await isAccountAddressExisting(options.pubkeySend, options.redeemScriptSend)
+
+	if (isAddressExisting === true) {
+		win.webContents.send("new-account-error:existing", {})
+		return
+	}
+
+
   const getIdNumber = idNumber()
   pathMessage = 'message'
   const mybankers = fs.readFileSync(homedir + "/data/banker.json", "utf-8")
