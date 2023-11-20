@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, ipcRenderer } = require('electron');
+const { app, BrowserWindow, ipcMain, ipcRenderer, clipboard } = require('electron');
 const path = require('path');
 const https = require('https');
 const homedir = require('os').homedir();
@@ -130,6 +130,13 @@ function bankerIdNumber() {
 }
 
 // idNumber()
+
+/**
+	Function to copy message to clipboard
+**/
+ipcMain.on("message:copy", async(e, message) => {
+	clipboard.writeText(message)
+})
 
 
 /**
