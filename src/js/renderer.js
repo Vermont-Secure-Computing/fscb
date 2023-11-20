@@ -3,7 +3,6 @@
  // var multisig =  coinjs.pubkeys2MultisigAddress(keys, sigsNeeded);
  // console.log(multisig)
 
-
 //  Start Tab Pannels
 
 const importText = document.getElementById('import-text');
@@ -945,6 +944,19 @@ ipcRenderer.on('send:newBanker', function(e, evt) {
     p4.innerHTML = JSON.stringify(message, undefined, 2);
     p5.innerHTML = "-----End fscb message-----";
 
+
+    const copyToClipboardText = p1.innerHTML + '\n' + p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML
+    let copyButton = document.createElement('img')
+    copyButton.setAttribute('src', './images/copy_button.png')
+    copyButton.setAttribute('width', '50')
+    copyButton.setAttribute('height', '50')
+    copyButton.setAttribute('class', 'inline-flex absolute right-10 px-2 cursor-pointer hover:scale-125 transition duration-500')
+    copyButton.addEventListener("click", function() {
+      ipcRenderer.send('message:copy', copyToClipboardText)
+      alertSuccess("Message successfully copied in clipboard.")
+    }, false);
+
+    div.appendChild(copyButton)
     div.appendChild(p)
     div.appendChild(br)
     div.appendChild(p1)
@@ -1439,6 +1451,19 @@ function bankerSignTransaction(message, privkey) {
   p4.innerHTML = JSON.stringify(message, undefined, 2);
   p5.innerHTML = "-----End fscb message-----";
 
+  const copyToClipboardText = p1.innerHTML + '\n' + p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML
+  let copyButton = document.createElement('img')
+  copyButton.setAttribute('src', './images/copy_button.png')
+  copyButton.setAttribute('width', '50')
+  copyButton.setAttribute('height', '50')
+  copyButton.setAttribute('class', 'inline-flex absolute right-10 px-4 cursor-pointer hover:scale-125 transition duration-500')
+  copyButton.addEventListener("click", function() {
+    ipcRenderer.send('message:copy', copyToClipboardText)
+    alertSuccess("Message successfully copied in clipboard.")
+  }, false);
+
+  div.appendChild(copyButton)
+
   p1.classList.add('my-1')
   p4.classList.add('whitespace-pre-wrap', 'break-all')
   div.appendChild(p1)
@@ -1603,6 +1628,19 @@ ipcRenderer.on('owner:show-banker-signature-message', (e, message) => {
   p3.innerHTML = "-----Begin fscb message-----";
   p4.innerHTML = JSON.stringify(message, undefined, 2);
   p5.innerHTML = "-----End fscb message-----";
+
+  const copyToClipboardText = p1.innerHTML + '\n' + p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML
+  let copyButton = document.createElement('img')
+  copyButton.setAttribute('src', './images/copy_button.png')
+  copyButton.setAttribute('width', '50')
+  copyButton.setAttribute('height', '50')
+  copyButton.setAttribute('class', 'inline-flex absolute right-10 px-4 cursor-pointer hover:scale-125 transition duration-500')
+  copyButton.addEventListener("click", function() {
+    ipcRenderer.send('message:copy', copyToClipboardText)
+    alertSuccess("Message successfully copied in clipboard.")
+  }, false);
+
+  div.appendChild(copyButton)
 
   p1.classList.add('my-1')
   p4.classList.add('whitespace-pre-wrap', 'break-all')
@@ -1858,6 +1896,19 @@ function finalizeNewKeys(evt){
     p5.innerHTML = "-----End fscb message-----";
     // p4.setAttribute("class", "w-10")
     p4.classList.add('whitespace-pre-wrap', 'break-all')
+
+    const copyToClipboardText = p1.innerHTML + '\n' + p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML
+    let copyButton = document.createElement('img')
+    copyButton.setAttribute('src', './images/copy_button.png')
+    copyButton.setAttribute('width', '50')
+    copyButton.setAttribute('height', '50')
+    copyButton.setAttribute('class', 'inline-flex absolute right-10 px-4 cursor-pointer hover:scale-125 transition duration-500')
+    copyButton.addEventListener("click", function() {
+      ipcRenderer.send('message:copy', copyToClipboardText)
+      alertSuccess("Message successfully copied in clipboard.")
+    }, false);
+
+    div.appendChild(copyButton)
     div.appendChild(p)
     div.appendChild(br)
     div.appendChild(p1)
@@ -2360,8 +2411,8 @@ function requestSignatureWindow(tx, account, banker) {
   const accountParse = JSON.parse(account)
   console.log("account parse: ", accountParse)
   const br = document.createElement('br')
+
   const p1 = document.createElement('p')
-  //p1.innerHTML = "Please copy the line below and send it to" + " " + accountParse[0].bankers[0].banker_email
   p1.innerHTML = "Please copy the line below and send it to" + " " + banker.banker_email
   const p2 = document.createElement('p')
   p2.innerHTML = accountParse[0].creator_name + " is requesting for your banker signature at this " + accountParse[0].contract_name
@@ -2395,6 +2446,20 @@ function requestSignatureWindow(tx, account, banker) {
   p16.innerHTML = '"withdrawal_id":' + '"' + withdrawalID + '"}'
   const p17 = document.createElement('p')
   p17.innerHTML = "-----End fscb message-----"
+
+  const copyToClipboardText = p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML + '\n' + p6.innerHTML + '\n' + p7.innerHTML + '\n' + p8.innerHTML + '\n' + p9.innerHTML + '\n' + p10.innerHTML + '\n' + p11.innerHTML + '\n' + p12.innerHTML + '\n' + p13.innerHTML + '\n' + p14.innerHTML + '\n' + p15.innerHTML
+   + '\n' + p16.innerHTML + '\n' + p17.innerHTML
+  let copyButton = document.createElement('img')
+  copyButton.setAttribute('src', './images/copy_button.png')
+  copyButton.setAttribute('width', '50')
+  copyButton.setAttribute('height', '50')
+  copyButton.setAttribute('class', 'inline-flex absolute right-10 px-4 cursor-pointer hover:scale-125 transition duration-500')
+  copyButton.addEventListener("click", function() {
+    ipcRenderer.send('message:copy', copyToClipboardText)
+    alertSuccess("Message successfully copied in clipboard.")
+  }, false);
+
+  messageSignature.appendChild(copyButton)
   messageSignature.appendChild(p1)
   messageSignature.appendChild(br)
   messageSignature.appendChild(br)
