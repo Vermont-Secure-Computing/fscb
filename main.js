@@ -8,6 +8,15 @@ const jsonFile = homedir + "/data/data.json"
 const jsonFileBanker = homedir + "/data/banker.json"
 console.log(homedir)
 
+const config = require('dotenv');
+config.config({
+  path: '.env'
+})
+const {
+  API_KEY
+} = process.env
+console.log("API_KEY: ", API_KEY)
+
 const isDev = process.env.NODE_ENV !== 'production';
 
 let win;
@@ -398,7 +407,7 @@ ipcMain.on('balance:api', (e, options) => {
         let data = '';
         response.on('data', (chunk) => {
             data = data + chunk.toString();
-            console.log("all account ", chunk.toString())
+            //console.log("all account ", chunk.toString())
         });
 
         response.on('end', async () => {
@@ -459,14 +468,14 @@ ipcMain.on('balance:api', (e, options) => {
             port: 443,
             method: 'GET',
             headers: {
-              'API-KEY': 'fuLTNLsgF24ePCVdXIkxujWo1ZGuLu4J'
+              'API-KEY': API_KEY
             }
           }
           const request = https.request(options, (response) => {
             let data = '';
             response.on('data', (chunk) => {
               data = data + chunk.toString();
-              // console.log("all account 2 ", chunk.toString())
+              console.log("all account 2 ", chunk.toString())
             });
             response.on('end', async () => {
               const body = await JSON.parse(data);
@@ -518,7 +527,7 @@ ipcMain.on('balance:api', (e, options) => {
             port: 443,
             method: 'GET',
             headers: {
-              'API-KEY': 'fuLTNLsgF24ePCVdXIkxujWo1ZGuLu4J'
+              'API-KEY': API_KEY
             }
           }
           const request = https.request(options, (response) => {
@@ -652,7 +661,7 @@ ipcMain.on('withdrawal:api', (e, message) => {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					'API-KEY': 'fuLTNLsgF24ePCVdXIkxujWo1ZGuLu4J'
+					'API-KEY': API_KEY
 				}
 			}
 		  const request = https.request(options, (response) => {
@@ -768,7 +777,7 @@ ipcMain.on('unspent:api', (e, address) => {
         port: 443,
         method: 'GET',
         headers: {
-          'API-KEY': 'fuLTNLsgF24ePCVdXIkxujWo1ZGuLu4J'
+          'API-KEY': API_KEY
         }
       }
       const request = https.request(options , (response) => {
@@ -801,7 +810,7 @@ ipcMain.on('unspent:api', (e, address) => {
         port: 443,
         method: 'GET',
         headers: {
-          'API-KEY': 'fuLTNLsgF24ePCVdXIkxujWo1ZGuLu4J'
+          'API-KEY': API_KEY
         }
       }
       const request = https.request(options, (response) => {
