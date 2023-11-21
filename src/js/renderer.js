@@ -948,8 +948,6 @@ ipcRenderer.on('send:newBanker', function(e, evt) {
     const copyToClipboardText = p1.innerHTML + '\n' + p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML
     let copyButton = document.createElement('img')
     copyButton.setAttribute('src', './images/copy_button.png')
-    copyButton.setAttribute('width', '50')
-    copyButton.setAttribute('height', '50')
     copyButton.setAttribute('class', 'inline-flex absolute right-10 px-2 cursor-pointer hover:scale-125 transition duration-500')
     copyButton.addEventListener("click", function() {
       ipcRenderer.send('message:copy', copyToClipboardText)
@@ -1454,8 +1452,6 @@ function bankerSignTransaction(message, privkey) {
   const copyToClipboardText = p1.innerHTML + '\n' + p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML
   let copyButton = document.createElement('img')
   copyButton.setAttribute('src', './images/copy_button.png')
-  copyButton.setAttribute('width', '50')
-  copyButton.setAttribute('height', '50')
   copyButton.setAttribute('class', 'inline-flex absolute right-10 px-4 cursor-pointer hover:scale-125 transition duration-500')
   copyButton.addEventListener("click", function() {
     ipcRenderer.send('message:copy', copyToClipboardText)
@@ -1632,8 +1628,6 @@ ipcRenderer.on('owner:show-banker-signature-message', (e, message) => {
   const copyToClipboardText = p1.innerHTML + '\n' + p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML
   let copyButton = document.createElement('img')
   copyButton.setAttribute('src', './images/copy_button.png')
-  copyButton.setAttribute('width', '50')
-  copyButton.setAttribute('height', '50')
   copyButton.setAttribute('class', 'inline-flex absolute right-10 px-4 cursor-pointer hover:scale-125 transition duration-500')
   copyButton.addEventListener("click", function() {
     ipcRenderer.send('message:copy', copyToClipboardText)
@@ -1900,8 +1894,6 @@ function finalizeNewKeys(evt){
     const copyToClipboardText = p1.innerHTML + '\n' + p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML
     let copyButton = document.createElement('img')
     copyButton.setAttribute('src', './images/copy_button.png')
-    copyButton.setAttribute('width', '50')
-    copyButton.setAttribute('height', '50')
     copyButton.setAttribute('class', 'inline-flex absolute right-10 px-4 cursor-pointer hover:scale-125 transition duration-500')
     copyButton.addEventListener("click", function() {
       ipcRenderer.send('message:copy', copyToClipboardText)
@@ -2451,8 +2443,6 @@ function requestSignatureWindow(tx, account, banker) {
    + '\n' + p16.innerHTML + '\n' + p17.innerHTML
   let copyButton = document.createElement('img')
   copyButton.setAttribute('src', './images/copy_button.png')
-  copyButton.setAttribute('width', '50')
-  copyButton.setAttribute('height', '50')
   copyButton.setAttribute('class', 'inline-flex absolute right-10 px-4 cursor-pointer hover:scale-125 transition duration-500')
   copyButton.addEventListener("click", function() {
     ipcRenderer.send('message:copy', copyToClipboardText)
