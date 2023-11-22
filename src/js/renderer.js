@@ -1058,7 +1058,6 @@ ipcRenderer.on('send:bankers', function(e, evt) {
       active.appendChild(span);
 
       selectOptions.forEach((option) => {
-          //console.log(option)
           let text = option.innerText;
           if(option.selected){
               let tag = document.createElement('a');
@@ -1087,15 +1086,16 @@ ipcRenderer.on('send:bankers', function(e, evt) {
       select.parentElement.append(newSelect);
       span.appendChild(select);
 
-      // newSelect.appendChild(select);
-      //select.style.display = "none";
-      //1
-      //document.querySelectorAll('.selectMultiple ul li').forEach((li) => {
+
       document.querySelector('.selectMultiple ul').addEventListener('click', (e) => {
           let li = e.target.closest('li');
           if(!li){return;}
           let select = li.closest('.selectMultiple');
-          if(!select.classList.contains('clicked')){
+
+          // add a checker, banker selected should not exceed to 14 bankers
+          let selectedB = document.querySelectorAll('.activeClass a')
+          if(!select.classList.contains('clicked') && selectedB.length < 14){
+
               select.classList.add('clicked');
               if(li.previousElementSibling){
                   li.previousElementSibling.classList.add('beforeRemove');
@@ -1149,17 +1149,10 @@ ipcRenderer.on('send:bankers', function(e, evt) {
                           li.remove();
                           select.classList.remove('clicked');
                       }
-      //             setTimeout(() => {
-      //                 if(li.previousElementSibling){
-      //                     li.previousElementSibling.classList.remove('beforeRemove');
-      //                 }
-      //                 if(li.nextElementSibling){
-      //                     li.nextElementSibling.classList.remove('afterRemove');
-      //                 }
-
-      //             }, 200);
               }, 300); //600
                   //2nd
+          } else {
+            alertError("Maximum number of bankers in an account is 14.")
           }
       });
       //2
