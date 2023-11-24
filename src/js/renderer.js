@@ -946,15 +946,18 @@ ipcRenderer.on('send:newBanker', function(e, evt) {
 
 
     const copyToClipboardText = p1.innerHTML + '\n' + p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML
+    let copyButtonContainer = document.createElement('div')
+    copyButtonContainer.setAttribute('class', 'flex justify-end')
     let copyButton = document.createElement('img')
     copyButton.setAttribute('src', './images/copy_button.png')
-    copyButton.setAttribute('class', 'inline-flex absolute right-10 px-2 cursor-pointer hover:scale-125 transition duration-500')
+    copyButton.setAttribute('class', 'px-2 cursor-pointer hover:scale-125 transition duration-500')
     copyButton.addEventListener("click", function() {
       ipcRenderer.send('message:copy', copyToClipboardText)
       alertSuccess("Message successfully copied in clipboard.")
     }, false);
 
-    div.appendChild(copyButton)
+    copyButtonContainer.appendChild(copyButton)
+    div.appendChild(copyButtonContainer)
     div.appendChild(p)
     div.appendChild(br)
     div.appendChild(p1)
@@ -1443,15 +1446,18 @@ function bankerSignTransaction(message, privkey) {
   p5.innerHTML = "-----End fscb message-----";
 
   const copyToClipboardText = p1.innerHTML + '\n' + p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML
+  let copyButtonContainer = document.createElement('div')
+  copyButtonContainer.setAttribute('class', 'flex justify-end')
   let copyButton = document.createElement('img')
   copyButton.setAttribute('src', './images/copy_button.png')
-  copyButton.setAttribute('class', 'inline-flex absolute right-10 px-4 cursor-pointer hover:scale-125 transition duration-500')
+  copyButton.setAttribute('class', 'px-2 cursor-pointer hover:scale-125 transition duration-500')
   copyButton.addEventListener("click", function() {
     ipcRenderer.send('message:copy', copyToClipboardText)
     alertSuccess("Message successfully copied in clipboard.")
   }, false);
 
-  div.appendChild(copyButton)
+  copyButtonContainer.appendChild(copyButton)
+  div.appendChild(copyButtonContainer)
 
   p1.classList.add('my-1')
   p4.classList.add('whitespace-pre-wrap', 'break-all')
@@ -1619,15 +1625,18 @@ ipcRenderer.on('owner:show-banker-signature-message', (e, message) => {
   p5.innerHTML = "-----End fscb message-----";
 
   const copyToClipboardText = p1.innerHTML + '\n' + p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML
+  let copyButtonContainer = document.createElement('div')
+  copyButtonContainer.setAttribute('class', 'flex justify-end')
   let copyButton = document.createElement('img')
   copyButton.setAttribute('src', './images/copy_button.png')
-  copyButton.setAttribute('class', 'inline-flex absolute right-10 px-4 cursor-pointer hover:scale-125 transition duration-500')
+  copyButton.setAttribute('class', 'px-2 cursor-pointer hover:scale-125 transition duration-500')
   copyButton.addEventListener("click", function() {
     ipcRenderer.send('message:copy', copyToClipboardText)
     alertSuccess("Message successfully copied in clipboard.")
   }, false);
 
-  div.appendChild(copyButton)
+  copyButtonContainer.appendChild(copyButton)
+  div.appendChild(copyButtonContainer)
 
   p1.classList.add('my-1')
   p4.classList.add('whitespace-pre-wrap', 'break-all')
@@ -1885,15 +1894,18 @@ function finalizeNewKeys(evt){
     p4.classList.add('whitespace-pre-wrap', 'break-all')
 
     const copyToClipboardText = p1.innerHTML + '\n' + p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML
+    let copyButtonContainer = document.createElement('div')
+    copyButtonContainer.setAttribute('class', 'flex justify-end')
     let copyButton = document.createElement('img')
     copyButton.setAttribute('src', './images/copy_button.png')
-    copyButton.setAttribute('class', 'inline-flex absolute right-10 px-4 cursor-pointer hover:scale-125 transition duration-500')
+    copyButton.setAttribute('class', 'px-2 cursor-pointer hover:scale-125 transition duration-500')
     copyButton.addEventListener("click", function() {
       ipcRenderer.send('message:copy', copyToClipboardText)
       alertSuccess("Message successfully copied in clipboard.")
     }, false);
 
-    div.appendChild(copyButton)
+    copyButtonContainer.appendChild(copyButton)
+    div.appendChild(copyButtonContainer)
     div.appendChild(p)
     div.appendChild(br)
     div.appendChild(p1)
@@ -2434,15 +2446,18 @@ function requestSignatureWindow(tx, account, banker) {
 
   const copyToClipboardText = p2.innerHTML + '\n' + p3.innerHTML + '\n' + p4.innerHTML  + '\n' +  p5.innerHTML + '\n' + p6.innerHTML + '\n' + p7.innerHTML + '\n' + p8.innerHTML + '\n' + p9.innerHTML + '\n' + p10.innerHTML + '\n' + p11.innerHTML + '\n' + p12.innerHTML + '\n' + p13.innerHTML + '\n' + p14.innerHTML + '\n' + p15.innerHTML
    + '\n' + p16.innerHTML + '\n' + p17.innerHTML
+  let copyButtonContainer = document.createElement('div')
+  copyButtonContainer.setAttribute('class', 'flex justify-end')
   let copyButton = document.createElement('img')
   copyButton.setAttribute('src', './images/copy_button.png')
-  copyButton.setAttribute('class', 'inline-flex absolute right-10 px-4 cursor-pointer hover:scale-125 transition duration-500')
+  copyButton.setAttribute('class', 'px-2 cursor-pointer hover:scale-125 transition duration-500')
   copyButton.addEventListener("click", function() {
     ipcRenderer.send('message:copy', copyToClipboardText)
     alertSuccess("Message successfully copied in clipboard.")
   }, false);
 
-  messageSignature.appendChild(copyButton)
+  copyButtonContainer.appendChild(copyButton)
+  messageSignature.appendChild(copyButtonContainer)
   messageSignature.appendChild(p1)
   messageSignature.appendChild(br)
   messageSignature.appendChild(br)
