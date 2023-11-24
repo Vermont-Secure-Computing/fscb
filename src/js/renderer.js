@@ -1410,7 +1410,7 @@ function bankerSignTransaction(message, privkey) {
   }
 
   const scriptToSign = tx.deserialize(message.transaction_id_for_signature)
-  signedTX = scriptToSign.sign(privkey, 1)
+  const signedTX = scriptToSign.sign(privkey, 1)
 
   console.log("signed: ", signedTX)
 
