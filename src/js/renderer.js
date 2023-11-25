@@ -2555,6 +2555,20 @@ ipcRenderer.on('export:response', (e, message) => {
 
   p1.classList.add('my-1')
   p2.classList.add('whitespace-pre-wrap', 'break-all')
+
+  const copyToClipboardText = p1.innerHTML + '\n' + p2.innerHTML + '\n' + p3.innerHTML
+  let copyButtonContainer = document.createElement('div')
+  copyButtonContainer.setAttribute('class', 'flex justify-end')
+  let copyButton = document.createElement('img')
+  copyButton.setAttribute('src', './images/copy_button.png')
+  copyButton.setAttribute('class', 'px-2 cursor-pointer hover:scale-125 transition duration-500')
+  copyButton.addEventListener("click", function() {
+    ipcRenderer.send('message:copy', copyToClipboardText)
+    alertSuccess("Message successfully copied in clipboard.")
+  }, false);
+
+  copyButtonContainer.appendChild(copyButton)
+  div.appendChild(copyButtonContainer)
   div.appendChild(p1)
   div.appendChild(p2)
   div.appendChild(p3)
