@@ -4,8 +4,8 @@ const https = require('https');
 const homedir = require('os').homedir();
 const fs = require("fs");
 const contextMenu = require('electron-context-menu');
-const jsonFile = homedir + "/data/data.json"
-const jsonFileBanker = homedir + "/data/banker.json"
+const jsonFile = homedir + "/.fscb/data.json"
+const jsonFileBanker = homedir + "/.fscb/banker.json"
 console.log(homedir)
 
 const config = require('dotenv');
@@ -67,17 +67,17 @@ const createWindow = () => {
 
 
   win.removeMenu()
-  const existAccount = fs.existsSync(homedir + '/data/data.json')
+  const existAccount = fs.existsSync(homedir + '/.fscb/data.json')
 
   // const accountParse = JSON.parse(accounts)
 
-  const existsUser = fs.existsSync(homedir + '/data/user.json')
+  const existsUser = fs.existsSync(homedir + '/.fscb/user.json')
 
 
   win.loadFile('src/index.html').then(() => {
 
     if (existAccount) {
-      const accounts = fs.readFileSync(homedir +  "/data/data.json", "utf-8");
+      const accounts = fs.readFileSync(homedir +  "/.fscb/data.json", "utf-8");
       console.log("accounts: ", accounts);
       win.webContents.send("list:file", accounts);
     }
@@ -152,7 +152,7 @@ ipcMain.on("message:copy", async(e, message) => {
 	Check if address and redeem script is already used by an existing account
 **/
 async function isAccountAddressExisting(address, redeemScript) {
-  const accounts = await JSON.parse(fs.readFileSync(homedir + "/data/data.json", "utf-8"))
+  const accounts = await JSON.parse(fs.readFileSync(homedir + "/.fscb/data.json", "utf-8"))
 
   let checker = false
   for (const [key, value] of Object.entries(accounts)) {
@@ -185,7 +185,7 @@ ipcMain.on("message:contractnew", async(e, options) => {
 
   const getIdNumber = idNumber()
   pathMessage = 'message'
-  const mybankers = fs.readFileSync(homedir + "/data/banker.json", "utf-8")
+  const mybankers = fs.readFileSync(homedir + "/.fscb/banker.json", "utf-8")
   const bankersParse = JSON.parse(mybankers)
   let mergeBankers = []
   for (let i = 0; i < options.bankersMerge.length; i++ ) {
@@ -239,7 +239,7 @@ ipcMain.on("message:contractnew", async(e, options) => {
   }
   const sData = JSON.stringify(data, null, 2)
   const fileName = "data.json"
-  const path = "data"
+  const path = ".fscb"
   try {
     fs.mkdir(homedir + "/" + path, { recursive: true}, function (err) {
       if (err) return err;
@@ -255,8 +255,8 @@ ipcMain.on("message:contractnew", async(e, options) => {
             if (err) {
               console.log(err)
             } else {
-              // console.log(fs.readFileSync("./data/data.json", "utf8"));
-              const accounts = fs.readFileSync(homedir + "/data/data.json", "utf-8")
+              // console.log(fs.readFileSync("./.fscb/data.json", "utf8"));
+              const accounts = fs.readFileSync(homedir + "/.fscb/data.json", "utf-8")
               win.webContents.send("list:file", accounts)
               win.webContents.send("send:newAccountSuccess", {})
             }
@@ -272,8 +272,8 @@ ipcMain.on("message:contractnew", async(e, options) => {
           if (err)  {
             console.log(err)
           } else {
-            // console.log(fs.readFileSync("./data/data.json", "utf8"));
-            const accounts = fs.readFileSync(homedir + "/data/data.json", "utf-8")
+            // console.log(fs.readFileSync("./.fscb/data.json", "utf8"));
+            const accounts = fs.readFileSync(homedir + "/.fscb/data.json", "utf-8")
 
             win.webContents.send("list:file", accounts)
             win.webContents.send("send:newAccountSuccess", {})
@@ -286,7 +286,7 @@ ipcMain.on("message:contractnew", async(e, options) => {
     console.log(e)
   }
   console.log("Success")
-  // const accounts = fs.readFileSync("./data/data.json", "utf-8")
+  // const accounts = fs.readFileSync("./.fscb/data.json", "utf-8")
   // win.webContents.send("list:file",  accounts)
 })
 
@@ -302,7 +302,7 @@ ipcMain.on('message:addBanker', (e, options) => {
     "pubkey": ""
   }
   const fileName = "banker.json"
-  const path = "data"
+  const path = ".fscb"
   try {
     fs.mkdir(homedir + "/" + path, { recursive: true}, function (err) {
       if (err) return err;
@@ -349,7 +349,7 @@ ipcMain.on('newaccount:banker:filter', (e) => {
 
 function readBankersFile() {
   const fileName = "banker.json"
-  const path = "data"
+  const path = ".fscb"
   if (fs.existsSync(homedir + "/" + path +"/"+ fileName)) {
     fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
       console.log("jdata: ", jdata)
@@ -396,9 +396,9 @@ ipcMain.on('balance:api', (e, options) => {
   // console.log(options)
   let account = {};
   const fileName = "data.json"
-  const path = "data"
+  const path = ".fscb"
   if (fs.existsSync(jsonFile)) {
-    accounts = fs.readFileSync(homedir + "/data/data.json", "utf-8")
+    accounts = fs.readFileSync(homedir + "/.fscb/data.json", "utf-8")
     const allaccount = JSON.parse(accounts)
     for(let i in allaccount) {
       // console.log(Object.keys(allaccount).length)
@@ -430,7 +430,7 @@ ipcMain.on('balance:api', (e, options) => {
                       if (err) {
                         return console.log(err)
                       } else {
-                        const readMore = fs.readFileSync(homedir + "/data/data.json", "utf-8")
+                        const readMore = fs.readFileSync(homedir + "/.fscb/data.json", "utf-8")
 
                         win.webContents.send("list:file",  readMore)
 
@@ -497,7 +497,7 @@ ipcMain.on('balance:api', (e, options) => {
                         if (err) {
                           return console.log(err)
                         } else {
-                          const readMore = fs.readFileSync(homedir + "/data/data.json", "utf-8")
+                          const readMore = fs.readFileSync(homedir + "/.fscb/data.json", "utf-8")
 
                           win.webContents.send("list:file",  readMore)
 
@@ -556,7 +556,7 @@ ipcMain.on('balance:api', (e, options) => {
                         if (err) {
                           return console.log(err)
                         } else {
-                          const readMore = fs.readFileSync(homedir + "/data/data.json", "utf-8")
+                          const readMore = fs.readFileSync(homedir + "/.fscb/data.json", "utf-8")
 
                           win.webContents.send("list:file",  readMore)
 
@@ -608,7 +608,7 @@ ipcMain.on('withdrawal:api', (e, message) => {
 	          console.log("withdrawal response message: ", body)
 						if (body.message) {
 							console.log("body.message: ", body.message)
-							const accounts = await JSON.parse(fs.readFileSync(homedir + "/data/data.json", "utf-8"))
+							const accounts = await JSON.parse(fs.readFileSync(homedir + "/.fscb/data.json", "utf-8"))
 							for (const [key, value] of Object.entries(accounts)) {
 					      let account = value
 								console.log("account.id vs accountId: ", account.id, accountId)
@@ -622,7 +622,7 @@ ipcMain.on('withdrawal:api', (e, message) => {
 											withdrawal.txid = body.message.result
 											console.log(withdrawal)
 											const updatedAccounts = JSON.stringify(accounts, null, 2)
-											fs.writeFile(homedir + "/data/data.json"
+											fs.writeFile(homedir + "/.fscb/data.json"
 												, updatedAccounts, function writeJson(err) {
 												if (err)  {
 													console.log("updating withdrawal after successful broadcasting error: ", err)
@@ -695,7 +695,7 @@ ipcMain.on('withdrawal:api', (e, message) => {
 		          console.log("withdrawal response message: ", body)
 							if (body.message) {
 								console.log("body.message: ", body.message)
-								const accounts = await JSON.parse(fs.readFileSync(homedir + "/data/data.json", "utf-8"))
+								const accounts = await JSON.parse(fs.readFileSync(homedir + "/.fscb/data.json", "utf-8"))
 								for (const [key, value] of Object.entries(accounts)) {
 						      let account = value
 									console.log("account.id vs accountId: ", account.id, accountId)
@@ -709,7 +709,7 @@ ipcMain.on('withdrawal:api', (e, message) => {
 												withdrawal.txid = body.data.hash
 												console.log(withdrawal)
 												const updatedAccounts = JSON.stringify(accounts, null, 2)
-												fs.writeFile(homedir + "/data/data.json"
+												fs.writeFile(homedir + "/.fscb/data.json"
 													, updatedAccounts, function writeJson(err) {
 													if (err)  {
 														console.log("updating withdrawal after successful broadcasting error: ", err)
@@ -842,8 +842,8 @@ ipcMain.on('unspent:api', (e, address) => {
 })
 
 ipcMain.on('get:user', async() => {
-  if (fs.existsSync(homedir + "/data/user.json")) {
-    const user = await JSON.parse(fs.readFileSync(homedir + "/data/user.json", "utf-8"))
+  if (fs.existsSync(homedir + "/.fscb/user.json")) {
+    const user = await JSON.parse(fs.readFileSync(homedir + "/.fscb/user.json", "utf-8"))
     console.log("user data: ", user)
     win.webContents.send('response:user', user)
   }else {
@@ -853,8 +853,8 @@ ipcMain.on('get:user', async() => {
 
 async function bankerPubkeyResponse(evt) {
   console.log(evt)
-  if (fs.existsSync(homedir + "/data/banker.json")) {
-    const allbankers = await JSON.parse(fs.readFileSync(homedir + "/data/banker.json", "utf-8"))
+  if (fs.existsSync(homedir + "/.fscb/banker.json")) {
+    const allbankers = await JSON.parse(fs.readFileSync(homedir + "/.fscb/banker.json", "utf-8"))
     console.log("got all bankers")
     for (const i in allbankers) {
       console.log("i: ", i)
@@ -862,7 +862,7 @@ async function bankerPubkeyResponse(evt) {
         allbankers[i].pubkey = evt.pubkey
         const wData = JSON.stringify(allbankers, null, 2)
         console.log(wData)
-        fs.writeFile(homedir + "/data/banker.json", wData, (err) => {
+        fs.writeFile(homedir + "/.fscb/banker.json", wData, (err) => {
           if (err) {
             console.log(err)
           } else {
@@ -879,8 +879,8 @@ async function bankerPubkeyResponse(evt) {
 }
 
 async function bankerPubkeyRequest(evt) {
-  if (fs.existsSync(homedir + "/data/user.json")) {
-    const user = await JSON.parse(fs.readFileSync(homedir + "/data/user.json", "utf-8"))
+  if (fs.existsSync(homedir + "/.fscb/user.json")) {
+    const user = await JSON.parse(fs.readFileSync(homedir + "/.fscb/user.json", "utf-8"))
     console.log("user log", user)
     evt.message = "response-pubkey"
     evt.pubkey = user.pubkey
@@ -893,7 +893,7 @@ async function importData(data) {
 
 	if (data.user) {
 		const user = JSON.stringify(data.user, null, 2)
-		fs.writeFile(homedir + "/data/user.json"
+		fs.writeFile(homedir + "/.fscb/user.json"
 			, user, function writeJson(err) {
 			if (err) return console.log(err);
 			console.log('writing to user.json');
@@ -901,7 +901,7 @@ async function importData(data) {
 	}
 	if (data.bankers) {
 		const bankers = JSON.stringify(data.bankers, null, 2)
-		fs.writeFile(homedir + "/data/banker.json"
+		fs.writeFile(homedir + "/.fscb/banker.json"
 			, bankers, function writeJson(err) {
 			if (err) return console.log(err);
 			console.log('writing to banker.json');
@@ -909,7 +909,7 @@ async function importData(data) {
 	}
 	if (data.accounts) {
 		const accounts = JSON.stringify(data.accounts, null, 2)
-		fs.writeFile(homedir + "/data/data.json"
+		fs.writeFile(homedir + "/.fscb/data.json"
 			, accounts, function writeJson(err) {
 			if (err) return console.log(err);
 			console.log('writing to data.json');
@@ -925,8 +925,8 @@ async function importData(data) {
   Function that will update the account's withdrawal signature array
 **/
 async function bankerSignatureResponse(message) {
-  if (fs.existsSync(homedir + "/data/data.json")) {
-    const accounts = await JSON.parse(fs.readFileSync(homedir + "/data/data.json", "utf-8"))
+  if (fs.existsSync(homedir + "/.fscb/data.json")) {
+    const accounts = await JSON.parse(fs.readFileSync(homedir + "/.fscb/data.json", "utf-8"))
     console.log(accounts)
     let accountID = message.id
     let bankerID = message.banker_id
@@ -945,7 +945,7 @@ async function bankerSignatureResponse(message) {
 				        signature.date_signed = date_signed
 
 				        const updatedAccounts = JSON.stringify(accounts, null, 2)
-				        fs.writeFile(homedir + "/data/data.json"
+				        fs.writeFile(homedir + "/.fscb/data.json"
 				          , updatedAccounts, function writeJson(err) {
 				          if (err)  {
 				            console.log(err)
@@ -984,8 +984,8 @@ ipcMain.on("owner:save-next-banker", async(e, data) => {
 
 	console.log("data: ", data)
 
-	if (fs.existsSync(homedir + "/data/data.json")) {
-    const accounts = await JSON.parse(fs.readFileSync(homedir + "/data/data.json", "utf-8"))
+	if (fs.existsSync(homedir + "/.fscb/data.json")) {
+    const accounts = await JSON.parse(fs.readFileSync(homedir + "/.fscb/data.json", "utf-8"))
 
 		for (const [key, value] of Object.entries(accounts)) {
       let acct = value
@@ -1022,7 +1022,7 @@ ipcMain.on("owner:save-next-banker", async(e, data) => {
 					  withdrawal.signatures.push(newSignatory)
 
 					  const accountsNewSignatory = JSON.stringify(accounts, null, 2)
-					  fs.writeFile(homedir + "/data/data.json"
+					  fs.writeFile(homedir + "/.fscb/data.json"
 					    , accountsNewSignatory, function writeJson(err) {
 					    if (err)  {
 					      console.log("updating signatures for next banker to sign error: ", err)
@@ -1085,10 +1085,10 @@ ipcMain.on('user:address', (e, options) => {
   }
   try {
     // const fileName = "user.json"
-    const path = "data"
+    const path = ".fscb"
     const wData = JSON.stringify(data, null, 2)
     fs.mkdir(homedir + "/" + path, { recursive: true}, function (err) {
-      fs.writeFile(homedir + "/data/user.json", wData, (err) => {
+      fs.writeFile(homedir + "/.fscb/user.json", wData, (err) => {
         if (err) {
           console.log(err)
         } else {
@@ -1103,7 +1103,7 @@ ipcMain.on('user:address', (e, options) => {
 
 ipcMain.on('getredeemscript:redeemscript', (e, options) => {
   console.log("options script: ", options.script)
-  const accounts = JSON.parse(fs.readFileSync(homedir + "/data/data.json", "utf-8"))
+  const accounts = JSON.parse(fs.readFileSync(homedir + "/.fscb/data.json", "utf-8"))
   const accountFilter = Object.values(accounts).filter(value => {
     console.log(value);
     return value.redeem_script === options.script;
@@ -1114,13 +1114,13 @@ ipcMain.on('getredeemscript:redeemscript', (e, options) => {
 
 ipcMain.on('signature:encode', (e, options) => {
   console.log(options)
-  // const accounts = JSON.parse(fs.readFileSync(homedir + "/data/data.json", "utf-8"))
+  // const accounts = JSON.parse(fs.readFileSync(homedir + "/.fscb/data.json", "utf-8"))
   // const accountFilter = Object.values(accounts).filter(value => {
   //   console.log(value);
   //   return value.id === options;
   // });
   // console.log("account filter: ",JSON.stringify(accountFilter))
-  const path = "data"
+  const path = ".fscb"
   const fileName = "data.json"
   fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
     jdata = JSON.parse(jdata);
@@ -1133,7 +1133,7 @@ ipcMain.on('signature:encode', (e, options) => {
         console.log(err)
       } else {
         console.log("successfully updated");
-        const accounts = fs.readFileSync(homedir + "/data/data.json", "utf-8")
+        const accounts = fs.readFileSync(homedir + "/.fscb/data.json", "utf-8")
         win.webContents.send("list:file", accounts)
         // win.webContents.send("send:newAccountSuccess", {})
       }
@@ -1148,13 +1148,14 @@ ipcMain.on('signature:encode', (e, options) => {
 ipcMain.on('export:get-data', () => {
 
 	console.log("export main")
-	const user = fs.readFileSync(homedir + "/data/user.json", "utf-8")
-	const bankers = fs.readFileSync(homedir + "/data/banker.json", "utf-8")
-	const accounts = fs.readFileSync(homedir + "/data/data.json", "utf-8")
+  console.log("does data.json exist? : ", fs.existsSync(homedir + '/.fscb/data.json'))
+	const user = fs.existsSync(homedir + '/.fscb/user.json') ? fs.readFileSync(homedir + "/.fscb/user.json", "utf-8") : null
+	const bankers = fs.existsSync(homedir + '/.fscb/banker.json') ? fs.readFileSync(homedir + "/.fscb/banker.json", "utf-8") : null
+	const accounts = fs.existsSync(homedir + '/.fscb/data.json') ? fs.readFileSync(homedir + "/.fscb/data.json", "utf-8") : null
 
-	const parsedUser = JSON.parse(user)
-  const parsedBankers = JSON.parse(bankers)
-  const parsedAccounts = JSON.parse(accounts)
+	const parsedUser = user ? JSON.parse(user) : null
+  const parsedBankers = bankers ? JSON.parse(bankers) : null
+  const parsedAccounts = accounts ? JSON.parse(accounts) : null
 
   let accountJson = {
     "user": parsedUser,
