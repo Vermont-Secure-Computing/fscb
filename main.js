@@ -6,7 +6,6 @@ const fs = require("fs");
 const contextMenu = require('electron-context-menu');
 const jsonFile = homedir + "/.fscb/data.json"
 const jsonFileBanker = homedir + "/.fscb/banker.json"
-console.log(homedir)
 
 const config = require('dotenv');
 config.config({
@@ -15,7 +14,6 @@ config.config({
 const {
   API_KEY
 } = process.env
-console.log("API_KEY: ", API_KEY)
 
 const isDev = process.env.NODE_ENV !== 'production';
 
@@ -69,7 +67,6 @@ const createWindow = () => {
   win.removeMenu()
   const existAccount = fs.existsSync(homedir + '/.fscb/data.json')
 
-  // const accountParse = JSON.parse(accounts)
 
   const existsUser = fs.existsSync(homedir + '/.fscb/user.json')
 
@@ -78,7 +75,6 @@ const createWindow = () => {
 
     if (existAccount) {
       const accounts = fs.readFileSync(homedir +  "/.fscb/data.json", "utf-8");
-      console.log("accounts: ", accounts);
       win.webContents.send("list:file", accounts);
     }
 
@@ -111,7 +107,6 @@ function idNumber() {
     if (fs.existsSync(jsonFile)) {
       const dataJson = fs.readFileSync(jsonFile, "utf-8")
       const jconvert = JSON.parse(dataJson)
-      console.log("length: ", jconvert[Object.keys(jconvert)[Object.keys(jconvert).length - 1]].contract_id)
       return jconvert[Object.keys(jconvert)[Object.keys(jconvert).length - 1]].contract_id + 1
     } else {
       return 1
@@ -127,7 +122,6 @@ function bankerIdNumber() {
     if (fs.existsSync(jsonFileBanker)) {
       const dataJson = fs.readFileSync(jsonFileBanker, "utf-8")
       const jconvert = JSON.parse(dataJson)
-      console.log("banker length: ", jconvert[Object.keys(jconvert)[Object.keys(jconvert).length - 1]].banker_id)
       return jconvert[Object.keys(jconvert)[Object.keys(jconvert).length - 1]].banker_id + 1
     } else {
       return 1
@@ -152,19 +146,21 @@ ipcMain.on("message:copy", async(e, message) => {
 	Check if address and redeem script is already used by an existing account
 **/
 async function isAccountAddressExisting(address, redeemScript) {
-  const accounts = await JSON.parse(fs.readFileSync(homedir + "/.fscb/data.json", "utf-8"))
-
-  let checker = false
-  for (const [key, value] of Object.entries(accounts)) {
-    let acct = value
-    if (acct.address === address && acct.redeem_script) {
-      checker = true
-      break;
+  try {
+    const accounts = await JSON.parse(fs.readFileSync(homedir + "/.fscb/data.json", "utf-8"))
+    let checker = false
+    for (const [key, value] of Object.entries(accounts)) {
+      let acct = value
+      if (acct.address === address && acct.redeem_script) {
+        checker = true
+        break;
+      }
     }
-  }
 
-  console.log("checker: ", checker)
-	return checker
+  	return checker
+  } catch(e) {
+    if (e.code === "ENOENT") return false
+  }
 }
 
 
@@ -195,35 +191,10 @@ ipcMain.on("message:contractnew", async(e, options) => {
       }
     }
   }
-  // }
-  // for (let i = 0; i < options.bankersMerge; i++ ) {
-  //   const result = testing.fil
-  // }
-  // const contractTextReference = options.contractSendName +"-"+ options.creatorSendEmail +"-"+ "contract"+getIdNumber+".txt";
-  // for (let i = 0; i < options.bankersMerge.length; i++) {
-  //   let textData = `contract_id: ${getIdNumber} \n
-  //   banker_id: ${options.bankersMerge[i].banker_id}
-  //   creator_name: ${options.creatorSendName} \n
-  //   creator_email: ${options.creatorSendEmail} \n
-  //   banker_name: ${options.bankersMerge[i].banker_name} \n
-  //   banker_email: ${options.bankersMerge[i].banker_email} \n
-  //   banker_respons_address: ${options.bankersMerge[i].banker_response_address}`
-  //   fs.mkdir(pathMessage, { recursive: true}, function (err) {
-  //     //     if (err) return err;
-  //     fs.writeFile(pathMessage +"/"+ options.bankersMerge[i].banker_request_address
-  //       , textData, function writeText() {
-  //       if (err) return console.log(err);
-  //       // console.log(JSON.stringify(sData));
-  //       console.log('writing to ' + options.bankersMerge[i].banker_request_address);
-  //     });
-  //   })
 
-  // }
-	console.log("mergeBankers: ", mergeBankers)
   let data = {
       "id": Math.floor(1000000000 + Math.random() * 9000000000),
       "contract_id": getIdNumber,
-      // "txt_file_reference": contractTextReference,
       "contract_name": options.contractSendName,
       "creator_name": options.creatorSendName,
       "creator_email": options.creatorSendEmail,
@@ -231,7 +202,6 @@ ipcMain.on("message:contractnew", async(e, options) => {
       "signature_nedded": options.sigSendNumber,
       "address": options.pubkeySend,
       "redeem_script": options.redeemScriptSend,
-      //"signatures": [],
 			"withdrawals": [],
       "balance": "0.0",
       "currency": options.coinCurrencySend,
@@ -249,13 +219,11 @@ ipcMain.on("message:contractnew", async(e, options) => {
           jdata = JSON.parse(jdata);
           //Step 3: append contract variable to list
           jdata["contract" + getIdNumber] = data
-          // console.log(jdata);
           const wData = JSON.stringify(jdata, null, 2)
           fs.writeFile(homedir + "/" + path +"/"+ fileName, wData, function writeJson() {
             if (err) {
               console.log(err)
             } else {
-              // console.log(fs.readFileSync("./.fscb/data.json", "utf8"));
               const accounts = fs.readFileSync(homedir + "/.fscb/data.json", "utf-8")
               win.webContents.send("list:file", accounts)
               win.webContents.send("send:newAccountSuccess", {})
@@ -272,7 +240,6 @@ ipcMain.on("message:contractnew", async(e, options) => {
           if (err)  {
             console.log(err)
           } else {
-            // console.log(fs.readFileSync("./.fscb/data.json", "utf8"));
             const accounts = fs.readFileSync(homedir + "/.fscb/data.json", "utf-8")
 
             win.webContents.send("list:file", accounts)
@@ -285,13 +252,10 @@ ipcMain.on("message:contractnew", async(e, options) => {
   } catch (e) {
     console.log(e)
   }
-  console.log("Success")
-  // const accounts = fs.readFileSync("./.fscb/data.json", "utf-8")
-  // win.webContents.send("list:file",  accounts)
+
 })
 
 ipcMain.on('message:addBanker', (e, options) => {
-  console.log('message addbanker: ', options)
   const getBankerIdNumber = bankerIdNumber()
   let data = {
     "id": Math.floor(1000000000 + Math.random() * 9000000000),
@@ -309,7 +273,6 @@ ipcMain.on('message:addBanker', (e, options) => {
       if (fs.existsSync(jsonFileBanker)) {
         fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
           jdata = JSON.parse(jdata);
-          //console.log("current banker: ", jdata)
           //Step 3: append contract variable to list
           jdata["banker" + getBankerIdNumber] = data
 
@@ -321,7 +284,6 @@ ipcMain.on('message:addBanker', (e, options) => {
           })
       });
       } else {
-        console.log("file not existing")
         const addBanker = {
           ["banker" + getBankerIdNumber]: data
         }
@@ -329,8 +291,6 @@ ipcMain.on('message:addBanker', (e, options) => {
         fs.writeFile(homedir + "/" + path +"/"+ fileName
           , sData, function writeJson() {
           if (err) return console.log(err);
-          // console.log(JSON.stringify(sData));
-          console.log('writing to ' + fileName);
           win.webContents.send("send:newBanker", data)
           readBankersFile()
         });
@@ -352,11 +312,7 @@ function readBankersFile() {
   const path = ".fscb"
   if (fs.existsSync(homedir + "/" + path +"/"+ fileName)) {
     fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
-      console.log("jdata: ", jdata)
       jdata = JSON.parse(jdata);
-      //Step 3: append contract variable to list
-      // console.log(jdata);
-      // const wData = JSON.stringify(jdata, null, 2)
       win.webContents.send('send:bankers', jdata)
     })
   }
@@ -364,32 +320,9 @@ function readBankersFile() {
 }
 
 ipcMain.on('click:addBanker', () => {
-  console.log("ipcmain click: ")
   readBankersFile()
 })
 
-// ipcMain.on('get:balance', (e, options) => {
-//   console.log(options)
-//   const request = https.request(`https://twigchain.com/ext/getbalance/${options.pubkey}`, (response) => {
-//     let data = '';
-//     response.on('data', (chunk) => {
-//         data = data + chunk.toString();
-//     });
-
-//     response.on('end', () => {
-//         const body = JSON.parse(data);
-//         console.log(body);
-//         win.webContents.send('response:balance', body)
-//     });
-//   })
-
-//   request.on('error', (error) => {
-//       console.log('An error', error);
-//       // win.webContents.send('response:balance', toString(0))
-//   });
-
-//   request.end()
-// })
 
 ipcMain.on('balance:api', (e, options) => {
   // e.preventDefault()
@@ -587,7 +520,6 @@ ipcMain.on('balance:api', (e, options) => {
 
 
 ipcMain.on('withdrawal:api', (e, message) => {
-  console.log("ipc main withdrawal txid: ", message)
 	const txid = message.transaction_id
 	const accountId = message.id
 	const withdrawalId = message.withdrawal_id
@@ -595,32 +527,23 @@ ipcMain.on('withdrawal:api', (e, message) => {
 	if (message.currency === "woodcoin") {
 		try {
 	    const request = https.request(`https://api.logbin.org/api/broadcast/r?transaction=${txid}`, (response) => {
-	      console.log("withdrawal response")
 	      let data = '';
 	      response.on('data', (chunk) => {
 	          data = data + chunk.toString();
 	      });
 
 	      response.on('end', async () => {
-					console.log("response end: ", data)
 	          const body = await JSON.parse(data);
 
-	          console.log("withdrawal response message: ", body)
 						if (body.message) {
-							console.log("body.message: ", body.message)
 							const accounts = await JSON.parse(fs.readFileSync(homedir + "/.fscb/data.json", "utf-8"))
 							for (const [key, value] of Object.entries(accounts)) {
 					      let account = value
-								console.log("account.id vs accountId: ", account.id, accountId)
 					      if (account.id == accountId) {
-									console.log("inside account: ")
 									for (const [index, withdrawal] of account.withdrawals.entries()){
-										console.log("withdrawal.id vs withdrawalId: ", withdrawal.id, withdrawalId)
 										if (withdrawal.id == withdrawalId){
-											console.log("inside withdrawal id")
 											withdrawal.date_broadcasted = Date.now()
 											withdrawal.txid = body.message.result
-											console.log(withdrawal)
 											const updatedAccounts = JSON.stringify(accounts, null, 2)
 											fs.writeFile(homedir + "/.fscb/data.json"
 												, updatedAccounts, function writeJson(err) {
@@ -640,7 +563,6 @@ ipcMain.on('withdrawal:api', (e, message) => {
 	   })
 
 	    request.on('error', (error) => {
-	        console.log('An error', error);
 	        win.webContents.send('withdrawal:broadcast-response', body)
 	    });
 	    request.end()
@@ -665,14 +587,12 @@ ipcMain.on('withdrawal:api', (e, message) => {
 				}
 			}
 		  const request = https.request(options, (response) => {
-		      console.log("withdrawal response")
 		      let data = '';
 		      response.on('data', (chunk) => {
 		          data = data + chunk.toString();
 		      });
 
 		      response.on('end', async () => {
-						console.log("response end: ", data)
 		          const resp = await JSON.parse(data);
 							let body
 
@@ -692,22 +612,15 @@ ipcMain.on('withdrawal:api', (e, message) => {
 								}
 							}
 
-		          console.log("withdrawal response message: ", body)
 							if (body.message) {
-								console.log("body.message: ", body.message)
 								const accounts = await JSON.parse(fs.readFileSync(homedir + "/.fscb/data.json", "utf-8"))
 								for (const [key, value] of Object.entries(accounts)) {
 						      let account = value
-									console.log("account.id vs accountId: ", account.id, accountId)
 						      if (account.id == accountId) {
-										console.log("inside account: ")
 										for (const [index, withdrawal] of account.withdrawals.entries()){
-											console.log("withdrawal.id vs withdrawalId: ", withdrawal.id, withdrawalId)
 											if (withdrawal.id == withdrawalId){
-												console.log("inside withdrawal id")
 												withdrawal.date_broadcasted = Date.now()
 												withdrawal.txid = body.data.hash
-												console.log(withdrawal)
 												const updatedAccounts = JSON.stringify(accounts, null, 2)
 												fs.writeFile(homedir + "/.fscb/data.json"
 													, updatedAccounts, function writeJson(err) {
@@ -727,7 +640,6 @@ ipcMain.on('withdrawal:api', (e, message) => {
 		  })
 		  request.write(postData);
 	    request.on('error', (error) => {
-	        console.log('An error', error);
 	        win.webContents.send('withdrawal:broadcast-response', body)
 	    });
 	    request.end()
@@ -744,11 +656,9 @@ ipcMain.on('withdrawal:api', (e, message) => {
 })
 
 ipcMain.on('unspent:api', (e, address) => {
-  console.log("ipc main address: ", address)
   if (address.currency === 'woodcoin') {
     try {
       const request = https.request(`https://api.logbin.org/api?address=${address.address}`, (response) => {
-        console.log("im here")
         let data = '';
         response.on('data', (chunk) => {
             data = data + chunk.toString();
@@ -756,8 +666,6 @@ ipcMain.on('unspent:api', (e, address) => {
 
         response.on('end', async () => {
             const body = await JSON.parse(data);
-						console.log("unspent body woodcoin: ", body)
-            console.log("unspent body woodcoin: ", body.message.address)
             win.webContents.send('unspent:address', {"utxo":body.message.address, "currency":address.currency})
         });
      })
@@ -781,7 +689,6 @@ ipcMain.on('unspent:api', (e, address) => {
         }
       }
       const request = https.request(options , (response) => {
-        console.log("im here")
         let data = '';
         response.on('data', (chunk) => {
             data = data + chunk.toString();
@@ -789,8 +696,6 @@ ipcMain.on('unspent:api', (e, address) => {
 
         response.on('end', async () => {
             const body = await JSON.parse(data);
-            // console.log("body response", body)
-            console.log("unspent body: ", body.data.outputs)
             win.webContents.send('unspent:address', {"utxo":body.data.outputs, "currency":address.currency})
         });
      })
@@ -814,7 +719,6 @@ ipcMain.on('unspent:api', (e, address) => {
         }
       }
       const request = https.request(options, (response) => {
-        console.log("im here")
         let data = '';
         response.on('data', (chunk) => {
             data = data + chunk.toString();
@@ -822,8 +726,6 @@ ipcMain.on('unspent:api', (e, address) => {
 
         response.on('end', async () => {
             const body = await JSON.parse(data);
-            console.log("body response", body)
-            console.log("ltc unspent body: ", body.data.outputs)
             win.webContents.send('unspent:address', {"utxo":body.data.outputs, "currency":address.currency})
         });
      })
@@ -844,7 +746,6 @@ ipcMain.on('unspent:api', (e, address) => {
 ipcMain.on('get:user', async() => {
   if (fs.existsSync(homedir + "/.fscb/user.json")) {
     const user = await JSON.parse(fs.readFileSync(homedir + "/.fscb/user.json", "utf-8"))
-    console.log("user data: ", user)
     win.webContents.send('response:user', user)
   }else {
     console.log()
@@ -852,16 +753,12 @@ ipcMain.on('get:user', async() => {
 })
 
 async function bankerPubkeyResponse(evt) {
-  console.log(evt)
   if (fs.existsSync(homedir + "/.fscb/banker.json")) {
     const allbankers = await JSON.parse(fs.readFileSync(homedir + "/.fscb/banker.json", "utf-8"))
-    console.log("got all bankers")
     for (const i in allbankers) {
-      console.log("i: ", i)
       if (allbankers[i].banker_id == evt.banker_id) {
         allbankers[i].pubkey = evt.pubkey
         const wData = JSON.stringify(allbankers, null, 2)
-        console.log(wData)
         fs.writeFile(homedir + "/.fscb/banker.json", wData, (err) => {
           if (err) {
             console.log(err)
@@ -881,10 +778,8 @@ async function bankerPubkeyResponse(evt) {
 async function bankerPubkeyRequest(evt) {
   if (fs.existsSync(homedir + "/.fscb/user.json")) {
     const user = await JSON.parse(fs.readFileSync(homedir + "/.fscb/user.json", "utf-8"))
-    console.log("user log", user)
     evt.message = "response-pubkey"
     evt.pubkey = user.pubkey
-    console.log(JSON.stringify(evt))
     win.webContents.send('response:pubkey', evt)
   }
 }
@@ -896,7 +791,6 @@ async function importData(data) {
 		fs.writeFile(homedir + "/.fscb/user.json"
 			, user, function writeJson(err) {
 			if (err) return console.log(err);
-			console.log('writing to user.json');
 		});
 	}
 	if (data.bankers) {
@@ -904,7 +798,6 @@ async function importData(data) {
 		fs.writeFile(homedir + "/.fscb/banker.json"
 			, bankers, function writeJson(err) {
 			if (err) return console.log(err);
-			console.log('writing to banker.json');
 		});
 	}
 	if (data.accounts) {
@@ -912,7 +805,6 @@ async function importData(data) {
 		fs.writeFile(homedir + "/.fscb/data.json"
 			, accounts, function writeJson(err) {
 			if (err) return console.log(err);
-			console.log('writing to data.json');
 		});
 	}
 
@@ -927,7 +819,6 @@ async function importData(data) {
 async function bankerSignatureResponse(message) {
   if (fs.existsSync(homedir + "/.fscb/data.json")) {
     const accounts = await JSON.parse(fs.readFileSync(homedir + "/.fscb/data.json", "utf-8"))
-    console.log(accounts)
     let accountID = message.id
     let bankerID = message.banker_id
     let next_banker
@@ -950,15 +841,11 @@ async function bankerSignatureResponse(message) {
 				          if (err)  {
 				            console.log(err)
 				          } else {
-				            console.log("accounts updated")
 				            // check number of signatures needed
 										const signatures = withdrawal.signatures.filter(val => val.transaction_id != "");
-										console.log("signatures: ", signatures);
 				            if (signatures.length == account.signature_nedded) {
-				              console.log("ready to broadcast")
 				              win.webContents.send('withdrawal:ready-to-broadcast', message)
 				            } else {
-				              console.log("request signature to next banker")
 											let data = {
 												"account": account,
 												"message": message
@@ -981,8 +868,6 @@ ipcMain.on("owner:save-next-banker", async(e, data) => {
 	let account = data.account
 	let message = data.message
 	let next_banker = data.parsedBanker
-
-	console.log("data: ", data)
 
 	if (fs.existsSync(homedir + "/.fscb/data.json")) {
     const accounts = await JSON.parse(fs.readFileSync(homedir + "/.fscb/data.json", "utf-8"))
@@ -1007,7 +892,6 @@ ipcMain.on("owner:save-next-banker", async(e, data) => {
 					    "currency": message.currency,
 							"withdrawal_id": message.withdrawal_id,
 					  }
-					  console.log("new message: ", newMessage)
 
 					  // Create new signature object in the account signature array
 					  const newSignatory = {
@@ -1041,10 +925,8 @@ ipcMain.on("owner:save-next-banker", async(e, data) => {
 
 ipcMain.on("banker:addorsig", (e, options) => {
   e.preventDefault()
-  // console.log(typeof(options))
 	try {
 	  const banker = JSON.parse(options)
-	  console.log(banker)
 	  if (banker.message.includes("request-pubkey")) {
 	    //bankerPubkeyRequest(banker)
 	    /**
@@ -1052,20 +934,14 @@ ipcMain.on("banker:addorsig", (e, options) => {
 	    **/
 	    win.webContents.send('request:banker-pubkey', banker)
 	  }else if (banker.message.includes("response-pubkey")) {
-	    // console.log("response pubkey")
 	    bankerPubkeyResponse(banker)
 	  }else if (banker.message.includes("request-signature")) {
-	    console.log("request signature")
 	    win.webContents.send('request:banker-signature', banker)
 	  } else if (banker.message.includes("response-signature")) {
-	    console.log("response signature")
 	    bankerSignatureResponse(banker)
-	    //win.webContents.send('response:banker-signature', banker)
 	  } else if (banker.message.includes("import:json-data")) {
-	    console.log("import backup data")
 	    importData(banker)
 	  } else {
-	    console.log("signature")
 			win.webContents.send('import-text:invalid', {})
 	  }
 	} catch (e) {
@@ -1074,17 +950,11 @@ ipcMain.on("banker:addorsig", (e, options) => {
 })
 
 ipcMain.on('user:address', (e, options) => {
-  console.log("user:address: ", options)
   let data = {
     "user_name": options.userName,
     "user_email": options.userEmail,
-    // "address": options.userAddress.address,
-    // "pubkey": options.userAddress.pubkey, // pubkey compressed 66 chars
-    // "privkey": options.userAddress.wif, // privkey 52 chars base58
-    // "wif": options.userAddress.privkey // privkey hex 64 chars
   }
   try {
-    // const fileName = "user.json"
     const path = ".fscb"
     const wData = JSON.stringify(data, null, 2)
     fs.mkdir(homedir + "/" + path, { recursive: true}, function (err) {
@@ -1102,40 +972,27 @@ ipcMain.on('user:address', (e, options) => {
 })
 
 ipcMain.on('getredeemscript:redeemscript', (e, options) => {
-  console.log("options script: ", options.script)
   const accounts = JSON.parse(fs.readFileSync(homedir + "/.fscb/data.json", "utf-8"))
   const accountFilter = Object.values(accounts).filter(value => {
-    console.log(value);
     return value.redeem_script === options.script;
   });
-  console.log("account filter: ",JSON.stringify(accountFilter))
   win.webContents.send('account:filterSig', JSON.stringify(accountFilter))
 });
 
 ipcMain.on('signature:encode', (e, options) => {
-  console.log(options)
-  // const accounts = JSON.parse(fs.readFileSync(homedir + "/.fscb/data.json", "utf-8"))
-  // const accountFilter = Object.values(accounts).filter(value => {
-  //   console.log(value);
-  //   return value.id === options;
-  // });
-  // console.log("account filter: ",JSON.stringify(accountFilter))
   const path = ".fscb"
   const fileName = "data.json"
   fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
     jdata = JSON.parse(jdata);
     //Step 3: append contract variable to list
     jdata["contract" + options.id] = options.contract
-    // console.log(jdata);
     const wData = JSON.stringify(jdata, null, 2)
     fs.writeFile(homedir + "/" + path +"/"+ fileName, wData, function writeJson() {
       if (err) {
         console.log(err)
       } else {
-        console.log("successfully updated");
         const accounts = fs.readFileSync(homedir + "/.fscb/data.json", "utf-8")
         win.webContents.send("list:file", accounts)
-        // win.webContents.send("send:newAccountSuccess", {})
       }
     })
   });
@@ -1147,8 +1004,6 @@ ipcMain.on('signature:encode', (e, options) => {
 **/
 ipcMain.on('export:get-data', () => {
 
-	console.log("export main")
-  console.log("does data.json exist? : ", fs.existsSync(homedir + '/.fscb/data.json'))
 	const user = fs.existsSync(homedir + '/.fscb/user.json') ? fs.readFileSync(homedir + "/.fscb/user.json", "utf-8") : null
 	const bankers = fs.existsSync(homedir + '/.fscb/banker.json') ? fs.readFileSync(homedir + "/.fscb/banker.json", "utf-8") : null
 	const accounts = fs.existsSync(homedir + '/.fscb/data.json') ? fs.readFileSync(homedir + "/.fscb/data.json", "utf-8") : null
@@ -1170,30 +1025,6 @@ ipcMain.on('export:get-data', () => {
 		"bankers": parsedBankers,
 		"accounts": parsedAccounts
 	}
-
-  //console.log("json message: ", message)
-
-	// let backup = "This is your FSCB backup. \n"
-	// const textBegin = "----- Begin fscb message ----- \n"
-	// const textEnd = "\n ----- End fscb message ----- \n"
-	//
-	// let backupMessage = backup + textBegin + JSON.stringify(message) + textEnd
-	// console.log("backupMessage: ", backupMessage)
-
-	/**
-		Disabled. New backup flow, display data in a textarea and let the user copy and save it
-	**/
-	// const path = "data"
-  // const fileName = "backup.txt"
-	// fs.writeFile(homedir + "/" + path +"/"+ fileName, backupMessage, function writeJson(err, bytes) {
-	// 	if (err) {
-	// 		console.log(err)
-	// 	} else {
-	// 		console.log("successfully write backup, bytes: ", bytes);
-	// 		win.webContents.send('export:response', {})
-	// 		return
-	// 	}
-	// })
 
 	win.webContents.send('export:response', message)
 
