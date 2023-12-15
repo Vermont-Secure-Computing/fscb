@@ -537,6 +537,7 @@ function accountWithdrawalFunc(address){
         let input1 = document.createElement('input')
         input1.setAttribute('class', 'col-span-2 txid-withdraw text-black text-base text-normal p-1')
         input1.setAttribute('id', 'txid-withdraw')
+        input1.setAttribute('readonly', true)
         input1.value = listPTXID
         let input2 = document.createElement('input')
         input2.setAttribute('class', 'text-black')
@@ -551,6 +552,7 @@ function accountWithdrawalFunc(address){
         let input4 = document.createElement('input')
         input4.setAttribute('class', 'col-span-1 text-black text-base text-normal p-1')
         input4.setAttribute('id', 'amount-withdraw')
+        input4.setAttribute('readonly', true)
         input4.value = listPAmount
         let input5 = document.createElement('input')
         input5.setAttribute('class', 'hidden')
@@ -1186,7 +1188,7 @@ ipcRenderer.on('send:bankers', function(e, evt) {
 function parseTextArea(e) {
     e.preventDefault();
     const textarea = document.getElementById('import-text');
-    const jsonString = textarea.value;
+    const jsonString = removeTagsFromInput(textarea.value);
     const startIndex = jsonString.indexOf('{');
     const endIndex = jsonString.lastIndexOf('}');
 
@@ -1316,7 +1318,7 @@ ipcRenderer.on('request:banker-signature', (e, message) => {
   signButton.addEventListener('click', () => {
 
     let pk = document.getElementById('banker-pivkey-for-signature')
-    let privkey = pk.value
+    let privkey = removeTagsFromInput(pk.value)
     if (privkey) {
         if (isWifKeyValid(privkey)) {
         bankerSignTransaction(message, privkey)
@@ -1656,8 +1658,8 @@ function getList() {
 
 async function createUserProfile(e) {
     e.preventDefault()
-    const userName = document.getElementById('user-name').value
-    const userEmail = document.getElementById('user-email').value
+    const userName = removeTagsFromInput(document.getElementById('user-name').value)
+    const userEmail = removeTagsFromInput(document.getElementById('user-email').value)
 
     /**
       Validation
@@ -1739,7 +1741,7 @@ ipcRenderer.on('request:banker-pubkey', async(e, message) => {
     let finalizeKeys = document.getElementById('banker-finalize-keys')
 
     generatePrivkey.addEventListener('click', async() => {
-      let updatedHex = privkeyHexInput.value
+      let updatedHex = removeTagsFromInput(privkeyHexInput.value)
       let isValid = isKeyValid(updatedHex)
       if (!isValid) {
         alertError("The text you entered is not a valid private key")
