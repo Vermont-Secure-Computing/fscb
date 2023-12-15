@@ -171,6 +171,22 @@ refreshBtn.addEventListener("click", () => {
 **/
 
 
+/**
+ * Sanitize inputs by replacing HTML tags with a null string
+ */
+function removeTagsFromInput(str) {
+  if ((str===null) || (str===''))
+      return false;
+  else
+      str = str.toString();
+       
+  return str.replace( /(<([^>]+)>)/ig, '');
+}
+/**
+ * End of sanitation
+ */
+
+
 
 
 function setAccountCurrency() {
@@ -235,7 +251,7 @@ function slicePubkey(pubkey) {
 **/
 async function saveAndCreateText(e) {
     e.preventDefault();
-    const contractSendName = contractName.value;
+    const contractSendName = removeTagsFromInput(contractName.value);
     const creatorSendName = USER.user_name;
     const creatorSendEmail = USER.user_email;
 
@@ -247,7 +263,9 @@ async function saveAndCreateText(e) {
       New account data validation
     **/
     if (contractSendName == "") return alertError("Contract name is required.")
+    if (contractSendName.length > 75) return alertError("Contract name should not be more than 75 characters.")
     if (innerMultiKey.length == 0) return alertError("Please select a banker")
+    if (innerMultiKey.length < parseInt(sigSendNumber)) return alertError("Number of required signature should not be more than the number of bankers.")
 
     let bankersMerge = [];
     for (let i = 0; i < innerMultiKey.length; i++) {
@@ -791,7 +809,7 @@ function addBanker(e) {
     var selectElement = document.getElementById('banker-coin-currency');
     var bankerCurrency = selectElement.options[selectElement.selectedIndex].text;
 
-    const bankerName = nameInput.value
+    const bankerName = removeTagsFromInput(nameInput.value)
     const bankerEmail = emailInput.value
 
     /**
@@ -801,6 +819,7 @@ function addBanker(e) {
       alertError("Banker User name and email is required.")
       return
     }
+    if (bankerName.length > 75) return alertError("Banker name should not be more than 75 characters.")
     if (bankerEmail) {
       let validEmail = isEmailValid(bankerEmail)
       if (!validEmail) {
