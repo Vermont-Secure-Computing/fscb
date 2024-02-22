@@ -26,8 +26,8 @@ contextMenu({
 const createWindow = () => {
   // Create splash window
   var splash = new BrowserWindow({
-    width: isDev ? 1500 : 800,
-    height: 728,
+    width: 1200,
+    height: 740,
     resizable: isDev,
     transparent: false,
     frame: false,
@@ -47,8 +47,8 @@ const createWindow = () => {
 
     // Create main window
     win = new BrowserWindow({
-      width: isDev ? 1500 : 800,
-      height: 728,
+      width: 1200,
+      height: 740,
       resizable: isDev,
       webPreferences: {
         nodeIntegration: true,
@@ -59,9 +59,9 @@ const createWindow = () => {
     });
 
     // Show devtools automatically if in development
-    if (isDev) {
-      win.webContents.openDevTools();
-    }
+    // if (isDev) {
+    //   win.webContents.openDevTools();
+    // }
 
 
   win.removeMenu()
