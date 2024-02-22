@@ -16,6 +16,7 @@
     content="script-src 'self' 'unsafe-inline'"
     />
     <title>Free State Central Bank</title>
+    <link href="./styles.css" rel="stylesheet">
     <link href="../dist/output.css" rel="stylesheet">
 		<script type="text/javascript" src="../src/js/moment.min.js"></script>
 
@@ -165,7 +166,7 @@
                   <p>WARNING</p>
                 </div>
                 <div class="font-normal text-base mt-6">
-                  <p>You have been asked by <span id="account-owner-name"></span> to manage a private key as a banker. If you don't know what this means, you should tell <span id="account-owner-name2"></span> you politely refuse.</p>
+                  <p>You have been asked by "<span id="account-owner-name"></span>" to manage a private key as a banker. If you don't know what this means, you should tell "<span id="account-owner-name2"></span>" you politely refuse.</p>
                 </div>
 
                 <div class="mt-6">
@@ -592,11 +593,82 @@
           <div id="third" class="p-9 hidden text-white text-xl font-bold">
             Instructions
             <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
-            <div class="h-96 bg-white font-normal text-base">
-             <p class="text-black py-2 px-5 font-bold">Requesting for Bankers Public key:</p>
-             <p class="text-black px-5 absolute mt-5 font-normal text-base">Please copy the line below and send it to robert@email.com</p>
-             <p class="text-black px-5 absolute mt-14 font-normal text-base">Jon Jon is requesting for you to become a banker at this Stargazer</p>
-             <p class="text-black px-5 absolute mt-24 font-normal text-base">Please copy the message inside and import in FSCB</p>
+            <div class="bg-white font-normal text-base mh-90vh overflow-auto pb-4">
+              <p class="text-black text-lg py-2 px-5 font-bold">Requesting for Bankers Public key:</p>
+              <p class="text-black px-5 mt-8 font-normal text-base">Go to Add Banker</p>
+              <img class="ml-12 mt-4" src="./images/instructions_banker_pubkey_1.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Choose Coin</p>
+              <img class="ml-12 mt-4" src="./images/instructions_banker_pubkey_2.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Fill up Username and E-mail (valid E-mail)</p>
+              <img class="ml-12 mt-4" src="./images/instructions_banker_pubkey_3.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Then click Submit button</p>
+              <img class="ml-12 mt-4" src="./images/instructions_banker_pubkey_4.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Please copy the message inside</p>
+              <img class="ml-12 mt-4" src="./images/instructions_banker_pubkey_5.png" alt="banker-pubkey-instruction-1" />
+
+              <hr class="my-5 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
+
+              <p class="text-black text-lg py-2 px-5 font-bold">Creating Contract:</p>
+              <p class="text-black px-5 mt-8 font-normal text-base">Go to New Account</p>
+              <img class="ml-12 mt-4" src="./images/instructions_create_contract_1.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Choose Coin</p>
+              <img class="ml-12 mt-4" src="./images/instructions_create_contract_2.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Fill up the contract name</p>
+              <img class="ml-12 mt-4" src="./images/instructions_create_contract_3.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Select how many bankers you want for the contract</p>
+              <img class="ml-12 mt-4" src="./images/instructions_create_contract_4.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Select how many signature you want for the contract to be released</p>
+              <img class="ml-12 mt-4" src="./images/instructions_create_contract_5.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Click submit</p>
+              <img class="ml-12 mt-4" src="./images/instructions_create_contract_6.png" alt="banker-pubkey-instruction-1" />
+
+              <hr class="my-5 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
+
+              <p class="text-black text-lg py-2 px-5 font-bold">Fundind a Contract:</p>
+              <p class="text-black px-5 mt-8 font-normal text-base">Go to Account List</p>
+              <img class="ml-12 mt-4" src="./images/instructions_funding_contract_1.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Copy the coin address of the contract you wish to fund</p>
+              <p class="text-black px-5 mt-8 font-normal text-base">Click View on the contract name</p>
+              <img class="ml-12 mt-4" src="./images/instructions_funding_contract_2.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Funds will be reflected on the contract name after 6 confirmation</p>
+              <img class="ml-12 mt-4" src="./images/instructions_funding_contract_3.png" alt="banker-pubkey-instruction-1" />
+
+              <hr class="my-5 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
+
+              <p class="text-black text-lg py-2 px-5 font-bold">Withdrawing Funds:</p>
+              <p class="text-black px-5 mt-8 font-normal text-base">Go to Account List</p>
+              <img class="ml-12 mt-4" src="./images/instructions_fund_withdrawal_1.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Click View on the contract name</p>
+              <img class="ml-12 mt-4" src="./images/instructions_fund_withdrawal_2.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Click Withdraw (The withdrawal option is disabled when a contract doesn't have funds.)</p>
+              <img class="ml-12 mt-4" src="./images/instructions_fund_withdrawal_3.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Click the checkbox of the transaction inputs you want to witdraw</p>
+              <img class="ml-12 mt-4" src="./images/instructions_fund_withdrawal_4.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Enter recipient address</p>
+              <img class="ml-12 mt-4" src="./images/instructions_fund_withdrawal_5.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Enter the amount to withdraw. If there is a change, it will automatically returned to the contract address.</p>
+              <img class="ml-12 mt-4" src="./images/instructions_fund_withdrawal_6.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Click Submit button</p>
+              <img class="ml-12 mt-4" src="./images/instructions_fund_withdrawal_7.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">The Verify screen will be shown. Click Generate button.</p>
+              <img class="ml-12 mt-4" src="./images/instructions_fund_withdrawal_8.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Select the banker that has the key for withdrawal</p>
+              <img class="ml-12 mt-4" src="./images/instructions_fund_withdrawal_9.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Click Generate</p>
+              <img class="ml-12 mt-4" src="./images/instructions_fund_withdrawal_10.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Copy the Generated message</p>
+              <img class="ml-12 mt-4" src="./images/instructions_fund_withdrawal_11.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Send the message to the banker's email indicated in the message. Wait for the banker to respond.</p>
+              <img class="ml-12 mt-4" src="./images/instructions_fund_withdrawal_12.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Once the banker responded, copy the message from the email.</p>
+              <img class="ml-12 mt-4" src="./images/instructions_fund_withdrawal_13.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Click Import Text and paste the message</p>
+              <img class="ml-12 mt-4" src="./images/instructions_fund_withdrawal_14.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">The broadcast screen will show</p>
+              <img class="ml-12 mt-4" src="./images/instructions_fund_withdrawal_15.png" alt="banker-pubkey-instruction-1" />
+              <p class="text-black px-5 mt-8 font-normal text-base">Click Broadcast</p>
+              <img class="ml-12 mt-4" src="./images/instructions_fund_withdrawal_16.png" alt="banker-pubkey-instruction-1" />
+              
             </div>
           </div>
           <div id="fourth" class="hidden p-9 text-white text-xl font-bold">
@@ -638,13 +710,13 @@
           </div>
         </div>
       </div>
-      <div id="user-profile" class="hidden h-screen bg-[#1a1a1a]">
-        <form id="user-profile-form" class="relative text-white left-44 p-1 pl-48">
-          <div class="mt-16 pl-7">
-            <img src="./images/fscb_logo_round.png" alt="fscb">
+      <div id="user-profile" class="p-3 md:p-2 hidden h-screen bg-[#1a1a1a] flex justify-center items-center">
+        <form id="user-profile-form" class="text-white w-full md:w-96">
+          <div class="flex justify-center">
+            <img src="./images/fscb_logo_round.png" alt="fscb" class="mx-auto">
           </div>
            <div class="font-semibold mt-8">
-            <!--span>Please do fill up the form</span-->
+            <p class="text-sm font-normal text-justify break-word">Usernames and emails serve as labels and communication modes among bankers. The system does not store any data in a database; it solely operates within the browser.</p>
            </div>
           <input input type="text" id="user-name" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block relative w-96 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Username">
           <input input type="email" id="user-email" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block relative w-96 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Users E-mail">
