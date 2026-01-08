@@ -1,4 +1,9 @@
-const { app, BrowserWindow, ipcMain, ipcRenderer, clipboard } = require('electron');
+const { app, BrowserWindow, ipcMain, clipboard } = require('electron');
+// Disable GPU on Linux to avoid DRM/Mesa issues
+app.commandLine.appendSwitch("disable-gpu");
+app.commandLine.appendSwitch("disable-gpu-compositing");
+// optional: force software GL
+app.commandLine.appendSwitch("use-gl", "swiftshader");
 const path = require('path');
 const https = require('https');
 const homedir = require('os').homedir();
@@ -7,13 +12,20 @@ const contextMenu = require('electron-context-menu');
 const jsonFile = homedir + "/.fscb/data.json"
 const jsonFileBanker = homedir + "/.fscb/banker.json"
 
-const config = require('dotenv');
-config.config({
-  path: '.env'
-})
-const {
-  API_KEY
-} = process.env
+let CURRENT_API_PROVIDER = "mempool";
+let CURRENT_API_KEY = null;
+
+const dns = require("dns");
+dns.setDefaultResultOrder("ipv4first");
+
+
+// const config = require('dotenv');
+// config.config({
+//   path: '.env'
+// })
+// const {
+//   API_KEY
+// } = process.env
 
 const isDev = process.env.NODE_ENV !== 'production';
 
@@ -91,6 +103,84 @@ const createWindow = () => {
 }, 2000);
 };
 
+ipcMain.on("api:state", (e, state) => {
+  CURRENT_API_PROVIDER = state.apiProvider || "mempool";
+  CURRENT_API_KEY = state.apiKey || null;
+
+  console.log("[API] Provider:", CURRENT_API_PROVIDER);
+});
+
+const DATA_PATH = homedir + "/.fscb/data.json";
+const BANKER_PATH = homedir + "/.fscb/banker.json";
+
+function writeDataJsonSafely(mutatorFn) {
+  let data;
+
+  try {
+    data = JSON.parse(fs.readFileSync(DATA_PATH, "utf8"));
+  } catch (e) {
+    console.error("data.json corrupted — aborting write");
+    return;
+  }
+
+  // mutate in memory
+  mutatorFn(data);
+
+  // atomic write
+  const tmp = DATA_PATH + ".tmp";
+  fs.writeFileSync(tmp, JSON.stringify(data, null, 2));
+  fs.renameSync(tmp, DATA_PATH);
+
+  win.webContents.send("list:file", fs.readFileSync(DATA_PATH, "utf-8"));
+}
+
+function writeBankerJsonSafely(mutatorFn) {
+  let data = {};
+
+  if (fs.existsSync(BANKER_PATH)) {
+    try {
+      data = JSON.parse(fs.readFileSync(BANKER_PATH, "utf8"));
+    } catch (e) {
+      console.error("banker.json corrupted — aborting write");
+      return;
+    }
+  }
+
+  // mutate in memory
+  mutatorFn(data);
+
+  // atomic write
+  const tmp = BANKER_PATH + ".tmp";
+  fs.writeFileSync(tmp, JSON.stringify(data, null, 2));
+  fs.renameSync(tmp, BANKER_PATH);
+}
+
+
+function resolveExplorerHost(provider, currency) {
+  if (provider !== "mempool") return null;
+
+  if (currency === "bitcoin") return "mempool.space";
+  if (currency === "litecoin") return "litecoinspace.org";
+
+  return null; // unsupported
+}
+
+function addressMatchesCurrency(currency, address) {
+  if (currency === "bitcoin") {
+    return address.startsWith("bc1") ||
+           address.startsWith("1") ||
+           address.startsWith("3");
+  }
+
+  if (currency === "litecoin") {
+    return address.startsWith("ltc1") ||
+           address.startsWith("L") ||
+           address.startsWith("M");
+  }
+
+  return true;
+}
+
 
 app.whenReady().then(() => {
   createWindow()
@@ -104,33 +194,43 @@ app.whenReady().then(() => {
 
 function idNumber() {
   try {
-    if (fs.existsSync(jsonFile)) {
-      const dataJson = fs.readFileSync(jsonFile, "utf-8")
-      const jconvert = JSON.parse(dataJson)
-      return jconvert[Object.keys(jconvert)[Object.keys(jconvert).length - 1]].contract_id + 1
-    } else {
-      return 1
-    }
-  } catch(err) {
-    console.error(err)
-  }
+    if (!fs.existsSync(jsonFile)) return 1;
 
+    const dataJson = fs.readFileSync(jsonFile, "utf-8");
+    const jconvert = JSON.parse(dataJson);
+
+    const ids = Object.values(jconvert)
+      .map(v => Number(v.contract_id))
+      .filter(Number.isFinite);
+
+    return ids.length ? Math.max(...ids) + 1 : 1;
+
+  } catch (err) {
+    console.error("idNumber error:", err);
+    return 1;
+  }
 }
+
 
 function bankerIdNumber() {
   try {
-    if (fs.existsSync(jsonFileBanker)) {
-      const dataJson = fs.readFileSync(jsonFileBanker, "utf-8")
-      const jconvert = JSON.parse(dataJson)
-      return jconvert[Object.keys(jconvert)[Object.keys(jconvert).length - 1]].banker_id + 1
-    } else {
-      return 1
-    }
-  } catch(err) {
-    console.error(err)
-  }
+    if (!fs.existsSync(jsonFileBanker)) return 1;
 
+    const dataJson = fs.readFileSync(jsonFileBanker, "utf-8");
+    const jconvert = JSON.parse(dataJson);
+
+    const ids = Object.values(jconvert)
+      .map(v => Number(v.banker_id))
+      .filter(Number.isFinite);
+
+    return ids.length ? Math.max(...ids) + 1 : 1;
+
+  } catch (err) {
+    console.error("bankerIdNumber error:", err);
+    return 1;
+  }
 }
+
 
 // idNumber()
 
@@ -151,7 +251,7 @@ async function isAccountAddressExisting(address, redeemScript) {
     let checker = false
     for (const [key, value] of Object.entries(accounts)) {
       let acct = value
-      if (acct.address === address && acct.redeem_script) {
+      if (acct.address === address && acct.redeem_script === redeemScript) {
         checker = true
         break;
       }
@@ -180,9 +280,12 @@ ipcMain.on("message:contractnew", async(e, options) => {
 
 
   const getIdNumber = idNumber()
-  pathMessage = 'message'
-  const mybankers = fs.readFileSync(homedir + "/.fscb/banker.json", "utf-8")
-  const bankersParse = JSON.parse(mybankers)
+  let bankersParse = {};
+  if (fs.existsSync(homedir + "/.fscb/banker.json")) {
+    bankersParse = JSON.parse(
+      fs.readFileSync(homedir + "/.fscb/banker.json", "utf-8")
+    );
+  }
   let mergeBankers = []
   for (let i = 0; i < options.bankersMerge.length; i++ ) {
     for (let j in bankersParse) {
@@ -256,51 +359,34 @@ ipcMain.on("message:contractnew", async(e, options) => {
 })
 
 ipcMain.on('message:addBanker', (e, options) => {
-  const getBankerIdNumber = bankerIdNumber()
-  let data = {
-    "id": Math.floor(1000000000 + Math.random() * 9000000000),
-    "banker_id": getBankerIdNumber,
-    "banker_name": options.bankerName,
-    "banker_email": options.bankerEmail,
-    "currency": options.bankerCurrency,
-    "pubkey": ""
-  }
-  const fileName = "banker.json"
-  const path = ".fscb"
   try {
-    fs.mkdir(homedir + "/" + path, { recursive: true}, function (err) {
-      if (err) return err;
-      if (fs.existsSync(jsonFileBanker)) {
-        fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
-          jdata = JSON.parse(jdata);
-          //Step 3: append contract variable to list
-          jdata["banker" + getBankerIdNumber] = data
+    fs.mkdirSync(homedir + "/.fscb", { recursive: true });
 
-          const wData = JSON.stringify(jdata, null, 2)
-          fs.writeFile(homedir + "/" + path +"/"+ fileName, wData, function writeJson() {
-            if (err) return console.log(err);
-            win.webContents.send("send:newBanker", data)
-            readBankersFile()
-          })
-      });
-      } else {
-        const addBanker = {
-          ["banker" + getBankerIdNumber]: data
-        }
-        const sData = JSON.stringify(addBanker, null, 2)
-        fs.writeFile(homedir + "/" + path +"/"+ fileName
-          , sData, function writeJson() {
-          if (err) return console.log(err);
-          win.webContents.send("send:newBanker", data)
-          readBankersFile()
-        });
+    const bankerId = bankerIdNumber();
 
-      }
+    const bankerData = {
+      id: Math.floor(1000000000 + Math.random() * 9000000000),
+      banker_id: bankerId,
+      banker_name: options.bankerName,
+      banker_email: options.bankerEmail,
+      currency: options.bankerCurrency,
+      pubkey: ""
+    };
+
+    // SAFE write
+    writeBankerJsonSafely((json) => {
+      json["banker" + bankerId] = bankerData;
     });
+
+    // notify renderer
+    win.webContents.send("send:newBanker", bankerData);
+    readBankersFile();
+
   } catch (e) {
-    console.log(e)
+    console.error("add banker error:", e);
   }
-})
+});
+
 
 
 ipcMain.on('newaccount:banker:filter', (e) => {
@@ -324,424 +410,591 @@ ipcMain.on('click:addBanker', () => {
 })
 
 
-ipcMain.on('balance:api', (e, options) => {
-  // e.preventDefault()
-  // console.log(options)
-  let account = {};
-  const fileName = "data.json"
-  const path = ".fscb"
-  if (fs.existsSync(jsonFile)) {
-    accounts = fs.readFileSync(homedir + "/.fscb/data.json", "utf-8")
-    const allaccount = JSON.parse(accounts)
-    for(let i in allaccount) {
-      // console.log(Object.keys(allaccount).length)
-      if (allaccount[i].currency === 'woodcoin') {
-        const request = https.request(`https://twigchain.com/ext/getAddress/${allaccount[i].address}`, (response) => {
-        let data = '';
-        response.on('data', (chunk) => {
-            data = data + chunk.toString();
-            //console.log("all account ", chunk.toString())
+ipcMain.on('balance:api', (e, options = {}) => {
+  if (!fs.existsSync(DATA_PATH)) return;
+
+  // DEFAULT = mempool (no API key needed)
+  const provider =
+    options.apiProvider ??
+    CURRENT_API_PROVIDER ??
+    "mempool";
+
+  const apiKey =
+    options.apiKey ??
+    CURRENT_API_KEY ??
+    null;
+
+
+  if (provider === "blockcypher" && !apiKey) {
+    win.webContents.send("balance:error", {
+      message: "BlockCypher API key not set"
+    });
+    return;
+  }
+
+  let accounts;
+  try {
+    accounts = JSON.parse(fs.readFileSync(DATA_PATH, "utf8"));
+  } catch {
+    win.webContents.send("balance:error", {
+      message: "Invalid data.json"
+    });
+    return;
+  }
+
+  for (const key of Object.keys(accounts)) {
+    const acct = accounts[key];
+
+    // =================================================
+    // WOODCOIN (unchanged)
+    // =================================================
+    if (acct.currency === "woodcoin") {
+      https.get(`https://twigchain.com/ext/getAddress/${acct.address}`, res => {
+        let data = "";
+        res.on("data", c => data += c);
+        res.on("end", () => {
+          try {
+            const body = JSON.parse(data);
+            writeDataJsonSafely(json => {
+              json[key].confirmed_balance = body.balance;
+              json[key].unconfirmed_balance = 0;
+              json[key].balance = body.balance;
+            });
+          } catch (e) {
+            console.error("woodcoin balance error:", e);
+          }
         });
+      });
+      continue;
+    }
 
-        response.on('end', async () => {
-            const body = await JSON.parse(data);
-            // console.log(body);
-            // allaccount[i].balance = body
-            if (body.address) {
-              if (allaccount[i].address === body.address) {
+    // =================================================
+    // BTC / LTC
+    // =================================================
+    
 
-                allaccount[i].balance = body.balance
-                // const allparse = JSON.stringify(allaccount[i], null, 2)
-                fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
-                  try {
-                    jdata = JSON.parse(jdata);
-                    //Step 3: append contract variable to list
-                    jdata[i] = allaccount[i]
-                    console.log(jdata);
-                    const wData = JSON.stringify(jdata, null, 2)
-                    fs.writeFile(homedir + "/" + path +"/"+ fileName, wData, (err) => {
-                      if (err) {
-                        return console.log(err)
-                      } else {
-                        const readMore = fs.readFileSync(homedir + "/.fscb/data.json", "utf-8")
+    if (!addressMatchesCurrency(acct.currency, acct.address)) {
+      console.warn(
+        "Skipping balance refresh — address/currency mismatch:",
+        acct.currency,
+        acct.address
+      );
+      continue;
+    }
 
-                        win.webContents.send("list:file",  readMore)
+    // =================================================
+    // MEMPOOL.SPACE (DEFAULT)
+    // =================================================
+    if (provider === "mempool") {
+      const explorer = resolveExplorerHost(provider, acct.currency);
+    
+      if (!explorer) {
+        continue; // skip unsupported coins (woodcoin, etc.)
+      }
+    
+      https.request({
+        hostname: explorer,
+        path: `/api/address/${acct.address}`,
+        method: "GET",
+        headers: { Accept: "application/json" }
+      }, res => {
+        let data = "";
+        res.on("data", c => data += c);
+        res.on("end", () => {
+          const ct = res.headers["content-type"] || "";
+    
+          // ⚠️ Esplora returns text/plain on errors
+          if (!ct.includes("application/json")) {
+            console.error(`${explorer} non-JSON response:`, data);
+            return;
+          }
+    
+          let body;
+          try {
+            body = JSON.parse(data);
+          } catch {
+            console.error(`${explorer} JSON parse failed`);
+            return;
+          }
+    
+          const confirmed =
+            body.chain_stats.funded_txo_sum -
+            body.chain_stats.spent_txo_sum;
+    
+          const unconfirmed =
+            body.mempool_stats.funded_txo_sum -
+            body.mempool_stats.spent_txo_sum;
+    
+          writeDataJsonSafely(json => {
+            json[key].confirmed_balance = confirmed;
+            json[key].unconfirmed_balance = unconfirmed;
+            json[key].balance = confirmed + unconfirmed;
+          });
+        });
+      }).end();
+    
+      continue;
+    }
 
-                      }
-                    })
-                  } catch (e) {
-                    console.log("parsing error: ", e)
+    // =================================================
+    // BLOCKCYPHER (OPTIONAL)
+    // =================================================
+    else if (provider === "blockcypher") {
+      let coinPath;
+      switch (acct.currency) {
+        case "bitcoin":
+          coinPath = "btc/main";
+          break;
+        case "litecoin":
+          coinPath = "ltc/main";
+          break;
+        default:
+          console.warn("BlockCypher unsupported currency:", acct.currency);
+          continue;
+      }
+      const path =
+        `/v1/${coinPath}/addrs/${acct.address}/balance` +
+        `?token=${encodeURIComponent(apiKey)}`;
+
+      https.request({
+        hostname: "api.blockcypher.com",
+        path,
+        method: "GET",
+        headers: { Accept: "application/json" }
+      }, res => {
+        let data = "";
+        res.on("data", c => data += c);
+        res.on("end", () => {
+          try {
+            const body = JSON.parse(data);
+
+            const confirmed = body.balance || 0;
+            const unconfirmed = body.unconfirmed_balance || 0;
+
+            writeDataJsonSafely(json => {
+              json[key].confirmed_balance = confirmed;
+              json[key].unconfirmed_balance = unconfirmed;
+              json[key].balance = confirmed + unconfirmed;
+            });
+
+          } catch (e) {
+            console.error("BlockCypher balance parse error:", e);
+          }
+        });
+      }).end();
+    }
+  }
+});
+
+
+
+
+ipcMain.on('withdrawal:api', (e, message = {}) => {
+  const {
+    transaction_id: txHex,
+    id: accountId,
+    withdrawal_id: withdrawalId,
+    currency,
+    apiProvider,
+    apiKey
+  } = message;
+
+  const provider =
+    apiProvider ??
+    CURRENT_API_PROVIDER ??
+    "mempool";
+
+  const key =
+    apiKey ??
+    CURRENT_API_KEY ??
+    null;
+
+
+  if (!txHex || !currency) {
+    win.webContents.send('withdrawal:broadcast-response', {
+      error: { message: 'Invalid withdrawal request' }
+    });
+    return;
+  }
+
+  // =================================================
+  // WOODCOIN (UNCHANGED)
+  // =================================================
+  if (currency === "woodcoin") {
+    try {
+      https.get(
+        `https://api.logbin.org/api/broadcast/r?transaction=${txHex}`,
+        res => {
+          let data = "";
+          res.on("data", c => data += c);
+          res.on("end", () => {
+            let body;
+            try {
+              body = JSON.parse(data);
+            } catch {
+              win.webContents.send('withdrawal:broadcast-response', {
+                error: { message: 'Invalid response from woodcoin API' }
+              });
+              return;
+            }
+
+            if (!body?.message?.result) {
+              win.webContents.send('withdrawal:broadcast-response', {
+                error: { message: 'Broadcast failed' }
+              });
+              return;
+            }
+
+            writeDataJsonSafely(json => {
+              for (const acct of Object.values(json)) {
+                if (acct.id == accountId) {
+                  for (const w of acct.withdrawals) {
+                    if (w.id == withdrawalId) {
+                      w.date_broadcasted = Date.now();
+                      w.txid = body.message.result;
+                    }
                   }
-                });
-                // account = allaccount[i]
-                // console.log(accounts)
-                // const updateJson = JSON.stringify(allaccount[i], null, 2)
-                // console.log(updateJson)
-                // fs.writeFile(jsonFile, updateJson, function writeJson() {
-                //   if (err) {
-                //     return console.log(err)
-                //   }
-                // })
+                }
               }
-            }
-          });
-        })
+            });
 
-        request.on('error', (error) => {
-            console.log('An error', error);
-            // win.webContents.send('response:balance', toString(0))
-        });
-        request.end()
-      } else if (allaccount[i].currency === 'bitcoin') {
-          console.log("currency ", allaccount[i].currency)
-          console.log("currency address ", allaccount[i].address)
-          const options = {
-            hostname: 'chain.so',
-            path: `/api/v3/balance/BTC/${allaccount[i].address}`,
-            port: 443,
-            method: 'GET',
-            headers: {
-              'API-KEY': API_KEY
+            win.webContents.send('withdrawal:broadcast-response', {
+              message: { result: body.message.result }
+            });
+          });
+        }
+      );
+    } catch (e) {
+      console.error("woodcoin broadcast error:", e);
+    }
+    return;
+  }
+
+  // =================================================
+  // MEMPOOL MODE (DEFAULT)
+  //  =================================================
+  if (provider === "mempool") {
+    const explorer = resolveExplorerHost("mempool", currency);
+    if (!explorer) return;
+
+    const postData = txHex;
+
+    const req = https.request({
+      hostname: explorer,
+      path: "/api/tx",
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain",
+        "Content-Length": Buffer.byteLength(postData)
+      }
+    }, res => {
+      let data = "";
+      res.on("data", c => data += c);
+      res.on("end", () => {
+        if (!res.statusCode || res.statusCode >= 300) {
+          win.webContents.send('withdrawal:broadcast-response', {
+            error: { message: data || "Broadcast failed" }
+          });
+          return;
+        }
+
+        const txid = data.trim();
+
+        writeDataJsonSafely(json => {
+          for (const acct of Object.values(json)) {
+            if (acct.id == accountId) {
+              for (const w of acct.withdrawals) {
+                if (w.id == withdrawalId) {
+                  w.date_broadcasted = Date.now();
+                  w.txid = txid;
+                }
+              }
             }
           }
-          const request = https.request(options, (response) => {
-            let data = '';
-            response.on('data', (chunk) => {
-              data = data + chunk.toString();
-              console.log("all account 2 ", chunk.toString())
-            });
-            response.on('end', async () => {
-              const body = await JSON.parse(data);
-              // const bodydata = Object.keys(body.data)
-              // const removeBracket = bodydata[0]
-              console.log("chain so response balance: ", body)
-              if (body.data) {
-                // if (allaccount[i].address === removeBracket) {
-                  // console.log("bitcoin satoshi ", body.data[allaccount[i].address].address.balance / Math.pow(10,8))
-                  allaccount[i].balance = body.data.confirmed // Math.pow(10,8)
-                  fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
-                    try {
-                      jdata = JSON.parse(jdata);
-                      //Step 3: append contract variable to list
-                      jdata[i] = allaccount[i]
-                      console.log(jdata);
-                      const wData = JSON.stringify(jdata, null, 2)
-                      fs.writeFile(homedir + "/" + path +"/"+ fileName, wData, (err) => {
-                        if (err) {
-                          return console.log(err)
-                        } else {
-                          const readMore = fs.readFileSync(homedir + "/.fscb/data.json", "utf-8")
+        });
 
-                          win.webContents.send("list:file",  readMore)
+        win.webContents.send('withdrawal:broadcast-response', {
+          message: { result: txid }
+        });
+      });
+    });
 
-                        }
-                      })
-                    } catch (e) {
-                      console.log("parsing error: ", e)
-                    }
-                  });
-                // }
-              }
-            })
+    req.on("error", err => {
+      win.webContents.send('withdrawal:broadcast-response', {
+        error: { message: err.message }
+      });
+    });
 
-          })
-          request.on('error', (error) => {
-            console.log('An error', error);
-            // win.webContents.send('response:balance', toString(0))
+    req.write(postData);
+    req.end();
+    return;
+  }
 
+  // =================================================
+  // BLOCKCYPHER (OPTIONAL FALLBACK)
+  // =================================================
+  if (provider === "blockcypher") {
+    if (!key) {
+      win.webContents.send('withdrawal:broadcast-response', {
+        error: { message: 'BlockCypher API key not set' }
+      });
+      return;
+    }
+
+    // Map currency → BlockCypher chain
+    let coinPath;
+    switch (currency) {
+      case "bitcoin":
+        coinPath = "btc/main";
+        break;
+      case "litecoin":
+        coinPath = "ltc/main";
+        break;
+      default:
+        win.webContents.send('withdrawal:broadcast-response', {
+          error: { message: `BlockCypher unsupported currency: ${currency}` }
+        });
+        return;
+    }
+
+    const postData = JSON.stringify({ tx: txHex });
+
+    const req = https.request({
+      hostname: "api.blockcypher.com",
+      path: `/v1/${coinPath}/txs/push?token=${encodeURIComponent(key)}`,
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "Content-Length": Buffer.byteLength(postData)
+      }
+    }, res => {
+      let data = "";
+      res.on("data", c => data += c);
+      res.on("end", () => {
+        let resp;
+        try {
+          resp = JSON.parse(data);
+        } catch {
+          win.webContents.send('withdrawal:broadcast-response', {
+            error: { message: "Invalid BlockCypher response" }
           });
-          request.end()
-      } else if (allaccount[i].currency === 'litecoin') {
-        console.log("currency ", allaccount[i].currency)
-          console.log("currency address ", allaccount[i].address)
-          const options = {
-            hostname: 'chain.so',
-            path: `/api/v3/balance/LTC/${allaccount[i].address}`,
-            port: 443,
-            method: 'GET',
-            headers: {
-              'API-KEY': API_KEY
+          return;
+        }
+
+        if (!resp?.tx?.hash) {
+          win.webContents.send('withdrawal:broadcast-response', {
+            error: { message: resp?.errors?.[0]?.error || "Broadcast failed" }
+          });
+          return;
+        }
+
+        writeDataJsonSafely(json => {
+          for (const acct of Object.values(json)) {
+            if (acct.id == accountId) {
+              for (const w of acct.withdrawals) {
+                if (w.id == withdrawalId) {
+                  w.date_broadcasted = Date.now();
+                  w.txid = resp.tx.hash;
+                }
+              }
             }
           }
-          const request = https.request(options, (response) => {
-            let data = '';
-            response.on('data', (chunk) => {
-              data = data + chunk.toString();
-              // console.log("all account 2 ", chunk.toString())
+        });
+
+        win.webContents.send('withdrawal:broadcast-response', {
+          message: { result: resp.tx.hash }
+        });
+      });
+    });
+
+    req.write(postData);
+    req.end();
+  }
+});
+
+
+
+ipcMain.on('unspent:api', (e, payload = {}) => {
+  const { address, currency, apiProvider, apiKey } = payload;
+
+  if (!currency || !address) {
+    win.webContents.send('unspent:error', {
+      message: 'Invalid address request'
+    });
+    return;
+  }
+
+  const provider = apiProvider ?? CURRENT_API_PROVIDER ?? "mempool";
+  const key = apiKey ?? CURRENT_API_KEY ?? null;
+
+  // =========================
+  // WOODCOIN (UNCHANGED)
+  // =========================
+  if (currency === 'woodcoin') {
+    try {
+      https.get(
+        `https://api.logbin.org/api?address=${address}`,
+        res => {
+          let data = "";
+          res.on("data", c => data += c);
+          res.on("end", () => {
+            const body = JSON.parse(data);
+            win.webContents.send('unspent:address', {
+              utxo: body.message.address,
+              currency: currency
             });
-            response.on('end', async () => {
-              const body = await JSON.parse(data);
-              // const bodydata = Object.keys(body.data)
-              // const removeBracket = bodydata[0]
-              console.log("chain so response balance: ", body)
-              if (body.data) {
-                // if (allaccount[i].address === removeBracket) {
-                  // console.log("bitcoin satoshi ", body.data[allaccount[i].address].address.balance / Math.pow(10,8))
-                  allaccount[i].balance = body.data.confirmed  // Math.pow(10,8)
-                  fs.readFile(homedir + "/" + path +"/"+ fileName, 'utf8', function(err, jdata){
-                    try {
-                      jdata = JSON.parse(jdata);
-                      //Step 3: append contract variable to list
-                      jdata[i] = allaccount[i]
-                      console.log(jdata);
-                      const wData = JSON.stringify(jdata, null, 2)
-                      fs.writeFile(homedir + "/" + path +"/"+ fileName, wData, (err) => {
-                        if (err) {
-                          return console.log(err)
-                        } else {
-                          const readMore = fs.readFileSync(homedir + "/.fscb/data.json", "utf-8")
-
-                          win.webContents.send("list:file",  readMore)
-
-                        }
-                      })
-                    } catch (e) {
-                      console.log("parsing error: ", e)
-                    }
-                  });
-                // }
-              }
-            })
-
-          })
-          request.on('error', (error) => {
-            console.log('An error', error);
-            // win.webContents.send('response:balance', toString(0))
-
           });
-          request.end()
-    } else {
-        console.log("Chain not found")
-        return
-      }
-    }
-  }
-})
-
-
-ipcMain.on('withdrawal:api', (e, message) => {
-	const txid = message.transaction_id
-	const accountId = message.id
-	const withdrawalId = message.withdrawal_id
-
-	if (message.currency === "woodcoin") {
-		try {
-	    const request = https.request(`https://api.logbin.org/api/broadcast/r?transaction=${txid}`, (response) => {
-	      let data = '';
-	      response.on('data', (chunk) => {
-	          data = data + chunk.toString();
-	      });
-
-	      response.on('end', async () => {
-	          const body = await JSON.parse(data);
-
-						if (body.message) {
-							const accounts = await JSON.parse(fs.readFileSync(homedir + "/.fscb/data.json", "utf-8"))
-							for (const [key, value] of Object.entries(accounts)) {
-					      let account = value
-					      if (account.id == accountId) {
-									for (const [index, withdrawal] of account.withdrawals.entries()){
-										if (withdrawal.id == withdrawalId){
-											withdrawal.date_broadcasted = Date.now()
-											withdrawal.txid = body.message.result
-											const updatedAccounts = JSON.stringify(accounts, null, 2)
-											fs.writeFile(homedir + "/.fscb/data.json"
-												, updatedAccounts, function writeJson(err) {
-												if (err)  {
-													console.log("updating withdrawal after successful broadcasting error: ", err)
-												} else {
-													console.log("withdrawal broadcasted. record updated")
-												}
-											})
-										}
-									}
-								}
-							}
-						}
-	          win.webContents.send('withdrawal:broadcast-response', body)
-	      });
-	   })
-
-	    request.on('error', (error) => {
-	        win.webContents.send('withdrawal:broadcast-response', body)
-	    });
-	    request.end()
-	  } catch(e) {
-	    console.log("error : ", e)
-	  }
-	} else if (message.currency === "bitcoin" || message.currency === "litecoin") {
-		let chain = message.currency === "bitcoin" ? "BTC" : "LTC";
-		try {
-			var postData = JSON.stringify({
-    		'tx_hex' : txid
-			});
-
-			const options = {
-				hostname: 'chain.so',
-				path: `/api/v3/broadcast_transaction/${chain}`,
-				port: 443,
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'API-KEY': API_KEY
-				}
-			}
-		  const request = https.request(options, (response) => {
-		      let data = '';
-		      response.on('data', (chunk) => {
-		          data = data + chunk.toString();
-		      });
-
-		      response.on('end', async () => {
-		          const resp = await JSON.parse(data);
-							let body
-
-							if (resp.data) {
-								body = {
-									message: {
-										result: resp.data.hash
-									}
-								}
-							} else {
-								body = {
-									error : {
-										error: {
-											message: resp.error
-										}
-									}
-								}
-							}
-
-							if (body.message) {
-								const accounts = await JSON.parse(fs.readFileSync(homedir + "/.fscb/data.json", "utf-8"))
-								for (const [key, value] of Object.entries(accounts)) {
-						      let account = value
-						      if (account.id == accountId) {
-										for (const [index, withdrawal] of account.withdrawals.entries()){
-											if (withdrawal.id == withdrawalId){
-												withdrawal.date_broadcasted = Date.now()
-												withdrawal.txid = body.data.hash
-												const updatedAccounts = JSON.stringify(accounts, null, 2)
-												fs.writeFile(homedir + "/.fscb/data.json"
-													, updatedAccounts, function writeJson(err) {
-													if (err)  {
-														console.log("updating withdrawal after successful broadcasting error: ", err)
-													} else {
-														console.log("withdrawal broadcasted. record updated")
-													}
-												})
-											}
-										}
-									}
-								}
-							}
-		          win.webContents.send('withdrawal:broadcast-response', body)
-		      });
-		  })
-		  request.write(postData);
-	    request.on('error', (error) => {
-	        win.webContents.send('withdrawal:broadcast-response', body)
-	    });
-	    request.end()
-	  } catch(e) {
-	    console.log("error : ", e)
-	  }
-	} else {
-		console.log("invalid currency")
-		return
-	}
-
-
-
-})
-
-ipcMain.on('unspent:api', (e, address) => {
-  if (address.currency === 'woodcoin') {
-    try {
-      const request = https.request(`https://api.logbin.org/api?address=${address.address}`, (response) => {
-        let data = '';
-        response.on('data', (chunk) => {
-            data = data + chunk.toString();
-        });
-
-        response.on('end', async () => {
-            const body = await JSON.parse(data);
-            win.webContents.send('unspent:address', {"utxo":body.message.address, "currency":address.currency})
-        });
-     })
-
-      request.on('error', (error) => {
-          console.log('An error', error);
-      });
-      request.end()
-    } catch(e) {
-      console.log("error : ", e)
-    }
-  } else if (address.currency === 'bitcoin') {
-    try {
-      const options = {
-        hostname: 'chain.so',
-        path: `/api/v3/unspent_outputs/BTC/${address.address}/1`,
-        port: 443,
-        method: 'GET',
-        headers: {
-          'API-KEY': API_KEY
         }
-      }
-      const request = https.request(options , (response) => {
-        let data = '';
-        response.on('data', (chunk) => {
-            data = data + chunk.toString();
-        });
-
-        response.on('end', async () => {
-            const body = await JSON.parse(data);
-            win.webContents.send('unspent:address', {"utxo":body.data.outputs, "currency":address.currency})
-        });
-     })
-
-      request.on('error', (error) => {
-          console.log('An error', error);
+      ).on("error", err => {
+        win.webContents.send('unspent:error', { message: err.message });
       });
-      request.end()
-    } catch(e) {
-      console.log("error : ", e)
+    } catch (e) {
+      console.error("woodcoin utxo error:", e);
     }
-  } else if (address.currency === 'litecoin') {
-    try {
-      const options = {
-        hostname: 'chain.so',
-        path: `/api/v3/unspent_outputs/LTC/${address.address}/1`,
-        port: 443,
-        method: 'GET',
-        headers: {
-          'API-KEY': API_KEY
-        }
-      }
-      const request = https.request(options, (response) => {
-        let data = '';
-        response.on('data', (chunk) => {
-            data = data + chunk.toString();
-        });
-
-        response.on('end', async () => {
-            const body = await JSON.parse(data);
-            win.webContents.send('unspent:address', {"utxo":body.data.outputs, "currency":address.currency})
-        });
-     })
-
-      request.on('error', (error) => {
-          console.log('An error', error);
-      });
-      request.end()
-    } catch(e) {
-      console.log("error : ", e)
-    }
-  } else {
-      console.log("Chain not found")
-      return
+    return;
   }
-})
+
+  // =========================
+  // Address ↔ currency guard
+  // =========================
+  if (!addressMatchesCurrency(currency, address)) {
+    console.warn(
+      "Skipping UTXO fetch — address/currency mismatch:",
+      currency,
+      address
+    );
+    return;
+  }
+
+  // =========================
+  // MEMPOOL MODE (DEFAULT)
+  // =========================
+  if (provider === "mempool") {
+    const explorer = resolveExplorerHost("mempool", currency);
+    if (!explorer) return;
+
+    https.request({
+      hostname: explorer,
+      path: `/api/address/${address}/utxo`,
+      method: "GET",
+      headers: { Accept: "application/json" }
+    }, res => {
+      let data = "";
+      res.on("data", c => data += c);
+      res.on("end", () => {
+        const ct = res.headers["content-type"] || "";
+        if (!ct.includes("application/json")) {
+          console.error(`${explorer} non-JSON UTXO response:`, data);
+          return;
+        }
+
+        let utxos;
+        try {
+          utxos = JSON.parse(data);
+        } catch {
+          console.error(`${explorer} UTXO JSON parse failed`);
+          return;
+        }
+
+        // CONFIRMED ONLY (safe spending)
+        const confirmed = utxos
+          .filter(u => u.status?.confirmed)
+          .map(u => ({
+            tx_hash: u.txid,
+            output_no: u.vout,
+            value: u.value,
+            confirmations: u.status.confirmed ? 1 : 0,
+            script_hex: u.scriptpubkey
+          }));
+
+        win.webContents.send('unspent:address', {
+          utxo: confirmed,
+          currency: currency
+        });
+      });
+    }).end();
+
+    return;
+  }
+
+  // =========================
+  // BLOCKCYPHER (OPTIONAL)
+  // =========================
+  if (provider === "blockcypher") {
+    if (!key) {
+      win.webContents.send('unspent:error', {
+        message: 'BlockCypher API key not set'
+      });
+      return;
+    }
+
+    // Map currency → BlockCypher chain
+    let coinPath;
+    switch (currency) {
+      case "bitcoin":
+        coinPath = "btc/main";
+        break;
+      case "litecoin":
+        coinPath = "ltc/main";
+        break;
+      default:
+        win.webContents.send('unspent:error', {
+          message: `BlockCypher unsupported currency: ${currency}`
+        });
+        return;
+    }
+
+
+    const path =
+      `/v1/${coinPath}/addrs/${address}` +
+      `?unspentOnly=true&includeScript=true&token=${encodeURIComponent(key)}`;
+
+    https.request({
+      hostname: "api.blockcypher.com",
+      path,
+      method: "GET",
+      headers: { Accept: "application/json" }
+    }, res => {
+      let data = "";
+      res.on("data", c => data += c);
+      res.on("end", () => {
+        let resp;
+        try {
+          resp = JSON.parse(data);
+        } catch {
+          win.webContents.send('unspent:error', {
+            message: 'Invalid response from BlockCypher'
+          });
+          return;
+        }
+
+        const all = [
+          ...(resp.txrefs || []),
+          ...(resp.unconfirmed_txrefs || [])
+        ];
+
+        const utxo = all
+          .filter(u => u.confirmations > 0)
+          .map(u => ({
+            tx_hash: u.tx_hash,
+            output_no: u.tx_output_n,
+            value: u.value,
+            confirmations: u.confirmations,
+            script_hex: u.script
+          }));
+
+        win.webContents.send('unspent:address', {
+          utxo,
+          currency: currency
+        });
+      });
+    }).end();
+  }
+});
+
+
+
 
 ipcMain.on('get:user', async() => {
   if (fs.existsSync(homedir + "/.fscb/user.json")) {
@@ -1012,12 +1265,6 @@ ipcMain.on('export:get-data', () => {
   const parsedBankers = bankers ? JSON.parse(bankers) : null
   const parsedAccounts = accounts ? JSON.parse(accounts) : null
 
-  let accountJson = {
-    "user": parsedUser,
-    "bankers": parsedBankers,
-    "accounts": parsedAccounts
-  }
-
 	let message = {
 		"header": "free_state_central_bank",
 		"message": "import:json-data",
@@ -1034,3 +1281,8 @@ ipcMain.on('export:get-data', () => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
+
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Rejection:', reason);
+});
+

@@ -5,14 +5,17 @@
   "description": "Bank",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon --watch . --exec electron .",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dist": "electron-builder"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "autoprefixer": "^10.4.15",
     "electron": "^26.0.0",
+    "electron-builder": "^24.6.4",
+    "nodemon": "^3.1.11",
     "postcss": "^8.4.29",
     "postcss-loader": "^7.3.3",
     "prettier": "^3.0.3",
@@ -23,5 +26,15 @@
     "dotenv": "^16.3.1",
     "electron-context-menu": "^3.6.1",
     "toastify-js": "^1.12.0"
+  },
+  "build": {
+    "appId": "com.vermont.fscb",
+    "files": "!build-assets{/*}",
+    "directories": {
+      "output": "build"
+    },
+    "linux": {
+      "icon": "build-assets/icons"
+    }
   }
 }

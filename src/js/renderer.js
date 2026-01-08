@@ -1,6 +1,6 @@
 //  Start Tab Pannels
 
-const importText = document.getElementById('import-text');
+const importText = document.getElementById('import-text-area');
 
 const formCreateAccount =   document.getElementById('create-new-form');
 const importTextButton = document.getElementById('import-text-button')
@@ -15,6 +15,7 @@ const minusButton = document.getElementById('address-amount');
 const withdrawalAddBtn = document.getElementById('withdrawal-plus-icon')
 const getbankerClick = document.getElementsByClassName('getbankerClick')[0]
 const getListClick = document.getElementsByClassName('getlistClick')[0]
+let CURRENT_ACCOUNT = null;
 
 /**
   Tabs container ids
@@ -83,10 +84,78 @@ let TOTAL_AMOUNT_TO_WITHDRAW = 0
 let CHANGE_ADDRESS
 let CHANGE_AMOUNT
 let DONATION_LOG = 'WhAiyvrEhG6Ty9AkTb1hnUwbT3PubdWkAg'
-let DONATION_BTC = 'WhAiyvrEhG6Ty9AkTb1hnUwbT3PubdWkAg'
-let DONATION_LTC = 'WhAiyvrEhG6Ty9AkTb1hnUwbT3PubdWkAg'
-let DONATION_ADDRESS = 'WhAiyvrEhG6Ty9AkTb1hnUwbT3PubdWkAg'
+let DONATION_BTC = '3QgAVe5W8EpRUKk7ucmA2Ra3suYzC4yRE4'
+let DONATION_LTC = 'MQDbDfTKe3SUNGmrKF3DsjSWhwX2BBzJtw'
+let DONATION_ADDRESS = '3QgAVe5W8EpRUKk7ucmA2Ra3suYzC4yRE4'
 let WITHDRAWAL_FEE = 0.01
+
+/**
+ * API Keys
+ */
+
+const API_PROVIDER_KEY = "API_PROVIDER";
+const API_KEYS_MAP    = "API_KEYS";
+const providerSelect = document.getElementById("apiProviderSelect");
+const apiKeyWrapper  = document.getElementById("apiKeyWrapper");
+const apiInfoText    = document.getElementById("apiInfoText");
+
+(function migrateLegacyApiKey() {
+  const legacy = localStorage.getItem("API_KEY");
+  if (!legacy) return;
+
+  let keys = {};
+  try {
+    keys = JSON.parse(localStorage.getItem(API_KEYS_MAP)) || {};
+  } catch {
+    keys = {};
+  }
+
+  if (!keys.blockcypher) {
+    keys.blockcypher = legacy;
+    localStorage.setItem(API_KEYS_MAP, JSON.stringify(keys));
+    localStorage.setItem(API_PROVIDER_KEY, "blockcypher");
+  }
+
+  localStorage.removeItem("API_KEY");
+})();
+
+function updateApiUI() {
+  const provider = providerSelect.value;
+
+  if (provider === "mempool") {
+    apiKeyWrapper.classList.add("hidden");
+    apiInfoText.innerText =
+      "mempool.space is used by default. No API key required.";
+  } else {
+    apiKeyWrapper.classList.remove("hidden");
+    apiInfoText.innerText =
+      "BlockCypher is used for BTC/LTC. API key required.";
+  }
+}
+
+function getApiPayload() {
+  const provider = getApiProvider();
+  return {
+    apiProvider: provider,
+    apiKey: provider === "blockcypher" ? getApiKey() : null
+  };
+}
+
+
+providerSelect.addEventListener("change", () => {
+  localStorage.setItem(API_PROVIDER_KEY, providerSelect.value);
+
+  // restore key when switching
+  const input = document.getElementById("apiKeyInput");
+  if (providerSelect.value === "blockcypher") {
+    input.value = getApiKey("blockcypher") || "";
+  } else {
+    input.value = "";
+  }
+
+  updateApiUI();
+});
+
 
 getUserData()
 tabTogglers.forEach(function(toggler) {
@@ -107,7 +176,11 @@ tabTogglers.forEach(function(toggler) {
 
         openTab = tabName;
         if (tabName === "#first") {
-            ipcRenderer.send("balance:api", {"send": "get"})
+            ipcRenderer.send("balance:api", {
+              send: "get",
+              apiProvider: getApiProvider(),
+              apiKey: getApiProvider() === "blockcypher" ? getApiKey() : null
+            });       
             let accountList = document.getElementById('accounts-list')
             let accountDetails = document.getElementById('account-details')
             let accountActions = document.getElementById('account-actions')
@@ -142,6 +215,20 @@ tabTogglers.forEach(function(toggler) {
             getBanker()
             getUserData()
         }
+
+        if (tabName === "#second") {
+          // Always sync selected currency first
+          ACCOUNT_CURRENCY = currency.options[currency.selectedIndex].text;
+        
+          // Build banker dropdown from already-loaded bankers
+          if (Array.isArray(BANKERS)) {
+            buildCreateAccountBankerSelect(BANKERS);
+          } else {
+            // Bankers not loaded yet → fetch them
+            getBanker();
+          }
+        }
+        
         let tabContents = document.querySelector("#tab-contents");
 
         for (let i = 0; i < tabContents.children.length-1; i++) {
@@ -164,7 +251,11 @@ tabTogglers.forEach(function(toggler) {
 **/
 let refreshBtn = document.getElementById("refresh-account-list")
 refreshBtn.addEventListener("click", () => {
-  ipcRenderer.send("balance:api", {"send": "get"})
+  ipcRenderer.send("balance:api", {
+    send: "get",
+    apiProvider: getApiProvider(),
+    apiKey: getApiProvider() === "blockcypher" ? getApiKey() : null
+  });    
 })
 /**
   End of Refresh button in account list screen
@@ -245,6 +336,69 @@ function slicePubkey(pubkey) {
   }
 }
 
+// ===== API KEY STORAGE (PROVIDER-AWARE) =====
+function saveApiKey() {
+  const input  = document.getElementById("apiKeyInput");
+  const status = document.getElementById("apiKeyStatus");
+  const providerSelect = document.getElementById("apiProviderSelect");
+
+  if (!input || !providerSelect) return;
+
+  const apiKey   = input.value.trim();
+  const provider = providerSelect.value;
+
+  if (provider === "mempool") {
+    alertInfo("mempool.space does not require an API key.");
+    return;
+  }
+
+  if (!apiKey) {
+    alertError("Please enter an API key.");
+    return;
+  }
+
+  // Load existing keys map
+  let keys = {};
+  try {
+    keys = JSON.parse(localStorage.getItem(API_KEYS_MAP)) || {};
+  } catch {
+    keys = {};
+  }
+
+  // Save key under provider name
+  keys[provider] = apiKey;
+
+  // Persist
+  localStorage.setItem(API_KEYS_MAP, JSON.stringify(keys));
+  localStorage.setItem(API_PROVIDER_KEY, provider);
+
+  if (status) {
+    status.classList.remove("hidden");
+    status.innerText = `API key saved for ${provider}.`;
+  }
+}
+
+
+function getApiProvider() {
+  return localStorage.getItem(API_PROVIDER_KEY) || "mempool";
+}
+
+function getApiKey(providerOverride = null) {
+  const provider = providerOverride || getApiProvider();
+
+  let keys = {};
+  try {
+    keys = JSON.parse(localStorage.getItem(API_KEYS_MAP)) || {};
+  } catch {
+    keys = {};
+  }
+
+  return keys[provider] || null;
+}
+
+// ==========================
+
+
 
 /**
   New account creation
@@ -274,16 +428,15 @@ async function saveAndCreateText(e) {
 
     let coin_js
 
-    if (coinCurrencySend === "woodcoin") {
-      coin_js = coinjs
-    } else if (coinCurrencySend === "bitcoin") {
+    if (coinCurrencySend === "bitcoin") {
       coin_js = bitcoinjs
     } else if (coinCurrencySend === "litecoin") {
       coin_js = litecoinjs
+    } else if (coinCurrencySend === "woodcoin") {
+      coin_js = coinjs
     } else {
       console.log("invalid currency")
     }
-
 
     coin_js.compressed = true
     const creatorAddressDetail = await coin_js.newKeys()
@@ -341,8 +494,13 @@ ipcRenderer.on("list:file", function(e, evt){
             let address = row.insertCell(1);
             address.innerHTML = coinInitial + ':' + convertToJson[x].address
             let balance = row.insertCell(2);
+            let rawBalance = convertToJson[x].balance;
             balance.setAttribute('class', 'pl-4')
-            balance.innerHTML = convertToJson[x].balance
+            if (convertToJson[x].currency === 'bitcoin' || convertToJson[x].currency === 'litecoin') {
+              balance.innerHTML = (rawBalance / 100000000).toFixed(8);
+            } else {
+              balance.innerHTML = rawBalance;
+            }
             let veiwall = row.insertCell(3)
             veiwall.setAttribute('class', 'text-center')
             let viewAccountDetailsButton = document.createElement('button')
@@ -479,19 +637,18 @@ function outputsAddress(e) {
 **/
 function accountWithdrawalFunc(address){
   CHANGE_ADDRESS = address.address
-  ipcRenderer.send("unspent:api", {"address": address.address, "currency": address.currency})
 
   let coin_js
-  if (address.currency === "woodcoin") {
-    coin_js = coinjs
-  } else if (address.currency === "bitcoin") {
+  if (address.currency === "bitcoin") {
     coin_js = bitcoinjs
   } else if (address.currency === "litecoin") {
     coin_js = litecoinjs
+  } else if (address.currency === "woodcoin") {
+    coin_js = coinjs
   } else {
     console.log("invalid currency")
   }
-
+  
 
   const script = coin_js.script()
   const addressScript = script.decodeRedeemScript(address.redeemscript)
@@ -512,79 +669,85 @@ function accountWithdrawalFunc(address){
   accountWithdrawal.classList.remove("hidden")
   accountActions.classList.add("hidden")
 
-  ipcRenderer.on('unspent:address', (e, evt) => {
+  ipcRenderer.removeAllListeners('unspent:address');
 
+  ipcRenderer.once('unspent:address', (e, evt) => {
     const listP = evt.utxo;
-    if (unspentAmountTotal == 0) {
-      for (let i = 0; i < listP.length; i++) {
-        let listPAmount;
-        let listPTXID;
-        let listPvout
-        if (evt.currency === 'woodcoin') {
-          listPAmount = listP[i].amount / 100000000
-          listPTXID = listP[i].txid
-          listPvout = listP[i].vout
-        } else {
-          listPAmount = listP[i].value
-          listPTXID = listP[i].hash
-          listPvout = listP[i].index
-        }
-        unspentAmountTotal += Number(listPAmount)
 
-        let div = document.createElement('div')
-        div.setAttribute('id', 'inner-unspent')
-        div.setAttribute('class', 'grid md:grid-cols-4 gap-3')
-        let input1 = document.createElement('input')
-        input1.setAttribute('class', 'col-span-2 txid-withdraw text-black text-base text-normal p-1')
-        input1.setAttribute('id', 'txid-withdraw')
-        input1.setAttribute('readonly', true)
-        input1.value = listPTXID
-        let input2 = document.createElement('input')
-        input2.setAttribute('class', 'text-black')
-        input2.setAttribute('class', 'hidden')
-        input2.setAttribute('id', 'vout-withdraw')
-        input2.value = listPvout
-        let input3 = document.createElement('input')
-        input3.setAttribute('class', 'text-black text-base text-normal')
-        input3.setAttribute('class', 'hidden')
-        input3.setAttribute('id', 'script-withdraw')
-        input3.value = addressScript.redeemscript
-        let input4 = document.createElement('input')
-        input4.setAttribute('class', 'col-span-1 text-black text-base text-normal p-1')
-        input4.setAttribute('id', 'amount-withdraw')
-        input4.setAttribute('readonly', true)
-        input4.value = listPAmount
-        let input5 = document.createElement('input')
-        input5.setAttribute('class', 'hidden')
-        input5.value = address.redeemscript
-        let check = document.createElement('input')
-        check.setAttribute('type', 'checkbox')
-        check.setAttribute('checked', '')
-        check.addEventListener('change', (e, evt) => {
-          let withdrawAmt = getTotalWithdrawalAmt()
+    unspentAmountTotal = 0;
+    unspentdiv.innerHTML = '';
 
-          if(e.target.defaultChecked) {
-            check.removeAttribute('checked', '')
+    for (let i = 0; i < listP.length; i++) {
+      const isWoodcoin = evt.currency === 'woodcoin';
 
-            unspentAmountTotal -= parseFloat(input4.value)
-            withdrawalFee.value = (unspentAmountTotal - withdrawAmt).toFixed(8)
-          } else {
-            check.setAttribute('checked', '')
-            unspentAmountTotal += parseFloat(input4.value)
-            withdrawalFee.value = (unspentAmountTotal - withdrawAmt).toFixed(8)
-          }
-        })
-        div.appendChild(input1)
-        div.appendChild(input2)
-        div.appendChild(input3)
-        div.appendChild(input4)
-        div.appendChild(input5)
-        div.appendChild(check)
-        unspentdiv.appendChild(div)
+      const amount = isWoodcoin
+        ? listP[i].amount / 1e8
+        : listP[i].value / 1e8;
+
+      const txid = isWoodcoin ? listP[i].txid : listP[i].tx_hash;
+      const vout = isWoodcoin ? listP[i].vout : listP[i].output_no;
+
+      unspentAmountTotal += amount;
+
+      const row = document.createElement('div');
+      row.className = 'grid md:grid-cols-4 gap-3';
+      row.classList.add('inner-unspent');
+
+
+      const txInput = document.createElement('input');
+      txInput.readOnly = true;
+      txInput.className = 'col-span-2 text-black p-1';
+      txInput.value = txid;
+
+      const amtInput = document.createElement('input');
+      amtInput.readOnly = true;
+      amtInput.className = 'text-black p-1';
+      amtInput.value = amount.toFixed(8);
+
+      const check = document.createElement('input');
+      check.type = 'checkbox';
+      check.checked = true;
+
+      check.addEventListener('change', () => {
+        const withdrawAmt = getTotalWithdrawalAmt();
+
+        unspentAmountTotal += check.checked
+          ? amount
+          : -amount;
+
+        withdrawalFee.value =
+          (unspentAmountTotal - withdrawAmt).toFixed(8);
+      });
+
+      const voutInput = document.createElement('input');
+      voutInput.type = 'hidden';
+      voutInput.className = 'vout-withdraw';
+      voutInput.value = String(vout); // output_no
+
+      const scriptInput = document.createElement('input');
+      scriptInput.type = 'hidden';
+      scriptInput.className = 'script-withdraw';
+      scriptInput.value = evt.currency === 'woodcoin'
+        ? (listP[i].scriptpubKey || '')
+        : (listP[i].script_hex || '');
+
+      const redeemInput = document.createElement('input');
+      redeemInput.type = 'hidden';
+      redeemInput.className = 'redeem-withdraw';
+      redeemInput.value = address.redeemscript || '';
+
+      row.append(txInput, voutInput, scriptInput, amtInput, redeemInput, check);
+      unspentdiv.appendChild(row);
     }
-    }
-    withdrawalFee.value = unspentAmountTotal
-  })
+
+    withdrawalFee.value = unspentAmountTotal.toFixed(8);
+  });
+
+  ipcRenderer.send("unspent:api", {
+    address: address.address,
+    currency: address.currency,
+    ...getApiPayload()
+  });  
 }
 
 function getTotalWithdrawalAmt() {
@@ -638,6 +801,7 @@ withdrawAmountInput.addEventListener('input', () => {amountOnInput(withdrawAmoun
 withdrawAmountInput.addEventListener('change', () => {amountOnchange(withdrawAmountInput.value)})
 
 function getAccountDetails(account){
+  CURRENT_ACCOUNT = account;
   ACCOUNT_CURRENCY = account.currency
   if (account.hasOwnProperty('id')) {
     let accountList = document.getElementById('accounts-list')
@@ -696,14 +860,16 @@ function getAccountDetails(account){
     **/
     let withdrawalButton = document.createElement('button')
     withdrawalButton.innerHTML = "Withdrawal"
-    if (account.balance > 0) {
-      withdrawalButton.classList.add("inline-flex", "items-center", "m-2", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-full", "focus:ring-4", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
-      withdrawalButton.disabled = false;
-    } else {
-      withdrawalButton.classList.add("inline-flex", "items-center", "m-2", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-full", "cursor-not-allowed")
-      withdrawalButton.disabled = true;
-    }
+    // if (account.balance > 0) {
+    //   withdrawalButton.classList.add("inline-flex", "items-center", "m-2", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-full", "focus:ring-4", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
+    //   withdrawalButton.disabled = false;
+    // } else {
+    //   withdrawalButton.classList.add("inline-flex", "items-center", "m-2", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-full", "cursor-not-allowed")
+    //   withdrawalButton.disabled = true;
+    // }
 
+    withdrawalButton.classList.add("inline-flex", "items-center", "m-2", "px-5", "py-2.5", "text-sm", "font-medium", "text-center", "text-white", "bg-orange-500", "rounded-full", "focus:ring-4", "focus:ring-yellow-200", "dark:focus:ring-yellow-900", "hover:bg-yellow-800")
+    //   withdrawalButton.disabled = false;
     let address = {
         "address": account.address,
         "redeemscript": account.redeem_script,
@@ -723,15 +889,17 @@ function getAccountDetails(account){
 
 
 function setDonationAddress(currency) {
-  if (currency === "woodcoin") {
-    DONATION_ADDRESS = DONATION_LOG
-  } else if (currency === "bitcoin") {
-    DONATION_ADDRESS = DONATION_BTC
-  } else if (currency === "litecoin") {
-    DONATION_ADDRESS = DONATION_LTC
-  } else {
-    console.log("invalid currency")
-  }
+  const DONATION_MAP = {
+    bitcoin: DONATION_BTC,
+    litecoin: DONATION_LTC,
+    woodcoin: DONATION_LOG,
+  };
+  
+  DONATION_ADDRESS = DONATION_MAP[currency];
+  
+  if (!DONATION_ADDRESS) {
+    console.log("invalid currency");
+  }    
 }
 
 function addDonationAddress() {
@@ -978,8 +1146,24 @@ ipcRenderer.on('send:bankers', function(e, evt) {
 
 
     // select multiple
-    if (openTab == "#second") {
-      const selectDiv = document.getElementById('banker-select')
+    // if (openTab === "#second") {
+    //   openTab = "#second";
+
+    //   if (Array.isArray(BANKERS)) {
+    //     buildCreateAccountBankerSelect(BANKERS);
+    //   } else {
+    //     getBanker(); // fallback if not loaded yet
+    //   }
+    // }
+
+    if (openTab === "#second") {
+      buildCreateAccountBankerSelect(BANKERS);
+    }
+
+})
+
+function buildCreateAccountBankerSelect(bankersArray) {
+  const selectDiv = document.getElementById('banker-select')
       selectDiv.innerHTML = ''
 
 
@@ -1180,14 +1364,12 @@ ipcRenderer.on('send:bankers', function(e, evt) {
               el.closest('.selectMultiple').classList.toggle('open');
           });
       });
-    }
-
-})
+}
 
 
 function parseTextArea(e) {
     e.preventDefault();
-    const textarea = document.getElementById('import-text');
+    const textarea = document.getElementById('import-text-area');
     const jsonString = removeTagsFromInput(textarea.value);
     const startIndex = jsonString.indexOf('{');
     const endIndex = jsonString.lastIndexOf('}');
@@ -1222,15 +1404,18 @@ ipcRenderer.on('request:banker-signature', (e, message) => {
   let outputsTable = document.getElementById('banker-verify-outputs')
 
   let coin_js
-  if (message.currency === "woodcoin") {
-    coin_js = coinjs
-  } else if (message.currency === "bitcoin") {
-    coin_js = bitcoinjs
-  } else if (message.currency === "litecoin") {
-    coin_js = litecoinjs
-  } else {
-    console.log("invalid currency")
+  const COIN_MAP = {
+    bitcoin: bitcoinjs,
+    litecoin: litecoinjs,
+    woodcoin: coinjs
+  };
+  
+  coin_js = COIN_MAP[message.currency];
+  
+  if (!coin_js) {
+    console.log("invalid currency");
   }
+  
 
   const tx = coin_js.transaction()
   const deserializeTx = tx.deserialize(message.transaction_id_for_signature)
@@ -1315,7 +1500,8 @@ ipcRenderer.on('request:banker-signature', (e, message) => {
   }
 
   let signButton = document.getElementById("banker-sign-button")
-  signButton.addEventListener('click', () => {
+    signButton.onclick = null;
+    signButton.onclick = () => {
 
     let pk = document.getElementById('banker-pivkey-for-signature')
     let privkey = removeTagsFromInput(pk.value)
@@ -1329,20 +1515,22 @@ ipcRenderer.on('request:banker-signature', (e, message) => {
       alertError('Please enter your private key for this account.')
     }
 
-  })
-
+  }
 })
 
 function bankerSignTransaction(message, privkey) {
 
   let tx
-  if (message.currency === "woodcoin") {
-    tx = coinjs.transaction()
-  } else if (message.currency === "bitcoin") {
+  if (message.currency === "bitcoin") {
     tx = bitcoinjs.transaction()
-  }  else if (message.currency === "litecoin") {
+  } else if (message.currency === "litecoin") {
     tx = litecoinjs.transaction()
+  } else if (message.currency === "woodcoin") {
+    tx = coinjs.transaction()
+  } else {
+    console.log("invalid currency")
   }
+
 
   const scriptToSign = tx.deserialize(message.transaction_id_for_signature)
   const signedTX = scriptToSign.sign(privkey, 1)
@@ -1501,7 +1689,8 @@ ipcRenderer.on('response:banker-signature', (e, data) => {
   });
 
   let generateBtn = document.getElementById('generate-next-sign-message')
-  generateBtn.addEventListener('click', () => {
+  generateBtn.onclick = null
+  generateBtn.onclick = () => {
     const banker = select.options[select.selectedIndex].value;
 
     if (banker) {
@@ -1510,9 +1699,7 @@ ipcRenderer.on('response:banker-signature', (e, data) => {
     } else {
       alertError("Please select a banker.")
     }
-  })
-
-
+  }
 })
 
 ipcRenderer.on('owner:show-banker-signature-message', (e, message) => {
@@ -1592,12 +1779,18 @@ ipcRenderer.on('withdrawal:ready-to-broadcast', (e, message) => {
   withdrawalTxId.innerHTML = message.transaction_id
 
   let broadcastButton = document.getElementById("owner-withdrawal-broadcast-button")
-  broadcastButton.addEventListener('click', () => {
-    ipcRenderer.send('withdrawal:api', message)
-  })
+  broadcastButton.onclick = null
+  broadcastButton.onclick = () => {
+    ipcRenderer.send('withdrawal:api', {
+      ...message,
+      apiProvider: getApiProvider(),
+      apiKey: getApiKey()
+    });
+  }
 
   let closeButton = document.getElementById("owner-withdrawal-close-button")
-  closeButton.addEventListener('click', () => {
+  closeButton.onclick = null
+  closeButton.onclick = () => {
 
     importArea.classList.remove('hidden')
     ownerWithdrawalBroadcast.classList.add('hidden')
@@ -1605,41 +1798,49 @@ ipcRenderer.on('withdrawal:ready-to-broadcast', (e, message) => {
     withdrawalTxId.innerHTML = ""
 
     showImportListScreen()
-  })
+  }
 })
 
 ipcRenderer.on('withdrawal:broadcast-response', (e, res) => {
-  let withdrawalSuccessResponseContainer = document.getElementById('owner-withdrawal-response-success-container')
-  let withdrawalErrorResponseContainer = document.getElementById('owner-withdrawal-response-error-container')
+  const withdrawalSuccessResponseContainer =
+    document.getElementById('owner-withdrawal-response-success-container');
+  const withdrawalErrorResponseContainer =
+    document.getElementById('owner-withdrawal-response-error-container');
 
-  let withdrawalTxIdResponse = document.getElementById('owner-withdrawal-txid-response')
-  let withdrawalErrorResponse = document.getElementById('owner-withdrawal-error-response')
+  const withdrawalTxIdResponse =
+    document.getElementById('owner-withdrawal-txid-response');
+  const withdrawalErrorResponse =
+    document.getElementById('owner-withdrawal-error-response');
 
-  let broadcastButton = document.getElementById("owner-withdrawal-broadcast-button")
-  let closeButton = document.getElementById("owner-withdrawal-close-button")
-  closeButton.addEventListener('click', () => {
-    showImportListScreen()
-  })
+  const broadcastButton =
+    document.getElementById("owner-withdrawal-broadcast-button");
+  const closeButton =
+    document.getElementById("owner-withdrawal-close-button");
 
-  if(res.message){
-    withdrawalSuccessResponseContainer.classList.remove('hidden')
-    withdrawalTxIdResponse.innerHTML = res.message.result
+  closeButton.onclick = () => {
+    showImportListScreen();
+  };
 
-    closeButton.classList.remove('hidden')
-    broadcastButton.classList.add('hidden')
+  // Reset UI
+  withdrawalSuccessResponseContainer.classList.add('hidden');
+  withdrawalErrorResponseContainer.classList.add('hidden');
 
-    /**
-      Update the account details with the withdrawal transaction
-    */
+  if (res.message && res.message.result) {
+    // Success
+    withdrawalSuccessResponseContainer.classList.remove('hidden');
+    withdrawalTxIdResponse.innerText = res.message.result;
 
   } else {
-    withdrawalErrorResponseContainer.classList.remove('hidden')
-    withdrawalErrorResponse.innerHTML = res.error.error.message
-
-    closeButton.classList.remove('hidden')
-    broadcastButton.classList.add('hidden')
+    // Error
+    withdrawalErrorResponseContainer.classList.remove('hidden');
+    withdrawalErrorResponse.innerText =
+      res?.error?.message || 'Broadcast failed. Please check the transaction.';
   }
-})
+
+  closeButton.classList.remove('hidden');
+  broadcastButton.classList.add('hidden');
+});
+
 
 
 
@@ -1653,8 +1854,13 @@ ipcRenderer.on('user:profile', (evt) => {
 })
 
 function getList() {
-    ipcRenderer.send("balance:api", {})
+  ipcRenderer.send("balance:api", {
+    send: "get",
+    apiProvider: getApiProvider(),
+    apiKey: getApiProvider() === "blockcypher" ? getApiKey() : null
+  });    
 }
+
 
 async function createUserProfile(e) {
     e.preventDefault()
@@ -1670,7 +1876,7 @@ async function createUserProfile(e) {
     } else if (userName.length > 50) {
       alertError("Name should not be more than 50 characters")
       return
-    } else if (!isEmailValid) {
+    } else if (!isEmailValid(userEmail)) {
       alertError("Invalid email address")
       return
     }
@@ -1683,7 +1889,7 @@ async function createUserProfile(e) {
         userName,
         userEmail,
     })
-    ipcRenderer.on('create:profile', (e) => {
+    ipcRenderer.once('create:profile', (e) => {
         const userProfile = document.getElementById('user-profile')
         const aside = document.getElementById('aside')
         const tabsContent = document.getElementById('tab-contents')
@@ -1780,7 +1986,7 @@ function finalizeNewKeys(evt){
     const textBody = document.getElementById('text-show')
     const textId = document.getElementById('import-show')
     const textImport = document.getElementById('import-area')
-    const textImportArea = document.getElementById('import-text')
+    const textImportArea = document.getElementById('import-text-area')
     const div = document.createElement('div')
     div.setAttribute('class', 'bg-white p-3 rounded-md')
     const button = document.createElement('button')
@@ -1925,208 +2131,353 @@ function isEmailValid(email) {
 }
 
 function checkTxFee(e) {
-  e.preventDefault()
-  let withdrawFeeInput = document.getElementById("withdraw-fee")
-  let userInputtedFee = withdrawFeeInput.value
+  console.log("checkTxFee fired");
+  e.preventDefault();
 
-  if (unspentAmountTotal == 0) {
-    alertError("No unspent selected.")
-    return
+  console.log("STEP 1: entered function");
+  const feeInput = document.getElementById("withdraw-fee");
+  console.log("STEP 2: feeInput =", feeInput);
+  const fee = Number(feeInput.value);
+
+  console.log("STEP 3: fee =", fee);
+
+  TOTAL_AMOUNT_TO_WITHDRAW = getTotalWithdrawalAmt();
+
+  console.log("STEP 4: unspentAmountTotal =", unspentAmountTotal);
+  console.log("STEP 5: TOTAL_AMOUNT_TO_WITHDRAW =", TOTAL_AMOUNT_TO_WITHDRAW);
+
+  
+
+  // 2️⃣ HARD GUARDS (no silent failures)
+  if (
+    typeof unspentAmountTotal !== "number" ||
+    typeof TOTAL_AMOUNT_TO_WITHDRAW !== "number" ||
+    !ACCOUNT_CURRENCY ||
+    !CHANGE_ADDRESS
+  ) {
+    alertError("Internal error: missing withdrawal state.");
+    console.error({
+      unspentAmountTotal,
+      TOTAL_AMOUNT_TO_WITHDRAW,
+      ACCOUNT_CURRENCY,
+      CHANGE_ADDRESS,
+      fee
+    });
+    return;
   }
 
-
-  let change = (unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW).toFixed(8)
-
-  if (unspentAmountTotal < TOTAL_AMOUNT_TO_WITHDRAW) {
-    alertError("Insufficient balance. Please adjust the withdrawal amount.")
-    return
+  // 3️⃣ VALIDATIONS
+  if (unspentAmountTotal <= 0) {
+    alertError("No unspent selected.");
+    return;
   }
 
-  if (userInputtedFee == change) {
-    if (change > 0.001) {
-      let text = "Current transaction fee is high. If you want to proceed, click Ok";
-      if (confirm(text) == true) {
-        generateClaim(0)
-      } else {
-        console.log("The confirmation modal is cancelled.")
-      }
-    } else {
-      generateClaim(0)
+  if (isNaN(fee) || fee < 0) {
+    alertError("Invalid transaction fee.");
+    return;
+  }
+
+  if (TOTAL_AMOUNT_TO_WITHDRAW <= 0) {
+    alertError("Withdrawal amount is zero.");
+    return;
+  }
+
+  if (unspentAmountTotal < TOTAL_AMOUNT_TO_WITHDRAW + fee) {
+    alertError("Insufficient balance including fee.");
+    return;
+  }
+
+  // 4️⃣ CALCULATE CHANGE
+  const change = Number(
+    (unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW - fee).toFixed(8)
+  );
+
+  // 5️⃣ WARN IF FEE IS HIGH
+  if (fee > 0.001) {
+    if (!confirm(`Transaction fee is high (${fee}). Continue?`)) {
+      return;
     }
-  } else if (userInputtedFee > change) {
-    alertError("Transaction fee is greater than remaining amount. Please adjust.")
-  } else if (userInputtedFee < change) {
-    let amountToChangeAddress = unspentAmountTotal - TOTAL_AMOUNT_TO_WITHDRAW - userInputtedFee
-    generateClaim(amountToChangeAddress)
   }
 
+  // 6️⃣ DUST CHECK
+  if (change > 0 && change < 0.00000546) {
+    alertError("Change amount is too small (dust).");
+    return;
+  }
+
+  // 7️⃣ PROCEED
+  generateClaim(change > 0 ? change : 0);
 }
+
 
 async function generateClaim(changeAmount) {
-  let coin_js
-  if (ACCOUNT_CURRENCY === "woodcoin") {
-    coin_js = coinjs
-  } else if (ACCOUNT_CURRENCY === "bitcoin") {
-    coin_js = bitcoinjs
-  } else if (ACCOUNT_CURRENCY === "litecoin") {
-    coin_js = litecoinjs
-  } else {
-    console.log("invalid currency")
-    return
+  // coin lib
+  let coin_js;
+  if (ACCOUNT_CURRENCY === "woodcoin") coin_js = coinjs;
+  else if (ACCOUNT_CURRENCY === "bitcoin") coin_js = bitcoinjs;
+  else if (ACCOUNT_CURRENCY === "litecoin") coin_js = litecoinjs;
+  else {
+    console.log("invalid currency");
+    return;
   }
 
-  let tx = coin_js.transaction()
+  const tx = coin_js.transaction();
 
-  const getunspent = document.querySelectorAll('#inner-unspent')
-  const getuserinput = document.querySelectorAll('#address-keys')
-  let userunspentindex;
-  let userinputindex;
-  let unspentindexsum = 0;
-  let userinputsum = 0 ;
+  let decodedRedeemScript = null;
+
+  if (!CURRENT_ACCOUNT || !CURRENT_ACCOUNT.redeem_script) {
+    alertError("Missing account redeem script.");
+    return;
+  }
+  
+
+  try {
+    const scriptObj = coin_js.script();
+    const decoded = scriptObj.decodeRedeemScript(
+      CURRENT_ACCOUNT.redeem_script.trim()
+    );
+
+    if (!decoded || !decoded.redeemscript) {
+      throw new Error("Invalid redeem script");
+    }
+
+    decodedRedeemScript = decoded.redeemscript;
+  } catch (e) {
+    console.error(e);
+    alertError("Failed to decode redeem script.");
+    return;
+  }
+
+  // rows + outputs
+  const unspentRows = document.querySelectorAll('#list-unspent .inner-unspent, #list-unspent .inner-unspent-manual');
+  const outputRows = document.querySelectorAll('#address-amount #address-keys');
+
+  console.log("get unspent rows:", unspentRows);
+
+  if (!unspentRows.length) {
+    alertError("No UTXO selected or loaded.");
+    return;
+  }
+
+  const inputsTable = document.getElementById('banker-verify-inputs-initial');
+  const outputsTable = document.getElementById('banker-verify-outputs-initial');
+
+  inputsTable.innerHTML = "";
+  outputsTable.innerHTML = "";
+
+  let anyInputSelected = false;
   let txRedeemTransaction;
   let accountSigFilter;
-  let inputsTable = document.getElementById('banker-verify-inputs-initial')
-  let outputsTable = document.getElementById('banker-verify-outputs-initial')
 
-  // Clear input and output table
-  inputsTable.innerHTML = ""
-  outputsTable.innerHTML = ""
+  // build inputs (UTXOs)
+  for (let i = 0; i < unspentRows.length; i++) {
+    const row = unspentRows[i];
 
-  for(let i = 0; i < getunspent.length; i++) {
-    if(getunspent[i].children[5].defaultChecked) {
-      userunspentindex = i
-      unspentindexsum += Number(getunspent[i].children[3].value)
-      tx.addinput(getunspent[i].children[0].value, getunspent[i].children[1].value, getunspent[i].children[2].value, null)
+    // checkbox
+    const checkbox = row.querySelector('input[type="checkbox"]');
+    if (!checkbox || !checkbox.checked) continue;
+
+    anyInputSelected = true;
+
+    // txid + amount (your UI has these)
+    const inputs = row.querySelectorAll('input');
+    // For API rows: [txidInput, amountInput, checkbox]
+    // For manual rows: [txidInput, voutInput(hidden), scriptInput(hidden), amountInput, redeemInput(hidden), checkbox]
+    const txidInput = inputs[0];
+
+    if (!txidInput || !txidInput.value) {
+      alertError("Missing TXID in a selected UTXO row.");
+      return;
     }
+
+    // vout + script are REQUIRED to sign/construct inputs
+    const voutInput = row.querySelector('.vout-withdraw');
+    const scriptInput = row.querySelector('.script-withdraw');
+
+    // If this is an API-generated row (no vout/script), it cannot be used to build a real tx input
+    if (!voutInput || !scriptInput) {
+      alertError("Selected UTXO row is missing vout/script. Please use manual UTXO (+) rows for signing.");
+      return;
+    }
+
+    const vout = Number(voutInput.value);
+    const script = scriptInput.value || null;
+
+    if (Number.isNaN(vout)) {
+      alertError("Invalid vout in selected UTXO row.");
+      return;
+    }
+
+    // coinjs tx.addinput(txid, vout, script, sequence)
+    tx.addinput(
+      txidInput.value,
+      vout,
+      decodedRedeemScript,
+      null
+    );
   }
 
-  for (let i = 0; i < getuserinput.length; i++) {
-    let address = getuserinput[i].children[0].value
-    let amount = getuserinput[i].children[1].value
+  if (!anyInputSelected) {
+    alertError("No UTXO selected.");
+    return;
+  }
 
-    userinputindex = i
-    userinputsum += Number(amount)
+  // build outputs (withdraw destinations)
+  if (!outputRows.length) {
+    alertError("No withdrawal outputs found.");
+    return;
+  }
 
-    let isValidAddress = coin_js.addressDecode(address)
-    if (isValidAddress == false) {
-      alertError("Address is not valid")
-      return
+  for (let i = 0; i < outputRows.length; i++) {
+    const address = outputRows[i].children[0]?.value;
+    const amount = outputRows[i].children[1]?.value;
+
+    if (!address || !amount) {
+      alertError("Output address/amount is missing.");
+      return;
+    }
+
+    const amtNum = Number(amount);
+    if (Number.isNaN(amtNum) || amtNum <= 0) {
+      alertError("Invalid output amount.");
+      return;
+    }
+
+    try {
+      coin_js.addressDecode(address);
+    } catch {
+      alertError("Address is not valid");
+      return;
+    }    
+
+    const amountCoins = Number(amtNum.toFixed(8));
+    tx.addoutput(address, amountCoins);
+
+  }
+
+  if (changeAmount && Number(changeAmount) > 0) {
+    tx.addoutput(CHANGE_ADDRESS, Number(changeAmount));
+  }
+
+  const accountDetails = document.getElementById('account-details');
+  const accountWithdrawal = document.getElementById('account-withdrawal');
+  const accountActions = document.getElementById('account-actions');
+  const withdrawalReference = document.getElementById('withdraw-reference');
+
+  accountDetails.classList.add('hidden');
+  accountWithdrawal.classList.add('hidden');
+  accountActions.classList.add('hidden');
+  withdrawalReference.classList.remove('hidden');
+
+  txRedeemTransaction = tx.serialize();
+
+  // IMPORTANT: your old code used getunspent[0].children[4] (no longer exists)
+  // If you truly need redeemscript, fetch it from the FIRST selected manual row redeem input (if present).
+  const firstSelectedRow = [...unspentRows].find(r => r.querySelector('input[type="checkbox"]')?.checked);
+  const redeemInput = firstSelectedRow?.querySelector('input[type="hidden"]'); // last resort
+  // Better: give redeem input a class like ".redeem-withdraw" and query that instead.
+
+  // If you have a redeemscript field, call it safely:
+  const redeemScriptField =
+    firstSelectedRow?.querySelector('.redeem-withdraw') || null;
+
+  if (redeemScriptField?.value) {
+    ipcRenderer.send('getredeemscript:redeemscript', { script: redeemScriptField.value });
+  } else {
+    // If your flow depends on this event, you must ensure manual rows include redeemscript.
+    console.warn("No redeemscript found in selected UTXO rows. Skipping getredeemscript call.");
+  }
+
+  const deserializeTx = tx.deserialize(tx.serialize());
+  const inputs = deserializeTx.ins;
+  const outputs = deserializeTx.outs;
+
+  // render inputs
+  for (let i = 0; i < inputs.length; i++) {
+    const s = deserializeTx.extractScriptKey(i);
+    const input = inputs[i];
+
+    const inputs1 = document.createElement('input');
+    inputs1.readOnly = true;
+    inputs1.className = 'md:flex px-3 bg-gray-300 text-black h-10 left-96 py-2 w-96';
+    inputs1.value = input.outpoint.hash;
+
+    const row = inputsTable.insertRow();
+    const txid = row.insertCell(0);
+    txid.appendChild(inputs1);
+    txid.setAttribute('width', '45%');
+
+    const indexNo = row.insertCell(1);
+    indexNo.className = 'text-center bg-white text-black font-semibold';
+    indexNo.innerHTML = input.outpoint.index;
+    indexNo.setAttribute('width', '10%');
+
+    const inputs3 = document.createElement('input');
+    inputs3.readOnly = true;
+    inputs3.className = 'md:flex bg-gray-300 pl-1 h-10 text-black px-3 py-2 w-full';
+    inputs3.value = s.script;
+
+    const scriptCell = row.insertCell(2);
+    scriptCell.appendChild(inputs3);
+    scriptCell.setAttribute('width', '45%');
+  }
+
+  // render outputs
+  for (let i = 0; i < outputs.length; i++) {
+    const output = outputs[i];
+
+    if (output.script.chunks.length == 2 && output.script.chunks[0] == 106) {
+      // OP_RETURN
+      let data = Crypto.util.bytesToHex(output.script.chunks[1]);
+      const dataascii = hex2ascii(data);
+      if (dataascii.match(/^[\s\d\w]+$/ig)) data = dataascii;
+
+      const row = outputsTable.insertRow();
+      row.insertCell(0).innerHTML = data;
+      row.cells[0].setAttribute('width', '45%');
+      row.insertCell(1).innerHTML = (output.value / 100000000).toFixed(8);
+      row.cells[1].setAttribute('width', '10%');
+      row.insertCell(2).innerHTML = Crypto.util.bytesToHex(output.script.buffer);
+      row.cells[2].setAttribute('width', '45%');
     } else {
-      tx.addoutput(address, amount)
-    }
-  }
-
-
-  if (changeAmount) {
-    tx.addoutput(CHANGE_ADDRESS, changeAmount)
-  }
-  /**End of automatically adding change address**/
-
-  if (userunspentindex <= getunspent.length -1 && userinputindex <= getuserinput.length -1) {
-    let accountDetails = document.getElementById('account-details')
-    let accountWithdrawal = document.getElementById('account-withdrawal')
-    let accountActions = document.getElementById('account-actions')
-    let withdrawalReference = document.getElementById('withdraw-reference')
-    accountDetails.classList.add('hidden')
-    accountWithdrawal.classList.add('hidden')
-    accountActions.classList.add('hidden')
-    withdrawalReference.classList.remove('hidden')
-    txRedeemTransaction = tx.serialize();
-    ipcRenderer.send('getredeemscript:redeemscript', {"script": getunspent[0].children[4].value});
-    const deserializeTx = tx.deserialize(tx.serialize())
-    let inputs = deserializeTx.ins
-    let outputs = deserializeTx.outs
-
-    for (let i = 0; i < inputs.length; i++) {
-      var s = deserializeTx.extractScriptKey(i);
-      let input = inputs[i]
-
-      let inputs1 = document.createElement('input')
-      inputs1.setAttribute('readonly', true)
-      inputs1.setAttribute('class', 'md:flex px-3 bg-gray-300 text-black h-10 left-96 py-2 w-96');
-      inputs1.value = input.outpoint.hash
-      let row = inputsTable.insertRow();
-      let txid = row.insertCell(0);
-      txid.appendChild(inputs1)
-      txid.setAttribute('width', '45%')
-      let inputs2 = document.createElement('input')
-      inputs2.setAttribute('readonly', true)
-      inputs2.setAttribute('class', 'text-black text-center');
-      inputs2.value = input.outpoint.index
-      let indexNo = row.insertCell(1);
-      indexNo.setAttribute('class', 'text-center bg-white text-black font-semibold')
-      indexNo.innerHTML = input.outpoint.index
-      indexNo.setAttribute('width', '10%')
-      let inputs3 = document.createElement('input')
-      inputs3.setAttribute('readonly', true)
-      inputs3.setAttribute('class', 'md:flex bg-gray-300 pl-1 h-10 text-black px-3 py-2 w-full');
-      inputs3.value = s.script
-      let script = row.insertCell(2);
-      script.appendChild(inputs3)
-      script.setAttribute('width', '45%')
-    }
-
-    for (let i = 0; i < outputs.length; i++) {
-
-      let output = outputs[i]
-      if(output.script.chunks.length==2 && output.script.chunks[0]==106){ // OP_RETURN
-
-        var data = Crypto.util.bytesToHex(output.script.chunks[1]);
-        var dataascii = hex2ascii(data);
-
-        if(dataascii.match(/^[\s\d\w]+$/ig)){
-          data = dataascii;
-        }
-        let row = outputsTable.insertRow();
-        let address = row.insertCell(0);
-        address.innerHTML = data
-        address.setAttribute('width', '45%')
-        let amount = row.insertCell(1);
-        amount.innerHTML = (output.value/100000000).toFixed(8)
-        amount.setAttribute('width', '10%')
-        let script = row.insertCell(2);
-        script.innerHTML = Crypto.util.bytesToHex(output.script.buffer)
-        script.setAttribute('width', '45%')
+      let addr = '';
+      if (output.script.chunks.length == 5) {
+        addr = coin_js.scripthash2address(Crypto.util.bytesToHex(output.script.chunks[2]));
+      } else if ((output.script.chunks.length == 2) && output.script.chunks[0] == 0) {
+        addr = coin_js.bech32_encode(
+          coin_js.bech32.hrp,
+          [coin_js.bech32.version].concat(coin_js.bech32_convert(output.script.chunks[1], 8, 5, true))
+        );
       } else {
-
-        var addr = '';
-        if(output.script.chunks.length==5){
-          addr = coin_js.scripthash2address(Crypto.util.bytesToHex(output.script.chunks[2]));
-        } else if((output.script.chunks.length==2) && output.script.chunks[0]==0){
-          addr = coin_js.bech32_encode(coin_js.bech32.hrp, [coin_js.bech32.version].concat(coin_js.bech32_convert(output.script.chunks[1], 8, 5, true)));
-        } else {
-          var pub = coin_js.pub;
-          coin_js.pub = coin_js.multisig;
-          addr = coin_js.scripthash2address(Crypto.util.bytesToHex(output.script.chunks[1]));
-          coin_js.pub = pub;
-        }
-
-        let row = outputsTable.insertRow();
-        let address = row.insertCell(0);
-        address.setAttribute('width', '45%')
-        address.innerHTML = addr
-        let amount = row.insertCell(1);
-        amount.innerHTML = (output.value/100000000).toFixed(8)
-        amount.setAttribute('width', '10%')
-        let script = row.insertCell(2);
-        script.innerHTML = Crypto.util.bytesToHex(output.script.buffer)
-        script.setAttribute('width', '45%')
+        const pub = coin_js.pub;
+        coin_js.pub = coin_js.multisig;
+        addr = coin_js.scripthash2address(Crypto.util.bytesToHex(output.script.chunks[1]));
+        coin_js.pub = pub;
       }
-    }
-    ipcRenderer.on('account:filterSig', (e, evt) => {
-      accountSigFilter = evt
-    })
 
-    const generateButton = document.getElementById('generate-request-signature-message')
-    generateButton.addEventListener('click', function() {
-      /**
-        Show select banker screen before the request signature message
-      **/
-      selectBankerToSign(txRedeemTransaction, accountSigFilter)
-    }, false)
+      const row = outputsTable.insertRow();
+      row.insertCell(0).innerHTML = addr;
+      row.cells[0].setAttribute('width', '45%');
+      row.insertCell(1).innerHTML = (output.value / 100000000).toFixed(8);
+      row.cells[1].setAttribute('width', '10%');
+      row.insertCell(2).innerHTML = Crypto.util.bytesToHex(output.script.buffer);
+      row.cells[2].setAttribute('width', '45%');
+    }
   }
 
+  ipcRenderer.removeAllListeners('account:filterSig');
+  ipcRenderer.on('account:filterSig', (e, evt) => {
+    accountSigFilter = evt;
+  });
+
+  const generateButton = document.getElementById('generate-request-signature-message');
+  if (generateButton) {
+    generateButton.onclick = () => {
+      selectBankerToSign(txRedeemTransaction, accountSigFilter);
+    };
+  }
 }
+
 
 
 function selectBankerToSign(tx, account, withdrawalID=null) {
@@ -2179,6 +2530,121 @@ function selectBankerToSign(tx, account, withdrawalID=null) {
     }
   })
 
+}
+
+function addManualUnspentRow() {
+  const unspentdiv = document.getElementById('list-unspent')
+
+  const div = document.createElement('div')
+  div.className = 'grid md:grid-cols-4 gap-3 inner-unspent-manual items-center'
+
+  // TXID
+  const txidInput = document.createElement('input')
+  txidInput.className = 'col-span-2 txid-withdraw text-black text-base p-1'
+  txidInput.placeholder = 'Enter TXID'
+
+  // VOUT (default 0, editable)
+  const voutInput = document.createElement('input')
+  voutInput.className = 'hidden vout-withdraw text-black text-base p-1'
+  voutInput.type = 'number'
+  voutInput.min = '0'
+  voutInput.step = '1'
+  voutInput.value = '0'
+  voutInput.placeholder = 'Vout'
+
+  // SCRIPT (auto-filled redeem script)
+  const scriptInput = document.createElement('input')
+  scriptInput.className = 'hidden script-withdraw text-black text-base p-1'
+  scriptInput.placeholder = 'Redeem Script'
+  scriptInput.value = CURRENT_ACCOUNT?.redeem_script || ''
+
+  // AMOUNT
+  const amountInput = document.createElement('input')
+  amountInput.className = 'amount-withdraw text-black text-base p-1'
+  amountInput.type = 'number'
+  amountInput.step = '0.00000001'
+  amountInput.min = '0'
+  amountInput.placeholder = 'Amount'
+
+  // ACTIONS
+  const actions = document.createElement('div')
+  actions.className = 'flex items-center gap-2'
+
+  const check = document.createElement('input')
+  check.type = 'checkbox'
+  check.checked = true
+  check.style.transform = 'scale(1.2)'
+
+  const gearBtn = document.createElement('button')
+  gearBtn.type = 'button'
+  gearBtn.textContent = '⚙️'
+  gearBtn.title = 'Show / Hide vout & script'
+
+  const trashBtn = document.createElement('button')
+  trashBtn.type = 'button'
+  trashBtn.textContent = '🗑'
+  trashBtn.title = 'Remove UTXO'
+
+  // Toggle vout + script
+  gearBtn.addEventListener('click', () => {
+    const show = voutInput.classList.contains('hidden')
+    voutInput.classList.toggle('hidden', !show)
+    scriptInput.classList.toggle('hidden', !show)
+
+    if (show) {
+      div.classList.remove('md:grid-cols-4')
+      div.classList.add('md:grid-cols-6')
+      voutInput.classList.add('col-span-1')
+      scriptInput.classList.add('col-span-2')
+    } else {
+      div.classList.remove('md:grid-cols-6')
+      div.classList.add('md:grid-cols-4')
+    }
+  })
+
+  // Delete row
+  trashBtn.addEventListener('click', () => {
+    div.remove()
+    recalcUnspentTotal()
+  })
+
+  // Amount recalculation
+  amountInput.addEventListener('input', recalcUnspentTotal)
+  check.addEventListener('change', recalcUnspentTotal)
+
+  actions.append(check, gearBtn, trashBtn)
+
+  // ORDER
+  div.append(
+    txidInput,
+    voutInput,
+    scriptInput,
+    amountInput,
+    actions
+  )
+
+  unspentdiv.appendChild(div)
+}
+
+
+
+
+function recalcUnspentTotal() {
+  let total = 0
+  const rows = document.querySelectorAll('#list-unspent .inner-unspent-manual, #list-unspent')
+
+  rows.forEach(row => {
+    const amountInput = row.querySelector('.amount-withdraw') || row.querySelector('#amount-withdraw')
+    const checkbox = row.querySelector('input[type="checkbox"]')
+
+    if (amountInput && checkbox && checkbox.checked) {
+      total += parseFloat(amountInput.value || 0)
+    }
+  })
+
+  unspentAmountTotal = total
+  let withdrawAmt = getTotalWithdrawalAmt()
+  withdrawalFee.value = (unspentAmountTotal - withdrawAmt).toFixed(8)
 }
 
 function requestSignatureWindow(tx, account, banker) {
@@ -2312,6 +2778,7 @@ function closeSendSignatureScreen() {
 }
 
 
+
 /**
   Function to export json data
 **/
@@ -2382,9 +2849,56 @@ ipcRenderer.on('export:response', (e, message) => {
 
 ipcRenderer.on('response:import-json', (e) => {
   alertSuccess("Successfully imported FSCB data.")
-  const textarea = document.getElementById('import-text');
+  const textarea = document.getElementById('import-text-area');
   textarea.innerHTML = ""
 })
+
+document.addEventListener('DOMContentLoaded', () => {
+  const saveBtn = document.getElementById('saveApiKeyBtn');
+  const input = document.getElementById('apiKeyInput');
+  const providerSelect = document.getElementById('apiProviderSelect');
+
+  if (!localStorage.getItem(API_PROVIDER_KEY)) {
+    localStorage.setItem(API_PROVIDER_KEY, "mempool");
+  }
+  
+
+  if (saveBtn) {
+    saveBtn.addEventListener('click', saveApiKey);
+  }
+
+  // Restore provider
+  if (providerSelect) {
+    providerSelect.value = getApiProvider();
+
+    providerSelect.addEventListener('change', () => {
+      localStorage.setItem(API_PROVIDER_KEY, providerSelect.value);
+
+      // Clear key input if mempool
+      if (providerSelect.value === "mempool") {
+        input.value = "";
+        input.disabled = false; // keep enabled but hidden by UI
+      } else {
+        input.disabled = false;
+        input.value = getApiKey(providerSelect.value) || "";
+      }      
+    });
+  }
+
+  // Restore API key
+  if (input && providerSelect?.value !== "mempool") {
+    input.value = getApiKey() || "";
+  }
+
+  updateApiUI();
+
+  ipcRenderer.send("api:state", {
+    apiProvider: getApiProvider(),
+    apiKey: getApiProvider() === "blockcypher" ? getApiKey() : null
+  });
+});
+
+
 
 
 formCreateAccount.addEventListener("submit", saveAndCreateText);
@@ -2400,3 +2914,14 @@ formWithdraw.addEventListener('submit', checkTxFee);
 donateBtn.addEventListener('click', addDonationAddress);
 exportBtn.addEventListener('click', exportJsonData);
 sendSignatureCloseBtn.addEventListener('click', closeSendSignatureScreen)
+
+const unspentAddBtn = document.getElementById('unspent-plus-icon');
+
+if (unspentAddBtn) {
+  console.log('Unspent + button found');
+  unspentAddBtn.addEventListener('click', () => {
+    console.log('Unspent + clicked');
+    addManualUnspentRow();
+  });
+}
+

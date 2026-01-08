@@ -3,18 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'"
-    />
-    <meta
-      http-equiv="X-Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'"
-    />
-    <meta
-    http-equiv="Content-Security-Policy"
-    content="script-src 'self' 'unsafe-inline'"
-    />
+    <meta http-equiv="Content-Security-Policy"
+      content="
+        default-src 'self';
+        script-src 'self';
+        style-src 'self' 'unsafe-inline';
+        img-src 'self' data:;
+        font-src 'self';
+        connect-src 'self' https:;
+      ">
     <title>Free State Central Bank</title>
     <link href="./styles.css" rel="stylesheet">
     <link href="../dist/output.css" rel="stylesheet">
@@ -48,16 +45,6 @@
           <img src="./images/fscb_logo.png" alt="fscb">
           <button id="import-text-button" class="inline-flex items-center px-10 py-2.5 text-base font-medium text-center absolute left-16 -mt-16  text-black bg-gray-300 rounded-lg focus:ring-4 focus:ring-blue-200 dark:focus:ring-gray-300 hover:bg-gray-300">Import Text</button>
           </div>
-          <!-- <div class="ml-5 w-1"> -->
-            <!-- <label
-              class="w-1.5  text-gray-800 font-semibold py-2 rounded-t"
-            >
-              <img src="./images/logo.svg" width="32" />
-              <span class="mt-2 text-sm">Import Text</span>
-              <input id="import-text" type="file" class="hidden" />
-            </label> -->
-            <!-- <button>Import Text</button> -->
-          <!-- </div> -->
           <!-- Tabs -->
           <ul class='list-outside list-disc ml-12 mt-12 h-96'>
             <ul id="tabs">
@@ -76,6 +63,9 @@
               <li class="list-disc marker:text-yellow-500 px-4 text-white font-semibold text-xl py-2 rounded-t"><a href="#fifth">How it works</a></li> -->
               <hr class="bg-gray-500 opacity-10 dark:opacity-50"/>
               <li class="list-disc marker:text-gray-800 px-4 text-white font-semibold text-xl py-2 rounded-t"><a href="#sixth">Backup</a></li>
+              <li class="list-disc marker:text-yellow-500 px-4 text-white font-semibold text-xl py-2 rounded-t">
+                <a href="#apikey">API Key</a>
+              </li>
             </ul>
           </ul>
         </aside>
@@ -88,7 +78,7 @@
               <p class="text-xl text-white font-bold">Welcome to FSCB</p>
               <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
               <form id="import-text-form">
-                <textarea name="" id="import-text" cols="30" rows="10" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Paste text here..."></textarea>
+                <textarea name="" id="import-text-area" cols="30" rows="10" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Paste text here..."></textarea>
                 <button type="submit" class="inline-flex items-center px-12 py-3 text-sm font-medium text-center absolute right-5 mt-5  text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Import</button>
               </form>
             </div>
@@ -360,7 +350,15 @@
                  </div>
                </div>
                <!--Body of list unspent-->
-               <div class="grid mb-4 mt-4 font-normal text-xl gap-2" id="list-unspent"></div>
+               <div class="grid grid-cols-5 gap-2 mb-4 mt-4 font-normal text-xl" id="list-unspent">
+                <!-- unspent rows go here -->
+              </div>
+              
+              <button id="unspent-plus-icon"
+                class="flex items-center gap-2 bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700">
+                <span class="text-xl font-bold">+</span>
+                Add manual UTXO
+              </button>            
                <form id="withdraw-submit" class="mt-28">
                   <div id="address-amount">
                      <div class="flex justify-end">
@@ -483,9 +481,9 @@
                   name="currency"
                   id="account-coin-currency"
                 >
-                  <option value="woodcoin" selected>woodcoin</option>
-                  <option value="bitcoin">bitcoin</option>
+                  <option value="bitcoin" selected>bitcoin</option>
                   <option value="litecoin">litecoin</option>
+                  <option value="woodcoin">woodcoin</option>
                 </select>
               </div>
               <div class="relative mb-4 flex flex-wrap items-stretch">
@@ -555,9 +553,9 @@
             <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
             <form class="mt-2" id="add-banker-form">
               <select class="text-black font-normal text-sm relative h-10 col-span-2 block w-full p-2 mt-4" name="currency" id="banker-coin-currency">
-                <option value="woodcoin">woodcoin</option>
                 <option value="bitcoin">bitcoin</option>
                 <option value="litecoin">litecoin</option>
+                <option value="woodcoin">woodcoin</option>
               </select>
               <input type="text" id="banker-name-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Bankers Name">
               <input type="email" id="banker-email-add" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-email-add absoulte mt-2" placeholder="Bankers Email">
@@ -632,11 +630,109 @@
               <img class="ml-12 mt-4" src="./images/instructions_funding_contract_2.png" alt="banker-pubkey-instruction-1" />
               <p class="text-black px-5 mt-8 font-normal text-base">Funds will be reflected on the contract name after 6 confirmation</p>
               <img class="ml-12 mt-4" src="./images/instructions_funding_contract_3.png" alt="banker-pubkey-instruction-1" />
-
+              
               <hr class="my-5 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
 
-              <p class="text-black text-lg py-2 px-5 font-bold">Withdrawing Funds:</p>
-              <p class="text-black px-5 mt-8 font-normal text-base">Go to Account List</p>
+              <p class="text-black text-lg py-2 px-5 font-bold">API Provider Setup (Required)</p>
+
+              <p class="text-black px-5 mt-4 font-normal text-base">
+              This application requires a blockchain API provider to fetch balances, unspent outputs (UTXOs), and broadcast transactions.
+              </p>
+
+              <p class="text-black px-5 mt-3 font-normal text-base">
+              By default, the app uses <b>mempool.space</b>. You may optionally enter your own API key to avoid rate limits.
+              </p>
+
+              <img class="ml-12 mt-4" src="./images/apikey_screen.png" alt="api-provider-section" />
+
+              <p class="text-black px-5 mt-6 font-normal text-base">
+                <b>Steps:</b>
+                </p>
+  
+                <p class="text-black px-5 mt-2 font-normal text-base">
+                1. Go to the <b>API Key</b> tab from the left menu.
+                </p>
+  
+                <p class="text-black px-5 mt-2 font-normal text-base">
+                2. Select an API provider (currently mempool).
+                </p>
+  
+                <p class="text-black px-5 mt-2 font-normal text-base">
+                3. (Optional) Paste your API key or token.
+                </p>
+  
+                <p class="text-black px-5 mt-2 font-normal text-base">
+                4. Click <b>Save</b>.
+                </p>
+  
+                <p class="text-black px-5 mt-4 font-normal text-base">
+                This app uses <b>Mempool.space</b> as the default blockchain data provider and works out of the box without an API key.
+                </p>
+  
+                <p class="text-black px-5 mt-2 font-normal text-base">
+                However, public endpoints are rate-limited. To avoid request limits or to use other providers in the future, you may optionally configure your own API key in the <b>API Key</b> tab.
+                </p>
+  
+  
+                <hr class="my-5 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
+  
+  
+                <p class="text-black text-lg py-2 px-5 font-bold">Manual Transaction Inputs (Manual UTXOs)</p>
+  
+                <p class="text-black px-5 mt-4 font-normal text-base">
+                By default, the app automatically fetches unspent outputs (UTXOs) using the configured API provider.
+                </p>
+  
+                <p class="text-black px-5 mt-3 font-normal text-base">
+                For advanced users, it is also possible to manually add transaction inputs (utxos).
+                </p>
+  
+                <img class="ml-12 mt-4" src="./images/manual_utxo_screen.png" alt="api-provider-section" />
+  
+                <p class="text-black px-5 mt-4 font-normal text-base">
+                <b>When to use Manual V-UTXOs:</b>
+                </p>
+  
+                <ul class="text-black px-10 mt-2 list-disc font-normal text-base">
+                  <li>If an API is unavailable or rate-limited</li>
+                  <li>If you want to spend a specific UTXO</li>
+                  <li>If you already know the transaction details</li>
+                </ul>
+  
+                <p class="text-black px-5 mt-4 font-normal text-base">
+                  <b>Required fields:</b>
+                </p>
+  
+                <ul class="text-black px-10 mt-2 list-disc font-normal text-base">
+                  <li>Transaction ID (TXID)</li>
+                  <li>Output index (VOUT) <span class="text-sm text-gray-600">(default is 0)</span></li>
+                  <li>Script <span class="text-sm text-gray-600">(redeem script / prevout script)</span></li>
+                  <li>Amount</li>
+                </ul>
+  
+                <p class="text-black px-5 mt-4 font-normal text-base">
+                  You can copy these values from API-generated UTXOs or from a block explorer.
+                </p>
+  
+                <p class="text-black px-5 mt-3 font-normal text-base">
+                  If you need to edit the <b>VOUT</b> index or the <b>Script</b>, click the <b>gear icon</b> to show those input fields.
+                </p>
+  
+                <p class="text-black px-5 mt-3 font-normal text-base">
+                  Manual V-INs are included in the transaction only if their checkbox is selected.
+                </p>
+  
+                <p class="text-black px-5 mt-3 font-normal text-base">
+                  To remove a manual UTXO, click the <b>delete</b> button.
+                </p>
+  
+  
+                <p class="text-black px-5 mt-4 font-normal text-base">
+                <b>Warning:</b> Incorrect values may result in an invalid or rejected transaction.
+                </p>
+
+              <p class="text-black text-lg py-3 px-5 font-bold">Withdrawing Funds:</p>
+              <p class="text-black px-5 mt-4 font-normal text-base">Go to Account List</p>
               <img class="ml-12 mt-4" src="./images/instructions_fund_withdrawal_1.png" alt="banker-pubkey-instruction-1" />
               <p class="text-black px-5 mt-8 font-normal text-base">Click View on the contract name</p>
               <img class="ml-12 mt-4" src="./images/instructions_fund_withdrawal_2.png" alt="banker-pubkey-instruction-1" />
@@ -708,6 +804,70 @@
               <button id="close-backup-btn" class="inline-flex items-center px-12 py-3 text-sm font-medium text-center absolute right-5 mt-5 text-white bg-orange-500 rounded-full focus:ring-4 focus:ring-blue-200 dark:focus:ring-orange-500 hover:bg-orange-500">Close</button>
             </div>
           </div>
+          <div id="apikey" class="hidden p-4 text-white text-xl font-bold">
+            Blockchain API
+            <hr class="my-3 h-0.5 border-t-0 bg-neutral-100 opacity-100 dark:opacity-50"/>
+          
+            <div class="mt-6 max-w-xl">
+          
+              <!-- API Provider -->
+              <label class="block text-sm text-gray-300 mb-2">
+                Select API Provider
+              </label>
+          
+              <select
+                id="apiProviderSelect"
+                class="block w-full p-2.5 text-sm
+                       bg-gray-50 border border-gray-300 text-gray-900
+                       focus:ring-blue-500 focus:border-blue-500
+                       dark:bg-gray-700 dark:border-gray-600
+                       dark:text-white">
+                       <option value="mempool" selected>
+                        mempool.space (No API Key)
+                      </option>
+                      <option value="blockcypher">
+                        BlockCypher (API Key required)
+                      </option>                      
+              </select>
+          
+              <!-- API Key (BlockCypher only) -->
+              <div id="apiKeyWrapper" class="mt-6">
+                <label class="block text-sm text-gray-300 mb-2">
+                  Enter your API Key
+                </label>
+          
+                <input
+                  type="text"
+                  id="apiKeyInput"
+                  placeholder="Your BlockCypher API key"
+                  class="block w-full p-2.5 mt-2 text-sm
+                         bg-gray-50 border border-gray-300 text-gray-900
+                         focus:ring-blue-500 focus:border-blue-500
+                         dark:bg-gray-700 dark:border-gray-600
+                         dark:placeholder-gray-400 dark:text-white"
+                />
+          
+                <button
+                  id="saveApiKeyBtn"
+                  class="mt-4 bg-orange-500 hover:bg-orange-600
+                         text-white px-8 py-2 rounded-full
+                         text-sm font-semibold">
+                  Save API Key
+                </button>
+          
+                <p id="apiKeyStatus" class="mt-2 text-sm text-green-400 hidden">
+                  API Key saved successfully.
+                </p>
+              </div>
+          
+              <!-- Info -->
+              <p id="apiInfoText" class="mt-4 text-sm text-gray-400">
+                BlockCypher is used for BTC/LTC. API key required.
+              </p>
+          
+            </div>
+          </div>
+                   
         </div>
       </div>
       <div id="user-profile" class="p-3 md:p-2 hidden h-screen bg-[#1a1a1a] flex justify-center items-center">
@@ -718,8 +878,8 @@
            <div class="font-semibold mt-8">
             <p class="text-sm font-normal text-justify break-word">Usernames and emails serve as labels and communication modes among bankers. The system does not store any data in a database; it solely operates within the browser.</p>
            </div>
-          <input input type="text" id="user-name" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block relative w-96 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Username">
-          <input input type="email" id="user-email" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block relative w-96 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Users E-mail">
+          <input type="text" id="user-name" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block relative w-96 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Username">
+          <input type="email" id="user-email" class="col-span-3 bg-gray-50 border border-gray-300 text-gray-900 text-sm focus:ring-blue-500 focus:border-blue-500 block relative w-96 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 banker-name-add absoulte mt-2" placeholder="Users E-mail">
           <button type="submit" class="items-center relative px-40 py-3 text-md font-medium text-center text-white bg-orange-500 focus:ring-4 focus:ring-orange-500 dark:focus:bg-orange-500 hover:bg-orange mt-5 ml-2 rounded-full">Submit</button>
         </form>
       </div>
