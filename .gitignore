@@ -57,3 +57,18 @@ spec/fixtures/logo.png
 
 /data
 /message
+
+# Electron / Linux build artifacts
+build/
+linux-unpacked/
+dist-electron/
+
+# Linux packages
+*.AppImage
+*.snap
+*.deb
+*.rpm
+
+# Electron unpacked binaries
+**/linux-unpacked/
+
